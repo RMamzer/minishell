@@ -1,37 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell.h                                        :+:      :+:    :+:   */
+/*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/06 16:04:45 by rmamzer          ###   ########.fr       */
+/*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
+/*   Updated: 2025/08/06 15:58:26 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MINISHELL_H
-# define MINISHELL_H
-
-#include <stdio.h> //perror, printf
-#include <errno.h> // errno, CHECK IF NEEDEED<---------------
-#include <stdlib.h> // malloc
-#include <unistd.h> //fork, write
-#include <sys/wait.h> //waitpid
-
-
-
-typedef struct s_ast
-{
-
-}	t_ast;
-
-typedef struct s_shell
-{
-
-}	t_shell;
-
-
-
-
-#endif
