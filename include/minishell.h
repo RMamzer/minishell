@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/06 16:04:45 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/06 18:04:39 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,12 @@
 
 typedef struct s_ast
 {
-
+	int type;
 }	t_ast;
 
 typedef struct s_shell
 {
-
+	int exit_code;
 }	t_shell;
 
 
