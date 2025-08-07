@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/07 16:29:19 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/07 19:33:40 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,20 +18,28 @@ void	error_exit(char	*msg)
 	exit (errno);
 }
 
-
-void	execute_command(t_ast *node, t_shell *shell)
+// focus on external cmd first
+void	check_command(t_ast *node, char *cmd, t_shell *shell)
 {
-	// check builtins
-	// otherwise, run established command
-	// check other shells logic and figure out mallocd
-
+	// if (ft_strcmp(cmd, "echo"))
+	// 	execute_builtin_echo;
+	// else if (ft_strcmp(cmd, "cd"))
+	// 	execute_builtin_cd;
+	// else if (ft_strcmp(cmd, "pwd"))
+	// 	execute_builtin_pwd;
+	// else if (ft_strcmp(cmd, "export"))
+	// 	execute_builtin_export;
+	// else if (ft_strcmp(cmd, "unset"))
+	// 	execute_builtin_unset;
+	// else if (ft_strcmp(cmd, "env"))
+	// 	execute_builtin_env;
+	// else if (ft_strcmp(cmd, "exit"))
+	// 	execute_builtin_exit;
+	// else
+	// 	execute_external_cmd;
 }
 
 
-/*
-external command:
-
-*/
 // check how to include 128 here? --> need to add extra signal return
 int	pipe_wait_children(pid_t *pids, int children_rem)
 {
@@ -55,6 +63,32 @@ int	pipe_wait_children(pid_t *pids, int children_rem)
 	return(exit_code);
 }
 
+void	execute_left_child(t_ast *node, t_shell *shell, int *pipefd)
+{
+	close (pipefd[READ_END]);
+	if (dup2(pipefd[WRITE_END], STDOUT_FILENO)== -1)
+	{
+		close(pipefd[WRITE_END]);
+		error_exit("minishell: fork failure");
+	}
+	close (pipefd[WRITE_END]);
+	shell->exit_code = execute_ast(node, shell);
+	exit(shell->exit_code);
+}
+
+void	execute_right_child(t_ast *node, t_shell *shell, int *pipefd)
+{
+	close (pipefd[WRITE_END]);
+	if (dup2(pipefd[READ_END], STDIN_FILENO) == -1)
+	{
+		close (pipefd[READ_END]);
+		error_exit("minishelll: fork failure");
+	}
+	close (pipefd[READ_END]);
+	shell->exit_code = execute_ast(node, shell);
+	exit (shell->exit_code);
+}
+
 void	execute_pipe(t_ast *node, t_shell *shell)
 {
 	int	pipefd[2];
@@ -71,19 +105,11 @@ void	execute_pipe(t_ast *node, t_shell *shell)
 	if (pids[1] == -1)
 		error_exit("minishell: fork falure");
 	if (pids[1] == 0)
-		execute_right_child(node->left, shell, pipefd);
-	close(pipefd[0]);
-	close(pipefd[1]);
-	shell ->exit_code = pipe_wait_children(pids, 2);
+		execute_right_child(node->right, shell, pipefd);
+	close(pipefd[WRITE_END]);
+	close(pipefd[READ_END]);
+	shell->exit_code = pipe_wait_children(pids, 2);
 }
-
-
-
-	// pid[0]= fork();
-	// if (pid[0] == -1)
-	// 	error_exit("minishell: fork failure" );
-
-
 
 int		execute_ast(t_ast *node, t_shell *shell)
 {
@@ -92,9 +118,9 @@ int		execute_ast(t_ast *node, t_shell *shell)
 	if (node->type == PIPE)
 		execute_pipe(node, shell);
 	if (node->type == WORD)
-		execute_command(node, shell);
+		check_command(node, node->value[0], shell);
 
 	//check redicrection
 
-	return (shell->exit_code);
+	return (shell->exit_code); // < do i need it if i modify using pointers?
 }

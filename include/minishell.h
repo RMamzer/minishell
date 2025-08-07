@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/07 15:55:32 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/07 17:35:06 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,10 @@
 
 # define SUCCESS 0
 # define FAILURE 1
+
+
+# define READ_END 0
+# define WRITE_END 1
 
 typedef struct s_shell
 {
@@ -51,17 +55,5 @@ typedef struct s_ast
   struct s_tree_node  *left;
   struct s_tree_node  *right;
 }	t_ast;
-
-// typedef struct s_tree_node
-// {
-//   t_token_type        type;
-//   char        **value;
-//   int          expand;
-//   int          status;
-//   int          fd[2];
-//   struct s_tree_node  *left;
-//   struct s_tree_node  *right;
-// }  t_tree_node;
-
 
 #endif
