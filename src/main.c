@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/06 18:30:33 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/08 14:04:12 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,15 @@
 
 int	main(int ac, char **av, char **env)
 {
-	char	*input;
 	t_shell	*data;
+    
 
-	input = NULL;
 	data = init_data();
-	process_input(input, data);
+    // reading a line with readline
+	if(process_input(data->input_line, data) == SUCCESS)
+    {
+        
+    }
 }
 t_shell	*init_data(void)
 {
@@ -27,18 +30,146 @@ t_shell	*init_data(void)
 
 	data = malloc(sizeof(t_shell));
 	if (data == NULL)
-		return (NULL);    // for now null
+		return (NULL);    // for now null need exit
 	data->exit_code = -1; // for now
+    data->input_line = NULL;
+    return (data);
 }
-bool	process_input(char *input, t_shell *data)
-{
-	char	*trimmed_input;
 
-	trimmed_input = ft_strtrim(input, TO_TRIM);
-	if (trimmed_input == NULL)
-		return (NULL); // for now
-	free(input);
-	lexer(trimmed_input, data);
+/*
+*   Initial processing of an input line.
+*   TO_TRIM chars removed from both ends of the line.
+*   Checks validity of QUOTES
+*   Checks validity of PIPE
+*   Checks validity of REDIRECTIONS
+*/
+bool	process_input(char *input_line, t_shell *data)
+{
+	char	*line;
+    
+	line = ft_strtrim(input_line, TO_TRIM);
+	if (line == NULL || line[0] == '\0')
+    {
+       free(data->input_line);
+       free(line);
+       return (FAILURE);
+    }
+    if (check_quote(line, ft_strlen(line)) != 0)
+    {
+        free(data->input_line);
+        free(line);
+        return (show_error("syntax error: unclosed quote", 258), FAILURE);
+    }
+    if(valid_pipe_usage(line) == FAILURE || valid_redirection_usage(line) == FAILURE)
+    {
+        free(data->input_line);
+        free(line);
+        return (FAILURE);
+    }
+}
+
+/*
+*   Checks the correctness of pipe ('|') usage.
+*   Returns FAILURE if:
+*   - The line starts with a pipe.
+*   - There are consecutive pipes '||' outside of quotes
+*   - The line ends with a pipe.
+*   The function ignores pipes inside quotes
+*   Otherwse, returns SUCCESS
+*/
+bool    valid_pipe_usage(char *line)
+{
+    int i;
+
+    if(line[0] == '|')
+        return (show_error("syntax error near unexpected token '|'", 258), FAILURE);
+    i = 0;
+    while(line[i])
+    {
+        if(line[i] == '|')
+        {
+            if(check_quotes(line, i) == 0)
+            {
+                if(line[i + 1] == '|')
+                    return (show_error("syntax error near unexpected token '||'", 258), FAILURE);
+            }
+        }    
+        i++;
+    }
+    if(line[i - 1] == '|')
+        return (show_error("syntax error near unexpected token '|'", 258), FAILURE);
+    return (SUCCESS);
+}
+/*
+*   Checks the correctness of redirection operators ('>' or '<')
+*   Returns FAILURE if:
+*    - operator appears inside invalid syntax(more than 2 consecutive).
+*    - operator is not followed by a valid token
+*    - operator outside of quotes
+*   Otherwise, returns SUCCESS
+*/
+bool    valid_redirection_usage(char *line)
+{
+    int i;
+    int count;
+    char c;
+    
+    i = 0;
+    while(line[i])
+    {
+        if((line[i] == '>' || line[i] == '<') && check_quote(line, i) == 0)
+        {
+            c = line[i];
+            count = 1;
+            while(line[i + count] == c)
+                count++;
+            if(count > 2)
+                return (show_error("syntax error near unexpected token", 258), FAILURE);
+            i += count;
+            while (line[i] == ' ' || line[i] == '\t' || line[i] == '\n')
+                i++;
+            if(line[i] == '|' || line[i] == '<' || line[i] == '>' || line[i] == '\0')
+                return (show_error("syntax error near unexpected token", 258), FAILURE);
+        }
+        else
+            i++;
+    }
+    return (SUCCESS);
+}
+
+/*
+*   Skips escaped characters and 
+*   returns 0 if not inside quotes at position 'index',
+*   ore returns the quote character (' or ") if inside a quote.
+*/
+char check_quote(char *line, int index)
+{
+    int i;
+    char quote;
+
+    i = 0;
+    quote = 0;
+    while(i < index)
+    {
+        if (line[i] == '\\' && quote != '\'' &&  (i + 1) < index)
+        {
+            i += 2;
+            continue ;
+        }
+        if(quote == 0 && (line[i] == '\'' || line[i] == '"'))
+            quote = line[i];
+        else if (quote != 0 && line[i] == quote)
+            quote = 0;
+        i++;
+    }
+    return (quote);
+}
+
+
+void show_error(char *msg, int exit_code)
+{
+    ft_putendl_fd(msg, 2);
+    //global exit status = exit_code
 }
 
 void	lexer(char *trimmed_input, t_shell *data)
