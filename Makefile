@@ -16,7 +16,7 @@ HEADERS = -I ./include  -I $(LIBFT_DIR)
 SRCS = main.c 
 
 OBJS = $(addprefix $(OBJS_DIR), $(SRCS:.c=.o))
-.SECONDARY: ${OBJS}
+.SECONDARY: $(OBJS)
 
 all: $(NAME)
 
@@ -28,7 +28,7 @@ $(OBJS_DIR)%.o: $(SRCS_DIR)%.c
 	$(CC) $(C_FLAGS) -c $< -o $@ $(HEADERS)
 
 $(NAME): $(OBJS) $(LIBFT)
-	$(CC) $(C_FLAGS) $(OBJS) $(LIBFT) -o $(NAME)
+	$(CC) $(C_FLAGS) $(OBJS) $(LIBFT)  -lreadline -o $(NAME)
 
 clean:
 	rm -rf $(OBJS_DIR)

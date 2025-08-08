@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/08 16:32:56 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/08 17:10:47 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,11 @@ int	main(int ac, char **av, char **env)
 	t_shell	*data;
 	char	*input;
 
-	(void)ac;
-	(void)av;
-	(void)env;
+	(void)ac;  // addded for testing
+	(void)av;  // addded for testing
+	(void)env; // addded for testing
 	data = init_data();
-	while (1)
+	while (1) // addded for testing
 	{
 		input = readline("dirty_shell>");
 		if (!input)
@@ -30,10 +30,9 @@ int	main(int ac, char **av, char **env)
 			add_history(input);
 		data->input_line = input;
 		if (process_input(data->input_line, data) == SUCCESS)
-			printf("ZAEBIS");
+			printf("ALL GOOD");
 		else
-			printf("NE ZAEBIS");
-		free(input);
+			printf("NOT GOOD");
 	}
 }
 t_shell	*init_data(void)
@@ -103,7 +102,7 @@ bool	valid_pipe_usage(char *line)
 	{
 		if (line[i] == '|')
 		{
-			if (check_quotes(line, i) == 0)
+			if (check_quote(line, i) == 0)
 			{
 				if (line[i + 1] == '|')
 					return (show_error("syntax error near unexpected token '||'",
@@ -187,6 +186,7 @@ char	check_quote(char *line, int index)
 
 void	show_error(char *msg, int exit_code)
 {
+	(void)exit_code; // addded for testing
 	ft_putendl_fd(msg, 2);
 	// global exit status = exit_code
 }
