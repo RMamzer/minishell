@@ -18,7 +18,7 @@ void	error_exit(char	*msg)
 	exit (errno);
 }
 
-// focus on external cmd first
+// focus on external cmd firstan
 void	check_command(t_ast *node, char *cmd, t_shell *shell)
 {
 	// if (ft_strcmp(cmd, "echo"))
