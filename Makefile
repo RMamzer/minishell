@@ -1,4 +1,4 @@
-NAME = pipex
+NAME = minishell
 
 CC = cc
 
@@ -13,7 +13,7 @@ SRCS_DIR = srcs/
 
 HEADERS = -I ./include  -I $(LIBFT_DIR)
 
-SRCS = main.c cmd_execution.c error_and_free.c utils.c
+SRCS = main.c 
 
 OBJS = $(addprefix $(OBJS_DIR), $(SRCS:.c=.o))
 .SECONDARY: ${OBJS}

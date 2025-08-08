@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/08 15:25:35 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/08 16:31:05 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,22 +14,25 @@
 # define MINISHELL_H
 
 # include "libft.h"
+# include <readline/history.h>  // add_history
+# include <readline/readline.h> // readline
 # include <stdbool.h>
+# include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
 
 # define SUCCESS 0
 # define FAILURE 1
 
-# define TO_TRIM " \t\n\v\f\r" // check this
+# define TO_TRIM " \t\n" // check this
 
 // core
 typedef struct s_shell
 {
-	int	exit_code;
-    char *input_line;
+	int		exit_code;
+	char	*input_line;
 
-}		t_shell;
+}			t_shell;
 
 // token type
 typedef enum e_token_type
@@ -41,6 +44,16 @@ typedef enum e_token_type
 	HEREDOC,
 	APPEND
 
-}		t_token_type;
+}			t_token_type;
+
+int			main(int ac, char **av, char **env);
+t_shell		*init_data(void);
+
+// pre processing of input
+bool		process_input(char *input_line, t_shell *data);
+bool		valid_pipe_usage(char *line);
+bool		valid_redirection_usage(char *line);
+char		check_quote(char *line, int index);
+void		show_error(char *msg, int exit_code);
 
 #endif
