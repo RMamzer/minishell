@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/06 18:28:51 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/08 14:04:09 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,13 @@
 # define SUCCESS 0
 # define FAILURE 1
 
-# define TO_TRIM " \t\n\v\f\r"
+# define TO_TRIM " \t\n\v\f\r" // check this
 
 // core
 typedef struct s_shell
 {
 	int	exit_code;
+    char *input_line;
 
 }		t_shell;
 
