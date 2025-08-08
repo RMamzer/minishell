@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/07 19:33:40 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/08 17:44:33 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,44 @@
 
 void	error_exit(char	*msg)
 {
-	perror (msg);
-	exit (errno);
+	perror(msg);
+	exit(errno);
 }
 
-// focus on external cmd firstan
-void	check_command(t_ast *node, char *cmd, t_shell *shell)
+char *find_env_value(char *str, t_env env)
+{
+
+}
+
+/*what does it need
+1. check if path r not
+*/
+void	execute_cmd_child(char **args, t_shell *shell)
+{
+	char *env_paths;
+	find_env_value("PATH", );
+}
+
+// check envp or args?
+// will need exstra signal check?
+// what should i return if not WIFEXITED?
+int	execute_external_cmd(char	**args, t_shell *shell)
+{
+pid_t	pid;
+
+pid = fork();
+if (pid == -1)
+	error_exit("minishell: fork failure");
+if (pid == 0)
+	execute_cmd_child(args, shell);
+waitpid(pid, &shell->exit_code, 0);
+if (WIFEXITED(shell->exit_code))
+	return(WEXITSTATUS(shell->exit_code));
+return (EXIT_FAILURE);
+}
+
+// do i need to check empty cmd here?
+int	check_command(t_ast *node, char *cmd, t_shell *shell)
 {
 	// if (ft_strcmp(cmd, "echo"))
 	// 	execute_builtin_echo;
@@ -36,18 +68,26 @@ void	check_command(t_ast *node, char *cmd, t_shell *shell)
 	// else if (ft_strcmp(cmd, "exit"))
 	// 	execute_builtin_exit;
 	// else
-	// 	execute_external_cmd;
+	shell->exit_code = execute_external_cmd(node->value, shell);
+	return (shell->exit_code);
 }
 
 
 // check how to include 128 here? --> need to add extra signal return
-int	pipe_wait_children(pid_t *pids, int children_rem)
+int	wait_children(pid_t *pids, int children_rem)
 {
 	int		status;
 	pid_t	term_pid;
 	int		exit_code;
 
 	exit_code = EXIT_FAILURE;
+	if (children_rem == 1)
+	{
+		term_pid = waitpid(*pids, &status, 0);
+		if (term_pid == -1)
+			error_exit("minishell: waitpd failed");
+
+	}
 	while (children_rem > 0)
 	{
 		term_pid = waitpid(-1, &status, 0);
@@ -108,7 +148,7 @@ void	execute_pipe(t_ast *node, t_shell *shell)
 		execute_right_child(node->right, shell, pipefd);
 	close(pipefd[WRITE_END]);
 	close(pipefd[READ_END]);
-	shell->exit_code = pipe_wait_children(pids, 2);
+	shell->exit_code = wait_children(pids, 2);
 }
 
 int		execute_ast(t_ast *node, t_shell *shell)
