@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/08 16:59:29 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/08 18:10:13 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,9 +48,6 @@ typedef enum e_token_type
 
 int			main(int ac, char **av, char **env);
 t_shell		*init_data(void);
-
-// readline test
-
 
 
 // pre processing of input

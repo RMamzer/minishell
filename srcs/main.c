@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/08 17:10:47 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/08 18:12:40 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,16 +23,16 @@ int	main(int ac, char **av, char **env)
 	data = init_data();
 	while (1) // addded for testing
 	{
-		input = readline("dirty_shell>");
+		input = readline("dirty_shell> ");
 		if (!input)
 			break ;
 		if (input[0] != '\0')
 			add_history(input);
 		data->input_line = input;
 		if (process_input(data->input_line, data) == SUCCESS)
-			printf("ALL GOOD");
+			printf("ALL GOOD\n");
 		else
-			printf("NOT GOOD");
+			printf("NOT GOOD\n");
 	}
 }
 t_shell	*init_data(void)
