@@ -6,11 +6,14 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/11 12:03:25 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/11 19:43:44 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+// TODO - handle words and add as token to the list
+// TODO - error function for lexer
 
 int	main(int ac, char **av, char **env)
 {
@@ -31,8 +34,8 @@ int	main(int ac, char **av, char **env)
 		data->input_line = input;
 		if (process_input(data->input_line, data) == SUCCESS)
 		{
-            lexer(data);
-        }
+			lexer(data->input_line, data);
+		}
 	}
 }
 t_shell	*init_data(void)
@@ -44,6 +47,7 @@ t_shell	*init_data(void)
 		return (NULL);    // for now null need exit
 	data->exit_code = -1; // for now
 	data->input_line = NULL;
+	data->token_list = NULL;
 	return (data);
 }
 
@@ -78,8 +82,8 @@ bool	process_input(char *input_line, t_shell *data)
 		free(line);
 		return (FAILURE);
 	}
-    free(data->input_line);
-    data->input_line = line;
+	free(data->input_line);
+	data->input_line = line;
 	return (SUCCESS);
 }
 
@@ -193,13 +197,91 @@ void	show_error(char *msg, int exit_code)
 	// global exit status = exit_code
 }
 
-
-
-void	lexer(t_shell *data)
+void	lexer(char *input_line, t_shell *data)
 {
-// loop through the input
-// find smth
-// extract
-// create node, add type, add to list
+	size_t	i;
+
+	i = 0;
+	while (input_line[i])
+	{
+		while (is_delimiter(input_line[i]))
+			i++;
+		if (is_operator(input_line[i]) && check_quote(input_line, i) == 0)
+			i += handle_operator(input_line, i, data);
+		else
+			i += handle_word(input_line, i, data);
+	}
 }
 
+/*
+ *	Processes operator tokens.
+ *	Adds the corresponding token to the token list.
+ *	Returns the length of the operator token processed (1 or 2).
+ */
+size_t	handle_operator(char *input_line, size_t i, t_shell *data)
+{
+	if (input_line[i] == '|')
+	{
+		add_token(data, PIPE, "|");
+		return (1);
+	}
+	if (input_line[i] == input_line[i + 1])
+	{
+		if (input_line[i] == '<')
+			add_token(data, HEREDOC, "<<");
+		else
+			add_token(data, APPEND, ">>");
+		return (2);
+	}
+	else
+	{
+		if (input_line[i] == '<')
+			add_token(data, IN, "<");
+		else
+			add_token(data, OUT, ">");
+		return (1);
+	}
+}
+
+/*
+ *	Creates a new token and appends it to the token list.
+ *	If token list is NULL, adds token as head node.
+ *	if token list is not NULL, adds token as the last one.
+ */
+void	add_token(t_shell *data, t_token_type type, char *content)
+{
+	t_token	*token;
+	t_token	*temp;
+
+	token = malloc(sizeof(t_token));
+	if (token == NULL)
+		return ; // for now, but need error function call here
+	token->type = type;
+	token->next = NULL;
+	token->content = ft_strdup(content);
+	if (token->content == NULL)
+		return ; // for now, but need error function call here
+	if (data->token_list == NULL)
+		data->token_list = token;
+	else
+	{
+		temp = data->token_list;
+		while (temp->next)
+			temp = temp->next;
+		temp->next = token;
+	}
+}
+
+bool	is_delimiter(int i)
+{
+	if (i == ' ' || i == '\n' || i == '\t')
+		return (true);
+	return (false);
+}
+
+bool	is_operator(char c)
+{
+	if (c == '|' || c == '<' || c == '>')
+		return (true);
+	return (false);
+}
