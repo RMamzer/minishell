@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/08 18:10:13 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/11 12:50:51 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,14 @@ typedef struct s_shell
 
 }			t_shell;
 
+typedef struct s_token
+{
+    t_token_type    type;
+    struct s_token *next;
+    char *content;
+}       t_token;
+
+
 // token type
 typedef enum e_token_type
 {
@@ -45,6 +53,8 @@ typedef enum e_token_type
 	APPEND
 
 }			t_token_type;
+
+
 
 int			main(int ac, char **av, char **env);
 t_shell		*init_data(void);
