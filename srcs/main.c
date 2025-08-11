@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/08 18:12:40 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/11 12:03:25 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,9 @@ int	main(int ac, char **av, char **env)
 			add_history(input);
 		data->input_line = input;
 		if (process_input(data->input_line, data) == SUCCESS)
-			printf("ALL GOOD\n");
-		else
-			printf("NOT GOOD\n");
+		{
+            lexer(data);
+        }
 	}
 }
 t_shell	*init_data(void)
@@ -78,6 +78,8 @@ bool	process_input(char *input_line, t_shell *data)
 		free(line);
 		return (FAILURE);
 	}
+    free(data->input_line);
+    data->input_line = line;
 	return (SUCCESS);
 }
 
@@ -191,10 +193,13 @@ void	show_error(char *msg, int exit_code)
 	// global exit status = exit_code
 }
 
-// void	lexer(char *trimmed_input, t_shell *data)
-//{
+
+
+void	lexer(t_shell *data)
+{
 // loop through the input
 // find smth
 // extract
 // create node, add type, add to list
-//}
+}
+
