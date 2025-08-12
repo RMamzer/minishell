@@ -6,14 +6,21 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/12 14:14:03 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/12 17:38:38 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// TODO - tests for lexer
-
+// test function, remove later
+void	test_tokens(t_token *list)
+{
+	while (list)
+	{
+		printf("[TYPE: %d] \"%s\"\n", list->type, list->content);
+		list = list->next;
+	}
+}
 
 int	main(int ac, char **av, char **env)
 {
@@ -35,6 +42,8 @@ int	main(int ac, char **av, char **env)
 		if (process_input(data->input_line, data) == SUCCESS)
 		{
 			lexer(data->input_line, data);
+			test_tokens(data->token_list); // added for test
+			free_list(&data->token_list);  // added for test
 		}
 	}
 }
@@ -45,9 +54,9 @@ t_shell	*init_data(void)
 	data = malloc(sizeof(t_shell));
 	if (data == NULL)
 	{
-        ft_putendl_fd("malloc: Memory allocation failed", 2);
-        exit(FAILURE);
-    }    
+		ft_putendl_fd("malloc: Memory allocation failed", 2);
+		exit(FAILURE);
+	}
 	data->exit_code = -1; // for now
 	data->input_line = NULL;
 	data->token_list = NULL;
@@ -194,33 +203,32 @@ void	show_error(char *msg, int exit_code)
 	ft_putendl_fd(msg, 2);
 	// global exit status = exit_code
 }
-void    lexer_error(char *input_line, t_shell *data)
+void	lexer_error(char *input_line, t_shell *data)
 {
-    free(input_line);
-    clear_history();
-    free_list(&data->token_list);
-    ft_putendl_fd("malloc: Memory allocation failed", 2);
-    data->exit_code = 1;
-    exit(data->exit_code);
+	free(input_line);
+	clear_history();
+	free_list(&data->token_list);
+	ft_putendl_fd("malloc: Memory allocation failed", 2);
+	data->exit_code = 1;
+	exit(data->exit_code);
 }
-void    free_list(t_token **list)
+void	free_list(t_token **list)
 {
-    t_token *temp;
-    
-    if(!list)
-        return ;
-    while(*list)
-    {
-        temp = *list;
-        *list = (*list)->next;
-        free(temp->content);
-        temp->content = NULL;
-        free(temp);
-        temp = NULL;
-    }
-    *list = NULL;
-}
+	t_token	*temp;
 
+	if (!list)
+		return ;
+	while (*list)
+	{
+		temp = *list;
+		*list = (*list)->next;
+		free(temp->content);
+		temp->content = NULL;
+		free(temp);
+		temp = NULL;
+	}
+	*list = NULL;
+}
 
 void	lexer(char *input_line, t_shell *data)
 {
@@ -238,33 +246,32 @@ void	lexer(char *input_line, t_shell *data)
 	}
 }
 
-
-size_t  handle_word(char *input_line, size_t start, t_shell *data)
+size_t	handle_word(char *input_line, size_t start, t_shell *data)
 {
-    size_t i;
-    size_t word_start;
-    size_t len;
-    char *temp;
+	size_t	i;
+	size_t	word_start;
+	size_t	len;
+	char	*temp;
 
-    i = start;
-    word_start = start;
-    while(input_line[i])
-    {
-        if(check_quote(input_line, i) == 0)
-        {
-            if(is_delimiter(input_line[i]) || is_operator(input_line[i]))
-                break;
-        }
-        i++;
-    }
-    len = i - word_start;
-    temp = malloc(len + 1);
-    if(temp == NULL)
-        lexer_error(input_line, data);
-    ft_strlcpy(temp, &input_line[word_start], len + 1);
-    add_token(data, WORD, temp);
-    free(temp);
-    return (len);
+	i = start;
+	word_start = start;
+	while (input_line[i])
+	{
+		if (check_quote(input_line, i) == 0)
+		{
+			if (is_delimiter(input_line[i]) || is_operator(input_line[i]))
+				break ;
+		}
+		i++;
+	}
+	len = i - word_start;
+	temp = malloc(len + 1);
+	if (temp == NULL)
+		lexer_error(input_line, data);
+	ft_strlcpy(temp, &input_line[word_start], len + 1);
+	add_token(data, WORD, temp);
+	free(temp);
+	return (len);
 }
 
 /*
@@ -314,10 +321,10 @@ void	add_token(t_shell *data, t_token_type type, char *content)
 	token->next = NULL;
 	token->content = ft_strdup(content);
 	if (token->content == NULL)
-    {
-        free(token);
-        lexer_error(data->input_line, data);
-    }	
+	{
+		free(token);
+		lexer_error(data->input_line, data);
+	}
 	if (data->token_list == NULL)
 		data->token_list = token;
 	else

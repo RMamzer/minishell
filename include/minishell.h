@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/12 14:16:37 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/12 17:58:47 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,22 +26,6 @@
 
 # define TO_TRIM " \t\n" // check this
 
-// core
-typedef struct s_shell
-{
-	int				exit_code;
-	char			*input_line;
-	t_token			*token_list;
-
-}					t_shell;
-
-typedef struct s_token
-{
-	t_token_type	type;
-	struct s_token	*next;
-	char			*content;
-}					t_token;
-
 // token type
 typedef enum e_token_type
 {
@@ -53,6 +37,22 @@ typedef enum e_token_type
 	APPEND
 
 }					t_token_type;
+
+typedef struct s_token
+{
+	t_token_type	type;
+	struct s_token	*next;
+	char			*content;
+}					t_token;
+
+// core
+typedef struct s_shell
+{
+	int				exit_code;
+	char			*input_line;
+	t_token			*token_list;
+
+}					t_shell;
 
 // main things
 int					main(int ac, char **av, char **env);
@@ -67,6 +67,7 @@ char				check_quote(char *line, int index);
 // lexer
 void				lexer(char *input_line, t_shell *data);
 size_t				handle_operator(char *input_line, size_t i, t_shell *data);
+size_t				handle_word(char *input_line, size_t start, t_shell *data);
 void				add_token(t_shell *data, t_token_type type, char *content);
 
 // helper functions
@@ -75,8 +76,7 @@ bool				is_operator(char c);
 
 // errors
 void				show_error(char *msg, int exit_code);
-void    lexer_error(char *input_line, t_shell *data);
-void    free_list(t_token **list);
-
+void				lexer_error(char *input_line, t_shell *data);
+void				free_list(t_token **list);
 
 #endif
