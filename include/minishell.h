@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/11 19:43:31 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/12 14:16:37 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,5 +75,8 @@ bool				is_operator(char c);
 
 // errors
 void				show_error(char *msg, int exit_code);
+void    lexer_error(char *input_line, t_shell *data);
+void    free_list(t_token **list);
+
 
 #endif
