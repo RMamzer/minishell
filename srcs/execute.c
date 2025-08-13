@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/08 17:44:33 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/13 15:42:38 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,18 +18,41 @@ void	error_exit(char	*msg)
 	exit(errno);
 }
 
-char *find_env_value(char *str, t_env env)
-{
 
+int	ft_strcmp( const char *s1, const char *s2)
+{
+	size_t i;
+
+	i = 0;
+	while (s1[i] || s2[i])
+	{
+		if (s1[i] != s2[i])
+			return((unsigned char)s1[i] - (unsigned char)s2[i]);
+		i++;
+	}
+	return (0);
 }
 
-/*what does it need
-1. check if path r not
-*/
+
+
+char *find_env_value(char *str, t_env *env)
+{
+	while (env!= NULL)
+	{
+		if (ft_strcmp(str, env->key))
+			return (env->content);
+		env = env->next;
+	}
+	return (NULL);
+}
+
+
 void	execute_cmd_child(char **args, t_shell *shell)
 {
 	char *env_paths;
-	find_env_value("PATH", );
+	env_paths = find_env_value("PATH", shell->env);
+	if (!env_paths)
+		error_exit("minishell: cmd: not found") // should return minishell" <cmd> not found????
 }
 
 // check envp or args?

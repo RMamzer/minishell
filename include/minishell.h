@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/07 17:35:06 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/13 14:53:12 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,18 @@
 typedef struct s_shell
 {
 	int	exit_code;
+	t_env	*env;
 
 }		t_shell;
+
+//environment struct
+typedef struct s_env
+{
+	char *key;
+	char *content;
+	t_env *next;
+}  t_env;
+
 
 // token type
 typedef enum e_token_type
@@ -55,5 +65,8 @@ typedef struct s_ast
   struct s_tree_node  *left;
   struct s_tree_node  *right;
 }	t_ast;
+
+
+
 
 #endif
