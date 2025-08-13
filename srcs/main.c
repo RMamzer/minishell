@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/13 11:52:27 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/13 14:00:47 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,7 +177,7 @@ bool	valid_redirection_usage(char *line)
 /*
  *
  *   returns 0 if not inside quotes at position 'index',
- *   ore returns the quote character (' or ") if inside a quote.
+ *   or returns the quote character (' or ") if inside a quote.
  */
 char	check_quote(char *line, int index)
 {
@@ -348,4 +348,34 @@ bool	is_operator(char c)
 	if (c == '|' || c == '<' || c == '>')
 		return (true);
 	return (false);
+}
+
+bool	check_syntax(t_shell *data)
+{
+	t_token	*current;
+
+	if (data->token_list == NULL)
+		return (SUCCESS); // what should be returned if it's empty ?
+	current = data->token_list;
+	while (current)
+	{
+		if (current->type == PIPE)
+		{
+			if (current == data->token_list || current->next == NULL)
+				return (show_error("syntax error near unexpected token '|'",
+						258), FAILURE);
+			if (current->next->type == PIPE)
+				return (show_error("syntax error near unexpected token '|'",
+						258), FAILURE);
+		}
+		if (current->type == IN || current->type == OUT
+			|| current->type == APPEND || current->type == HEREDOC)
+		{
+			if (current->next == NULL || current->next->type != WORD)
+				return (show_error("syntax error near unexpected token", 258),
+					FAILURE);
+		}
+		current = current->next;
+	}
+	return (SUCCESS);
 }
