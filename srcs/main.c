@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/13 14:00:47 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/13 15:09:21 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,6 @@ int	main(int ac, char **av, char **env)
 		data->input_line = input;
 		if (process_input(data->input_line, data) == SUCCESS)
 		{
-			lexer(data->input_line, data);
 			test_tokens(data->token_list); // added for test
 			free_list(&data->token_list);  // added for test
 		}
@@ -87,89 +86,14 @@ bool	process_input(char *input_line, t_shell *data)
 		free(line);
 		return (show_error("syntax error: unclosed quote", 258), FAILURE);
 	}
-	if (valid_pipe_usage(line) == FAILURE
-		|| valid_redirection_usage(line) == FAILURE)
-	{
-		free(data->input_line);
-		free(line);
-		return (FAILURE);
-	}
 	free(data->input_line);
 	data->input_line = line;
-	return (SUCCESS);
-}
-
-/*
- *   Checks the correctness of pipe ('|') usage.
- *   Returns FAILURE if:
- *   - The line starts with a pipe.
- *   - There are consecutive pipes '||' outside of quotes
- *   - The line ends with a pipe.
- *   The function ignores pipes inside quotes
- *   Otherwse, returns SUCCESS
- */
-bool	valid_pipe_usage(char *line)
-{
-	int	i;
-
-	if (line[0] == '|')
-		return (show_error("syntax error near unexpected token '|'", 258),
-			FAILURE);
-	i = 0;
-	while (line[i])
+	lexer(data->input_line, data);
+	if (check_syntax(data) == FAILURE)
 	{
-		if (line[i] == '|')
-		{
-			if (check_quote(line, i) == 0)
-			{
-				if (line[i + 1] == '|')
-					return (show_error("syntax error near unexpected token '||'",
-							258), FAILURE);
-			}
-		}
-		i++;
-	}
-	if (line[i - 1] == '|')
-		return (show_error("syntax error near unexpected token '|'", 258),
-			FAILURE);
-	return (SUCCESS);
-}
-/*
- *   Checks the correctness of redirection operators ('>' or '<')
- *   Returns FAILURE if:
- *    - operator appears inside invalid syntax(more than 2 consecutive).
- *    - operator is not followed by a valid token
- *    - operator outside of quotes
- *   Otherwise, returns SUCCESS
- */
-bool	valid_redirection_usage(char *line)
-{
-	int		i;
-	int		count;
-	char	c;
-
-	i = 0;
-	while (line[i])
-	{
-		if ((line[i] == '>' || line[i] == '<') && check_quote(line, i) == 0)
-		{
-			c = line[i];
-			count = 1;
-			while (line[i + count] == c)
-				count++;
-			if (count > 2)
-				return (show_error("syntax error near unexpected token", 258),
-					FAILURE);
-			i += count;
-			while (line[i] == ' ' || line[i] == '\t' || line[i] == '\n')
-				i++;
-			if (line[i] == '|' || line[i] == '<' || line[i] == '>'
-				|| line[i] == '\0')
-				return (show_error("syntax error near unexpected token", 258),
-					FAILURE);
-		}
-		else
-			i++;
+		printf("ZALUPA");
+		free_list(&data->token_list);
+		return (FAILURE);
 	}
 	return (SUCCESS);
 }
@@ -355,7 +279,7 @@ bool	check_syntax(t_shell *data)
 	t_token	*current;
 
 	if (data->token_list == NULL)
-		return (SUCCESS); // what should be returned if it's empty ?
+		return (SUCCESS);
 	current = data->token_list;
 	while (current)
 	{
