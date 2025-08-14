@@ -6,13 +6,14 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/14 14:24:35 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/14 19:41:57 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// TODO: var expansion, heredocsituation, remove qotes,
+// TODO: var expansion done but recheck the flow and free, etc.
+// TODO: heredocsituation, remove qotes,
 
 // test function, remove later
 void	test_tokens(t_token *list)
@@ -306,43 +307,158 @@ bool	check_syntax(t_shell *data)
 	return (SUCCESS);
 }
 
-
 /*
-*   Apply expansion to every WORD token, which contains '$' in the list.
-*
-*/
-void    expander(t_shell *data, char **env)
+ *   Apply expansion to every WORD token, which contains '$' in the list.
+ *
+ */
+void	expander(t_shell *data)
 {
-    t_token *current;
-    
-    current = data->token_list;
-    while(current)
-    {
-        if(current->type == WORD && ft_strchr(current->content, '$'))
-            current->content = expand_content(current->content, data, env);
-        current = current->next;
-    }
+	t_token	*current;
+
+	current = data->token_list;
+	while (current)
+	{
+		if (current->type == WORD && ft_strchr(current->content, '$'))
+			current->content = expand_content(current->content, data);
+		current = current->next;
+	}
 }
 
-char *expand_content(char *content, t_shell *data, char **env)
+char	*expand_content(char *content, t_shell *data)
 {
-    size_t i;
-    char *new_content;
-    char *temp;
+	size_t	i;
+	char	*new_content;
+	char	*temp;
 
-    i = 0;
-    new_content = ft_strdup("");
-    if (new_content == NULL)
-        lexer_error(content, data);
-    while(content[i])
-    {
-        if(content[i] == '$' && check_quote(content, i) != '\'')
-            temp = handle_dollar(content, &i, data, env);
-        else
-            temp = handle_characters(content, &i);
-    }
+	i = 0;
+	new_content = ft_strdup("");
+	if (new_content == NULL)
+		lexer_error(content, data);
+	while (content[i])
+	{
+		if (content[i] == '$' && check_quote(content, i) != '\'')
+			temp = handle_dollar(content, &i, data);
+		else
+			temp = handle_characters(content, &i);
+		if (temp == NULL)
+		{
+			free(new_content);
+			lexer_error(content, data);
+		}
+		new_content = strjoin_free(new_content, temp);
+		if (new_content == NULL)
+			lexer_error(content, data);
+	}
+	free(content);
+	return (new_content);
+}
+char	*strjoin_free(char *new_content, char *temp)
+{
+	char	*result;
+
+	result = ft_strjoin(new_content, temp);
+	free(new_content);
+	free(temp);
+	if (result == NULL)
+		return (NULL);
+	return (result);
 }
 
-// TODO: handle_dollar, handle_char,  ft_strjoin 
+char	*handle_characters(char *content, size_t *i)
+{
+	size_t	start;
+	char	*chars;
 
+	start = *i;
+	while (content[*i] && !(content[*i] == '$' && check_quote(content,
+				*i) != '\''))
+		(*i)++;
+	chars = ft_substr(content, start, *i - start);
+	if (chars == NULL)
+		return (NULL);
+	return (chars);
+}
 
+// shell var names can start with letters or '_'
+char	*handle_dollar(char *content, size_t *i, t_shell *data)
+{
+	char	*expanded;
+
+	(*i)++;
+	if (ft_isalpha(content[*i]) || content[*i] == '_')
+	{
+		expanded = expand_env_var(content, i, data->env);
+		return (expanded);
+	}
+	else if (content[*i] == '?')
+	{
+		(*i)++;
+		// or functon which updates exitcode idk yet
+		expanded = ft_itoa(data->exit_code);
+		return (expanded);
+	}
+	else
+	{
+		expanded = ft_strdup("$");
+		return (expanded);
+	}
+}
+
+char	*expand_env_var(char *content, size_t *i, t_env *env)
+{
+	size_t	start;
+	char	*name;
+	char	*value;
+
+	start = *i;
+	while (ft_isalnum(content[*i]) || content[*i] == '_')
+		(*i)++;
+	name = ft_substr(content, start, *i - start);
+	if (name == NULL)
+		return (NULL);
+	value = get_env_value(name, env);
+	if (value == NULL)
+	{
+		free(name);
+		return (NULL);
+	}
+	free(name);
+	return (value);
+}
+
+char	*get_env_value(char *name, t_env *env)
+{
+	t_env	*current;
+	char	*value;
+
+	current = env;
+	while (current)
+	{
+		if (ft_strcmp(current->key, name) == 0)
+		{
+			value = ft_strdup(current->value);
+			if (value == NULL)
+				return (NULL);
+			return (value);
+		}
+		current = current->next;
+	}
+	value = ft_strdup("");
+	if (value == NULL)
+		return (NULL);
+	return (value);
+}
+
+int	ft_strcmp(const char *s1, const char *s2)
+{
+	size_t i;
+
+	i = 0;
+	while (s1[i] != '\0' || s2[i] != '\0')
+	{
+		if ((unsigned char)s1[i] != (unsigned char)s2[i])
+			return ((unsigned char)s1[i] - (unsigned char)s2[i]);
+		i++;
+	}
+	return (0);
+}

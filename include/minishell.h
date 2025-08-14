@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/13 15:07:45 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/14 17:21:29 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,16 @@ typedef struct s_shell
 	int				exit_code;
 	char			*input_line;
 	t_token			*token_list;
+	t_env			*env;
 
 }					t_shell;
+// env struct
+typedef struct s_env
+{
+	char			*key;
+	char			*value;
+	t_env			*next;
+}					t_env;
 
 // main things
 int					main(int ac, char **av, char **env);
