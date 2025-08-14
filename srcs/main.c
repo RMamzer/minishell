@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/13 16:36:44 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/14 14:24:35 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -305,3 +305,44 @@ bool	check_syntax(t_shell *data)
 	}
 	return (SUCCESS);
 }
+
+
+/*
+*   Apply expansion to every WORD token, which contains '$' in the list.
+*
+*/
+void    expander(t_shell *data, char **env)
+{
+    t_token *current;
+    
+    current = data->token_list;
+    while(current)
+    {
+        if(current->type == WORD && ft_strchr(current->content, '$'))
+            current->content = expand_content(current->content, data, env);
+        current = current->next;
+    }
+}
+
+char *expand_content(char *content, t_shell *data, char **env)
+{
+    size_t i;
+    char *new_content;
+    char *temp;
+
+    i = 0;
+    new_content = ft_strdup("");
+    if (new_content == NULL)
+        lexer_error(content, data);
+    while(content[i])
+    {
+        if(content[i] == '$' && check_quote(content, i) != '\'')
+            temp = handle_dollar(content, &i, data, env);
+        else
+            temp = handle_characters(content, &i);
+    }
+}
+
+// TODO: handle_dollar, handle_char,  ft_strjoin 
+
+
