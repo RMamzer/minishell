@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/15 18:56:18 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/15 19:07:49 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -456,13 +456,11 @@ char	*handle_characters(char *content, size_t *i)
 	size_t	start;
 	char	*chars;
 
-	// printf("anal\n"); //<---------------------------------- remove
 	start = *i;
+	if (content[*i] == '$') // think about it 
+		(*i)++;
 	while (content[*i] && content[*i] != '$')
 		(*i)++;
-	// printf("new letter: %c\n", content[*i]); //<------------------ remove
-	// printf("new i: %zu\n", *i);
-	// printf(" start: %zu\n", start); //<------------------ remove
 	chars = ft_substr(content, start, *i - start);
 	if (chars == NULL)
 		return (NULL);
