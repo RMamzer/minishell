@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/15 14:49:24 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/15 17:43:29 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ t_shell	*init_data(void)
 	data->exit_code = -1; // for now
 	data->input_line = NULL;
 	data->token_list = NULL;
+	data->env = NULL; // test
 	return (data);
 }
 
@@ -94,11 +95,11 @@ bool	process_input(char *input_line, t_shell *data)
 	lexer(data->input_line, data);
 	if (check_syntax(data) == FAILURE)
 	{
-		printf("ZALUPA");
+		printf("OSHIBKA V CHECK SYNTAX DETECTED\n");
 		free_list(&data->token_list);
 		return (FAILURE);
 	}
-    expander(data); // test
+	expander(data); // test
 	return (SUCCESS);
 }
 
@@ -308,10 +309,10 @@ bool	check_syntax(t_shell *data)
 	return (SUCCESS);
 }
 
-/** 
+/**
  *  Expands all environment variables in the shell's token list.
  *  @param data Pointer to the shell struct containing tokens.
-*/
+ */
 void	expander(t_shell *data)
 {
 	t_token	*current;
@@ -331,22 +332,22 @@ void	expander(t_shell *data)
  * @param content The string to expand.
  * @param data Pointer to the shell struct(conteins env and exit code).
  * @return Newly allocated expanded string.
-*/
+ */
 char	*expand_content(char *content, t_shell *data)
 {
 	size_t	i;
 	char	*new_content;
 	char	*temp;
-    char    quote; 
-    
+	char	quote;
+
 	i = 0;
-    quote = 0;
+	quote = 0;
 	new_content = ft_strdup("");
 	if (new_content == NULL)
 		lexer_error(content, data);
 	while (content[i])
 	{
-        quote = update_quote(quote, content[i]);
+		quote = update_quote(quote, content[i]);
 		temp = process_content(content, &i, quote, data);
 		if (temp == NULL)
 		{
@@ -367,16 +368,16 @@ char	*expand_content(char *content, t_shell *data)
  * @param c Character to process.
  * @return Updated quote state.
  */
-char update_quote(char quote, char c)
+char	update_quote(char quote, char c)
 {
-    if(c == '\'' || c == '"')
-    {
-        if(quote == 0)
-            return (c);
-        else if(quote == c)
-            return (0);
-    }
-    return (quote);
+	if (c == '\'' || c == '"')
+	{
+		if (quote == 0)
+			return (c);
+		else if (quote == c)
+			return (0);
+	}
+	return (quote);
 }
 
 /**
@@ -387,16 +388,15 @@ char update_quote(char quote, char c)
  * @param data Pointer to the shell struct.
  * @return Newly allocated string for the processed part.
  */
-char *process_content(char *content, size_t *i, char quote, t_shell *data)
+char	*process_content(char *content, size_t *i, char quote, t_shell *data)
 {
-    if(content[*i] == '$' && quote != '\'')
-    {
-        (*i)++;
-        return (handle_dollar(content, i, data));
-    }
-    else
-        return (handle_characters(content, i));
-        
+	if (content[*i] == '$' && quote != '\'')
+	{
+		(*i)++;
+		return (handle_dollar(content, i, data));
+	}
+	else
+		return (handle_characters(content, i));
 }
 
 /**
@@ -525,7 +525,7 @@ char	*strjoin_free(char *new_content, char *temp)
 
 int	ft_strcmp(const char *s1, const char *s2)
 {
-	size_t i;
+	size_t	i;
 
 	i = 0;
 	while (s1[i] != '\0' || s2[i] != '\0')
