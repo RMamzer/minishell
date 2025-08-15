@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/14 19:41:57 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/15 14:49:24 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,7 @@ bool	process_input(char *input_line, t_shell *data)
 		free_list(&data->token_list);
 		return (FAILURE);
 	}
+    expander(data); // test
 	return (SUCCESS);
 }
 
@@ -307,10 +308,10 @@ bool	check_syntax(t_shell *data)
 	return (SUCCESS);
 }
 
-/*
- *   Apply expansion to every WORD token, which contains '$' in the list.
- *
- */
+/** 
+ *  Expands all environment variables in the shell's token list.
+ *  @param data Pointer to the shell struct containing tokens.
+*/
 void	expander(t_shell *data)
 {
 	t_token	*current;
@@ -324,22 +325,29 @@ void	expander(t_shell *data)
 	}
 }
 
+/**
+ * Expands environment variables, the $? variable,
+ * and handels quotes in the string.
+ * @param content The string to expand.
+ * @param data Pointer to the shell struct(conteins env and exit code).
+ * @return Newly allocated expanded string.
+*/
 char	*expand_content(char *content, t_shell *data)
 {
 	size_t	i;
 	char	*new_content;
 	char	*temp;
-
+    char    quote; 
+    
 	i = 0;
+    quote = 0;
 	new_content = ft_strdup("");
 	if (new_content == NULL)
 		lexer_error(content, data);
 	while (content[i])
 	{
-		if (content[i] == '$' && check_quote(content, i) != '\'')
-			temp = handle_dollar(content, &i, data);
-		else
-			temp = handle_characters(content, &i);
+        quote = update_quote(quote, content[i]);
+		temp = process_content(content, &i, quote, data);
 		if (temp == NULL)
 		{
 			free(new_content);
@@ -352,39 +360,56 @@ char	*expand_content(char *content, t_shell *data)
 	free(content);
 	return (new_content);
 }
-char	*strjoin_free(char *new_content, char *temp)
-{
-	char	*result;
 
-	result = ft_strjoin(new_content, temp);
-	free(new_content);
-	free(temp);
-	if (result == NULL)
-		return (NULL);
-	return (result);
+/**
+ * Updates the current quote state beased on the character.
+ * @param quote Current quote state (0, '\'' or '"').
+ * @param c Character to process.
+ * @return Updated quote state.
+ */
+char update_quote(char quote, char c)
+{
+    if(c == '\'' || c == '"')
+    {
+        if(quote == 0)
+            return (c);
+        else if(quote == c)
+            return (0);
+    }
+    return (quote);
 }
 
-char	*handle_characters(char *content, size_t *i)
+/**
+ * Determens wether to handle a dollar variable or normal characters.
+ * @param content The string being processed.
+ * @param i Pointer to the current index in the string.
+ * @param quote Current quote state.
+ * @param data Pointer to the shell struct.
+ * @return Newly allocated string for the processed part.
+ */
+char *process_content(char *content, size_t *i, char quote, t_shell *data)
 {
-	size_t	start;
-	char	*chars;
-
-	start = *i;
-	while (content[*i] && !(content[*i] == '$' && check_quote(content,
-				*i) != '\''))
-		(*i)++;
-	chars = ft_substr(content, start, *i - start);
-	if (chars == NULL)
-		return (NULL);
-	return (chars);
+    if(content[*i] == '$' && quote != '\'')
+    {
+        (*i)++;
+        return (handle_dollar(content, i, data));
+    }
+    else
+        return (handle_characters(content, i));
+        
 }
 
-// shell var names can start with letters or '_'
+/**
+ * Expands a variable starting with '$'.
+ * @param content The string being processed.
+ * @param i Pointer to the index after '$' in the string.
+ * @param data Pointer to the shell struct(conteins env and exit code).
+ * @return Newly allocated string for the processed part.
+ */
 char	*handle_dollar(char *content, size_t *i, t_shell *data)
 {
 	char	*expanded;
 
-	(*i)++;
 	if (ft_isalpha(content[*i]) || content[*i] == '_')
 	{
 		expanded = expand_env_var(content, i, data->env);
@@ -404,6 +429,32 @@ char	*handle_dollar(char *content, size_t *i, t_shell *data)
 	}
 }
 
+/**
+ * Reads consecutive non-variable characters.
+ * @param content The string being processed.
+ * @param i Pointer to the current index (updated to the end of read chars.)
+ * @return Newly allocated string containing the characters, or NULL.
+ */
+char	*handle_characters(char *content, size_t *i)
+{
+	size_t	start;
+	char	*chars;
+
+	start = *i;
+	while (content[*i] && content[*i] != '$')
+		(*i)++;
+	chars = ft_substr(content, start, *i - start);
+	if (chars == NULL)
+		return (NULL);
+	return (chars);
+}
+/**
+ * Extracts a variable name and returns its value from the env.
+ * @param content The string being processed.
+ * @param i Pointer to the current index (updated to end of variable name).
+ * @param env Pointer to th evironment linked list.
+ * @return Newly allocated string with variabl's value, or NULL.
+ */
 char	*expand_env_var(char *content, size_t *i, t_env *env)
 {
 	size_t	start;
@@ -425,7 +476,13 @@ char	*expand_env_var(char *content, size_t *i, t_env *env)
 	free(name);
 	return (value);
 }
-
+/**
+ * Finds the value of an environment variable.
+ * @param name Name of the environment variable.
+ * @param env Pointer to the environment list.
+ * @return Newly allocated string with value, or an empty string
+ * if not found or NULL.
+ */
 char	*get_env_value(char *name, t_env *env)
 {
 	t_env	*current;
@@ -447,6 +504,23 @@ char	*get_env_value(char *name, t_env *env)
 	if (value == NULL)
 		return (NULL);
 	return (value);
+}
+/**
+ * Joins two strings and frees the originals.
+ * @param new_content First string to join (freed inside).
+ * @param temp Second string to join (freed inside).
+ * @return Newly allocated concatenated string or NULL.
+ */
+char	*strjoin_free(char *new_content, char *temp)
+{
+	char	*result;
+
+	result = ft_strjoin(new_content, temp);
+	free(new_content);
+	free(temp);
+	if (result == NULL)
+		return (NULL);
+	return (result);
 }
 
 int	ft_strcmp(const char *s1, const char *s2)
