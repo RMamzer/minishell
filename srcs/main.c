@@ -6,11 +6,13 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/15 17:53:37 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/15 18:56:18 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+// in singl qt does not work.
 
 // TODO: var expansion done but recheck the flow and free, etc.
 // TODO: heredocsituation, remove qotes,
@@ -25,16 +27,27 @@ void	test_tokens(t_token *list)
 	}
 }
 
+void	test_env(t_env *envlist)
+{
+	while (envlist)
+	{
+		// printf("KEY: %s VALUE:%s \n", envlist->key, envlist->value);
+		printf("%s=%s\n", envlist->key, envlist->value);
+		envlist = envlist->next;
+	}
+}
+
 int	main(int ac, char **av, char **env)
 {
 	t_shell	*data;
 	char	*input;
 
-	(void)ac;  // addded for testing
-	(void)av;  // addded for testing
-	(void)env; // addded for testing
+	(void)ac; // addded for testing
+	(void)av; // addded for testing
 	data = init_data();
-	while (1) // addded for testing
+	create_env(data, env);
+	test_env(data->env); // test
+	while (1)            // addded for testing
 	{
 		input = readline("dirty_shell> ");
 		if (!input)
@@ -347,8 +360,11 @@ char	*expand_content(char *content, t_shell *data)
 		lexer_error(content, data);
 	while (content[i])
 	{
+		// printf("%zu\n", i);
 		quote = update_quote(quote, content[i]);
+		printf("%c\n", quote);
 		temp = process_content(content, &i, quote, data);
+		printf("%s\n", temp);
 		if (temp == NULL)
 		{
 			free(new_content);
@@ -440,9 +456,13 @@ char	*handle_characters(char *content, size_t *i)
 	size_t	start;
 	char	*chars;
 
+	// printf("anal\n"); //<---------------------------------- remove
 	start = *i;
 	while (content[*i] && content[*i] != '$')
 		(*i)++;
+	// printf("new letter: %c\n", content[*i]); //<------------------ remove
+	// printf("new i: %zu\n", *i);
+	// printf(" start: %zu\n", start); //<------------------ remove
 	chars = ft_substr(content, start, *i - start);
 	if (chars == NULL)
 		return (NULL);

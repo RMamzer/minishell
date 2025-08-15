@@ -17,7 +17,7 @@ RED = \033[31m
 
 HEADERS = -I ./include  -I $(LIBFT_DIR)
 
-SRCS = main.c execute.c
+SRCS = main.c execute.c env_functions.c 
 
 OBJS = $(addprefix $(OBJS_DIR), $(SRCS:.c=.o))
 .SECONDARY: $(OBJS)

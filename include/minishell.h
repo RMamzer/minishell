@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/15 17:50:04 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/15 18:18:01 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define MINISHELL_H
 
 # include "libft.h"
+# include <errno.h>
 # include <readline/history.h>  // add_history
 # include <readline/readline.h> // readline
 # include <stdbool.h>
@@ -45,6 +46,14 @@ typedef struct s_token
 	char			*content;
 }					t_token;
 
+// env struct
+typedef struct s_env
+{
+	char			*key;
+	char			*value;
+	struct s_env	*next;
+}					t_env;
+
 // core
 typedef struct s_shell
 {
@@ -54,13 +63,6 @@ typedef struct s_shell
 	t_env			*env;
 
 }					t_shell;
-// env struct
-typedef struct s_env
-{
-	char			*key;
-	char			*value;
-	t_env			*next;
-}					t_env;
 
 // main things
 int					main(int ac, char **av, char **env);
@@ -77,6 +79,19 @@ size_t				handle_word(char *input_line, size_t start, t_shell *data);
 void				add_token(t_shell *data, t_token_type type, char *content);
 bool				check_syntax(t_shell *data);
 
+// expansion
+void				expander(t_shell *data);
+char				*expand_content(char *content, t_shell *data);
+char				update_quote(char quote, char c);
+char				*process_content(char *content, size_t *i, char quote,
+						t_shell *data);
+char				*handle_dollar(char *content, size_t *i, t_shell *data);
+char				*handle_characters(char *content, size_t *i);
+char				*expand_env_var(char *content, size_t *i, t_env *env);
+char				*get_env_value(char *name, t_env *env);
+char				*strjoin_free(char *new_content, char *temp);
+int					ft_strcmp(const char *s1, const char *s2);
+
 // helper functions
 bool				is_delimiter(int i);
 bool				is_operator(char c);
@@ -85,5 +100,17 @@ bool				is_operator(char c);
 void				show_error(char *msg, int exit_code);
 void				lexer_error(char *input_line, t_shell *data);
 void				free_list(t_token **list);
+
+// env
+void				error_exit(char *msg);
+void				error_env_exit(char *key, char *value, t_shell *shell);
+bool				update_env_value(t_env **env, char *key, char *new_value);
+char				*find_env_value(char *str, t_env *env);
+void				update_shllvl_value(t_shell *shell);
+void				add_env_node(t_env **env, t_env *new_node);
+t_env				*create_env_node(char *key, char *value);
+void				process_env_line(t_shell *shell, const char *envp);
+void				set_minimal_env(t_shell *shell);
+void				create_env(t_shell *shell, char **envp);
 
 #endif
