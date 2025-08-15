@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/15 16:09:39 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/15 17:09:35 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void	error_env_exit(char *key, char *value, t_shell  *shell)
 		free(key);
 	if (value)
 		free(value);
-	if (shell)
+	if (shell) // free all previous ndes in env annd mallocs from before
 		// should anything beyond env be freed?
 }
 
@@ -51,7 +51,7 @@ bool	update_env_value(t_env **env, char *key, char *new_value)
 	temp = *env;
 	while (temp)
 	{
-		if (temp->key == key)
+		if (ft_strcmp(temp->key,key))
 		{
 			free(temp->value);
 			temp->value = new_value;
@@ -72,18 +72,20 @@ char *find_env_value(char *str, t_env *env)
 	}
 	return (NULL);
 }
+
 // updates shllvl value in environment. Increments it by 1 compared to the previous value
 void	update_shllvl_value(t_shell *shell)
 {
 	char *value_shlvl;
 	int	level;
 
-	value_shlvl = find_env_value("SHLVL", shell);
+	value_shlvl = find_env_value("SHLVL", shell->env);
+	// if !value --> malloc
 	level = ft_atoi(value_shlvl) + 1;
 	value_shlvl = ft_itoa(level);
 	if (!value_shlvl)
 		error_exit("minishell: itoa failed"); // <---------------------- what fucntion to exit with?
-	update_env_value(&shell->env, "SHLLVL", value_shlvl, shell);
+	update_env_value(&shell->env, "SHLLVL", value_shlvl);
 }
 
 // add the node to the env and connect last->next to new_node
@@ -146,7 +148,13 @@ void	process_env_line(t_shell *shell, const char *envp)
 void	set_minimal_env(t_shell *shell)
 {
 	char	*pwd_line;
-	pwd_line = ft_strjoin("PWD=", getcwd(NULL,0));
+	char	*pwd;
+
+	pwd = getcwd(NULL,0);
+	if (!pwd)
+		error_env_exit(NULL,NULL, shell);
+	pwd_line = ft_strjoin("PWD=", pwd);
+	free (pwd);
 	if (!pwd_line)
 		error_env_exit(NULL,NULL, shell);
 	process_env_line(shell, pwd_line);
@@ -157,7 +165,6 @@ void	set_minimal_env(t_shell *shell)
 void	create_env(t_shell *shell, const char **envp)
 {
 	char	*shell_name;
-	char	*pwd;
 
 	if (!envp || !envp[0])
 		set_minimal_env(shell);
@@ -170,10 +177,10 @@ void	create_env(t_shell *shell, const char **envp)
 		}
 	}
 	update_shllvl_value(shell);
-	// shell_name = ft_strdup("minishell");
-	// if (!shell_name)
-	// 	error_exit("minishell: malloc failed:"); //<---------------------- what fucntion to exit with?
-	// update_env_value(&shell->env, "SHELL", shell_name);
+	shell_name = ft_strdup("minishell");
+	if (!shell_name)
+		error_exit("minishell: malloc failed:"); //<---------------------- what fucntion to exit with?
+	update_env_value(&shell->env, "SHELL", shell_name);
 }
 
 
