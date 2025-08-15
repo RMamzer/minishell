@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/13 18:42:41 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/15 16:09:39 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,8 @@ void	error_env_exit(char *key, char *value, t_shell  *shell)
 }
 
 
-
+// update the value of a key to a new value: do we need to send there strdup?
+// can add new_value check and error exit with malloc error here, so we can send ft_strdup
 bool	update_env_value(t_env **env, char *key, char *new_value)
 {
 	t_env *temp;
@@ -71,11 +72,10 @@ char *find_env_value(char *str, t_env *env)
 	}
 	return (NULL);
 }
-
-void	update_shllvl_values(t_shell *shell)
+// updates shllvl value in environment. Increments it by 1 compared to the previous value
+void	update_shllvl_value(t_shell *shell)
 {
 	char *value_shlvl;
-	char *value_shell;
 	int	level;
 
 	value_shlvl = find_env_value("SHLVL", shell);
@@ -83,20 +83,17 @@ void	update_shllvl_values(t_shell *shell)
 	value_shlvl = ft_itoa(level);
 	if (!value_shlvl)
 		error_exit("minishell: itoa failed"); // <---------------------- what fucntion to exit with?
-	update_env_value(&shell->env, "SHLLVL", value_shlvl);
-	value_shell = ft_strdup("minishell");
-	if(!value_shell)
-		error_exit("minishell: malloc failed"); //<---------------------- what fucntion to exit with?
-	update_env_value(&shell->env, "SHELL", value_shell);
+	update_env_value(&shell->env, "SHLLVL", value_shlvl, shell);
 }
 
+// add the node to the env and connect last->next to new_node
 void	add_env_node(t_shell **env, t_env *new_node)
 {
 	t_env	*last;
 
 	if (!new_node)
 		return ;
-	if ( !(env))
+	if ( !(*env))
 	{
 		*env = new_node;
 		return ;
@@ -107,12 +104,12 @@ void	add_env_node(t_shell **env, t_env *new_node)
 	last->next = new_node;
 }
 
-t_env	*create_env_node(char *key, char *value) // should i add shell?
+t_env	*create_env_node(char *key, char *value)
 {
 	t_env *new_node;
 
-	// if (!key || !value)
-
+	if (!key || !value) // check later, would it mean that malloc broke or no input?
+		return (NULL);
 	new_node =  malloc(sizeof(t_env));
 	if (!new_node)
 		return (NULL);
@@ -146,25 +143,51 @@ void	process_env_line(t_shell *shell, const char *envp)
 	add_env_node(&shell->env, new_node);
 }
 
-void	set_minimal_env(t_shell)
+void	set_minimal_env(t_shell *shell)
 {
-
+	char	*pwd_line;
+	pwd_line = ft_strjoin("PWD=", getcwd(NULL,0));
+	if (!pwd_line)
+		error_env_exit(NULL,NULL, shell);
+	process_env_line(shell, pwd_line);
+	process_env_line(shell,"SHLVL=0");
+	process_env_line(shell,"_=/usr/bin/env");
 }
 
 void	create_env(t_shell *shell, const char **envp)
 {
 	char	*shell_name;
+	char	*pwd;
 
 	if (!envp || !envp[0])
-		set_minimal_env();
-	while (*envp) // what if !envp? will it crash here?
+		set_minimal_env(shell);
+	else
 	{
-		process_env_line(shell, *envp);
-		envp++;
+		while (*envp)
+		{
+			process_env_line(shell, *envp);
+			envp++;
+		}
 	}
 	update_shllvl_value(shell);
-	shell_name = ft_strdup("minishell");
-	if (!shell_name)
-		error_exit("minishell: malloc failed:"); //<---------------------- what fucntion to exit with?
-	update_env_value(&shell->env, "SHELL", shell_name);
+	// shell_name = ft_strdup("minishell");
+	// if (!shell_name)
+	// 	error_exit("minishell: malloc failed:"); //<---------------------- what fucntion to exit with?
+	// update_env_value(&shell->env, "SHELL", shell_name);
 }
+
+
+
+
+/*
+logic
+- create env
+	- if no env, set basic
+	- otherwise, actual env
+	- change name of env and n of shllvl
+- basic functions:
+	- function to read env line
+	- function to create and add node from inputs (would be useful for later work with env)
+		- i want to use strdup directly there, so i dont need to do it manually. Can we assume that we will not create empty info nodes?
+	- fucntion to exit if one of mallocs breaks
+*/
