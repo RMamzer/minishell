@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/15 18:19:46 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/15 19:17:34 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ bool	update_env_value(t_env **env, char *key, char *new_value)
 	temp = *env;
 	while (temp)
 	{
-		if (ft_strcmp(temp->key, key))
+		if (ft_strcmp(temp->key, key) == 0)
 		{
 			free(temp->value);
 			temp->value = new_value;
@@ -62,7 +62,7 @@ char	*find_env_value(char *str, t_env *env)
 {
 	while (env != NULL)
 	{
-		if (ft_strcmp(str, env->key))
+		if (ft_strcmp(str, env->key) == 0)
 			return (env->value);
 		env = env->next;
 	}
@@ -179,7 +179,8 @@ void	create_env(t_shell *shell, char **envp)
 	shell_name = ft_strdup("minishell");
 	if (!shell_name)
 		error_exit("minishell: malloc failed:"); //<-what fucntion to exit with?
-	update_env_value(&shell->env, "SHELL", shell_name);
+	if (update_env_value(&shell->env, "SHELL", shell_name) == false)
+		printf("izvinite");
 }
 
 /*
