@@ -6,11 +6,55 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/13 15:57:48 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/17 17:53:40 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+
+/*
+Questions:
+- should we care if env -i input? Or ca we just brake on empty env
+- create function that will create env*/
+
+int	get_env_size(t_env *lst)
+{
+	t_env	*tmp;
+	int		i;
+
+	i = 0;
+	tmp = lst;
+	while (tmp)
+	{
+		tmp = tmp->next;
+		i++;
+	}
+	return (i);
+}
+
+char	*path_strjoin(char const *s1, char const *s2, char const *s3)
+{
+	char	*joinedstr;
+	size_t	str1_l;
+	size_t	str2_l;
+	size_t	str3_l;
+
+	if (!s1 && !s2 && !s3)
+		return (NULL);
+	str1_l = ft_strlen(s1);
+	str2_l = ft_strlen(s2);
+	str3_l = ft_strlen(s3);
+	joinedstr = malloc(str1_l + str2_l + str3_l + 1);
+	if (!joinedstr)
+		return (NULL);
+	ft_memcpy(joinedstr, s1, str1_l);
+	ft_memcpy(joinedstr + str1_l, s2, str2_l);
+	ft_memcpy(joinedstr + str1_l + str2_l, s3, str3_l);
+	joinedstr[str1_l + str2_l + str3_l] = '\0';
+	return (joinedstr);
+}
+
 
 void	error_exit(char	*msg)
 {
@@ -35,24 +79,36 @@ int	ft_strcmp( const char *s1, const char *s2)
 
 
 
-char *find_env_value(char *str, t_env *env)
-{
-	while (env!= NULL)
-	{
-		if (ft_strcmp(str, env->key))
-			return (env->content);
-		env = env->next;
-	}
-	return (NULL);
-}
-
-
 void	execute_cmd_child(char **args, t_shell *shell)
 {
-	char *env_paths;
-	env_paths = find_env_value("PATH", shell->env);
-	if (!env_paths)
-		error_exit("minishell: cmd: not found") // should return minishell" <cmd> not found????
+	char	*env_path;
+	char	*joined_path;
+	int		i;
+
+	env_path = (get_env_value("PATH", shell->env, NO_ALLOC));
+	if (!env_path)
+		error_exit("minishell: cmd: not found");
+	shell->paths_array = ft_split(env_path,':');
+	if (!shell->paths_array)
+		error_exit("minishell: malloc broke"); // malloc env_paths here
+	shell->env_array = create_env_array
+
+	while(shell->paths_array[i])
+	{
+		joined_path = path_strjoin(shell->paths_array[i], "/", args[0]);
+		if (!joined_path)
+			error_exit ("minishell: malloc broke");  // malloc env_paths here
+		if (access(joined_path, F_OK))
+		{
+			if (access(joined_path, X_OK))
+			{
+				execve(joined_path, args, /*GOD PLEASE*/);
+
+			}
+		}
+
+		i++;
+	}
 }
 
 // check envp or args?
