@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/17 17:53:40 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/17 18:33:38 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ int	get_env_size(t_env *lst)
 	return (i);
 }
 
-char	*path_strjoin(char const *s1, char const *s2, char const *s3)
+char	*super_strjoin(char const *s1, char const *s2, char const *s3)
 {
 	char	*joinedstr;
 	size_t	str1_l;
@@ -78,6 +78,26 @@ int	ft_strcmp( const char *s1, const char *s2)
 }
 
 
+void	recreate_env_array(const t_env *env, t_shell	*shell)
+{
+	int i;
+	t_env *temp;
+
+	i = 0;
+	temp = env;
+	shell->env_array = malloc (sizeof(char *) * (get_env_size(env) + 1));
+	if (!shell->env_array)
+		error_exit("minishell: malloc broke");
+	while (temp)
+	{
+		shell->env_array[i] = super_strjoin(temp->key, "=", temp->value);
+		if (!shell->env_array[i])
+			error_exit("minishell: malloc broke");
+		i++;
+		temp = temp->next;
+	}
+	shell->env_array[i] = NULL;
+}
 
 void	execute_cmd_child(char **args, t_shell *shell)
 {
@@ -91,22 +111,24 @@ void	execute_cmd_child(char **args, t_shell *shell)
 	shell->paths_array = ft_split(env_path,':');
 	if (!shell->paths_array)
 		error_exit("minishell: malloc broke"); // malloc env_paths here
-	shell->env_array = create_env_array
-
+	recreate_env_array(shell->env, shell);
 	while(shell->paths_array[i])
 	{
-		joined_path = path_strjoin(shell->paths_array[i], "/", args[0]);
+		joined_path = super_strjoin(shell->paths_array[i], "/", args[0]);
 		if (!joined_path)
 			error_exit ("minishell: malloc broke");  // malloc env_paths here
 		if (access(joined_path, F_OK))
 		{
 			if (access(joined_path, X_OK))
 			{
-				execve(joined_path, args, /*GOD PLEASE*/);
-
+				execve(joined_path, args, shell->env_array);
+				free(joined_path);
+				error_exit("minishell: execution error");
 			}
+			free (joined_path);
+			error_exit("minishell: cannot execute cmd");
 		}
-
+		free(joined_path);
 		i++;
 	}
 }
