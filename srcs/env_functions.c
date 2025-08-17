@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env_functions.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/15 19:17:34 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/17 15:55:31 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,8 @@
 
 /*
 needs to be done:
-- add env setup without envp
 - check exit paths
 - make code more readable?
-- should shllvl update and shell name update be combined?
 */
 
 void	error_exit(char *msg)
@@ -58,16 +56,6 @@ bool	update_env_value(t_env **env, char *key, char *new_value)
 	return (false);
 }
 
-char	*find_env_value(char *str, t_env *env)
-{
-	while (env != NULL)
-	{
-		if (ft_strcmp(str, env->key) == 0)
-			return (env->value);
-		env = env->next;
-	}
-	return (NULL);
-}
 
 // updates shllvl value in environment. Increments it by 1 compared to the previous value
 void	update_shllvl_value(t_shell *shell)
@@ -75,7 +63,7 @@ void	update_shllvl_value(t_shell *shell)
 	char	*value_shlvl;
 	int		level;
 
-	value_shlvl = find_env_value("SHLVL", shell->env);
+	value_shlvl = get_env_value("SHLVL", shell->env, NO_ALLOC);
 	// if !value --> malloc
 	level = ft_atoi(value_shlvl) + 1;
 	value_shlvl = ft_itoa(level);
@@ -179,20 +167,5 @@ void	create_env(t_shell *shell, char **envp)
 	shell_name = ft_strdup("minishell");
 	if (!shell_name)
 		error_exit("minishell: malloc failed:"); //<-what fucntion to exit with?
-	if (update_env_value(&shell->env, "SHELL", shell_name) == false)
-		printf("izvinite");
+	update_env_value(&shell->env, "SHELL", shell_name);
 }
-
-/*
-logic
-- create env
-	- if no env, set basic
-	- otherwise, actual env
-	- change name of env and n of shllvl
-- basic functions:
-	- function to read env line
-	- function to create and add node from inputs (would be useful for later work with env)
-		- i want to use strdup directly there,
-			so i dont need to do it manually. Can we assume that we will not create empty info nodes?
-	- fucntion to exit if one of mallocs breaks
-*/

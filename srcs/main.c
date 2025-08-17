@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/15 19:07:49 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/17 15:54:07 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -360,11 +360,8 @@ char	*expand_content(char *content, t_shell *data)
 		lexer_error(content, data);
 	while (content[i])
 	{
-		// printf("%zu\n", i);
 		quote = update_quote(quote, content[i]);
-		printf("%c\n", quote);
 		temp = process_content(content, &i, quote, data);
-		printf("%s\n", temp);
 		if (temp == NULL)
 		{
 			free(new_content);
@@ -457,7 +454,7 @@ char	*handle_characters(char *content, size_t *i)
 	char	*chars;
 
 	start = *i;
-	if (content[*i] == '$') // think about it 
+	if (content[*i] == '$') // think about it
 		(*i)++;
 	while (content[*i] && content[*i] != '$')
 		(*i)++;
@@ -485,7 +482,7 @@ char	*expand_env_var(char *content, size_t *i, t_env *env)
 	name = ft_substr(content, start, *i - start);
 	if (name == NULL)
 		return (NULL);
-	value = get_env_value(name, env);
+	value = get_env_value(name, env, ALLOC);
 	if (value == NULL)
 	{
 		free(name);
@@ -501,7 +498,8 @@ char	*expand_env_var(char *content, size_t *i, t_env *env)
  * @return Newly allocated string with value, or an empty string
  * if not found or NULL.
  */
-char	*get_env_value(char *name, t_env *env)
+
+char	*get_env_value(char *name, t_env *env, bool alloc)
 {
 	t_env	*current;
 	char	*value;
@@ -511,10 +509,15 @@ char	*get_env_value(char *name, t_env *env)
 	{
 		if (ft_strcmp(current->key, name) == 0)
 		{
-			value = ft_strdup(current->value);
-			if (value == NULL)
-				return (NULL);
-			return (value);
+			if (alloc == ALLOC)
+			{
+				value = ft_strdup(current->value);
+				if (value == NULL)
+					return (NULL);
+				return (value);
+			}
+			else
+				return (current->value);
 		}
 		current = current->next;
 	}
