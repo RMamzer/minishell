@@ -6,16 +6,19 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/18 14:02:43 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/18 18:39:14 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// in singl qt does not work.
-
-// TODO: var expansion done but recheck the flow and free, etc.
-// TODO: heredocsituation, remove qotes,
+// FOR MAXIM BELOW
+// TODO: test var expansion. // need to redo
+// TODO: new branch for stuff below.
+// TODO: plan for heredoc(probably should be handeled before the expansion)
+// TODO: remove quotes.
+// TODO: AST situation.
+// TODO: ERROR MANAGEMENT
 
 // test function, remove later
 void	test_tokens(t_token *list)
@@ -453,20 +456,18 @@ char	*handle_characters(char *content, size_t *i, char quote)
 	size_t	start;
 	char	*chars;
 
+	(void)quote;
 	start = *i;
-	while(content[*i])
-    {
-        if(content[*i] == '$' && quote != '\'')
-            break;
-        if ((quote == '\'' || quote == '"') && content[*i] == quote)
-            break;
-        (*i)++;
-    }
+	if (content[*i] == '$')
+		(*i)++;
+	while (content[*i] && content[*i] != '$')
+		(*i)++;
 	chars = ft_substr(content, start, *i - start);
 	if (chars == NULL)
 		return (NULL);
 	return (chars);
 }
+
 /**
  * Extracts a variable name and returns its value from the env.
  * @param content The string being processed.
