@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/17 15:46:00 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/18 14:02:46 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ char				update_quote(char quote, char c);
 char				*process_content(char *content, size_t *i, char quote,
 						t_shell *data);
 char				*handle_dollar(char *content, size_t *i, t_shell *data);
-char				*handle_characters(char *content, size_t *i);
+char				*handle_characters(char *content, size_t *i, char quote);
 char				*expand_env_var(char *content, size_t *i, t_env *env);
 char				*get_env_value(char *name, t_env *env, bool alloc);
 char				*strjoin_free(char *new_content, char *temp);
