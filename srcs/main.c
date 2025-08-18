@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/17 15:54:07 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/18 14:02:43 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -409,7 +409,7 @@ char	*process_content(char *content, size_t *i, char quote, t_shell *data)
 		return (handle_dollar(content, i, data));
 	}
 	else
-		return (handle_characters(content, i));
+		return (handle_characters(content, i, quote));
 }
 
 /**
@@ -448,16 +448,20 @@ char	*handle_dollar(char *content, size_t *i, t_shell *data)
  * @param i Pointer to the current index (updated to the end of read chars.)
  * @return Newly allocated string containing the characters, or NULL.
  */
-char	*handle_characters(char *content, size_t *i)
+char	*handle_characters(char *content, size_t *i, char quote)
 {
 	size_t	start;
 	char	*chars;
 
 	start = *i;
-	if (content[*i] == '$') // think about it
-		(*i)++;
-	while (content[*i] && content[*i] != '$')
-		(*i)++;
+	while(content[*i])
+    {
+        if(content[*i] == '$' && quote != '\'')
+            break;
+        if ((quote == '\'' || quote == '"') && content[*i] == quote)
+            break;
+        (*i)++;
+    }
 	chars = ft_substr(content, start, *i - start);
 	if (chars == NULL)
 		return (NULL);
