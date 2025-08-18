@@ -2,7 +2,7 @@ NAME = minishell
 
 CC = cc
 
-C_FLAGS = -Wall -Wextra -Werror
+C_FLAGS = -Wall -Wextra -Werror -g
 
 LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a
@@ -13,7 +13,7 @@ SRCS_DIR = srcs/
 
 HEADERS = -I ./include  -I $(LIBFT_DIR)
 
-SRCS = main.c execute.c
+SRCS = main.c execute.c env_functions.c
 
 OBJS = $(addprefix $(OBJS_DIR), $(SRCS:.c=.o))
 .SECONDARY: ${OBJS}
@@ -28,7 +28,7 @@ $(OBJS_DIR)%.o: $(SRCS_DIR)%.c
 	$(CC) $(C_FLAGS) -c $< -o $@ $(HEADERS)
 
 $(NAME): $(OBJS) $(LIBFT)
-	$(CC) $(C_FLAGS) $(OBJS) $(LIBFT) -o $(NAME)
+	$(CC) $(C_FLAGS) $(OBJS) $(LIBFT) -lreadline -o $(NAME)
 
 clean:
 	rm -rf $(OBJS_DIR)

@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/17 17:52:13 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/18 17:07:19 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,28 +22,7 @@
 # include <stdlib.h>
 # include <unistd.h>
 
-// lib and macro for execution
-# include <sys/wait.h>
-# define READ_END 0
-# define WRITE_END 1
 
-typedef struct s_ast
-{
-  t_token_type        type;
-  char        **value;
-  int          expand;
-  int          status;
-  int          fd[2];
-  struct s_tree_node  *left;
-  struct s_tree_node  *right;
-}	t_ast;
-
-
-# define SUCCESS 0
-# define FAILURE 1
-
-# define ALLOC true
-# define NO_ALLOC false
 
 # define TO_TRIM " \t\n" // check this
 
@@ -81,13 +60,39 @@ typedef struct s_shell
 	char			*input_line;
 	t_token			*token_list;
 	t_env			*env;
-	t_env			**paths_array;
+	char			**paths_array;
 	char			**env_array;
 
 }					t_shell;
 
+
+// lib and macro for execution
+# include <sys/wait.h>
+# define READ_END 0
+# define WRITE_END 1
+
+typedef struct s_ast
+{
+  t_token_type        type;
+  char        **value;
+  int          expand;
+  int          status;
+  int          fd[2];
+  struct s_ast  *left;
+  struct s_ast  *right;
+}	t_ast;
+
+
+# define SUCCESS 0
+# define FAILURE 1
+
+# define ALLOC true
+# define NO_ALLOC false
+
+
+
 // main things
-int					main(int ac, char **av, char **env);
+//int					main(int ac, char **av, char **env);
 t_shell				*init_data(void);
 
 // pre processing of input
@@ -134,5 +139,21 @@ t_env				*create_env_node(char *key, char *value);
 void				process_env_line(t_shell *shell, const char *envp);
 void				set_minimal_env(t_shell *shell);
 void				create_env(t_shell *shell, char **envp);
+
+
+
+//execute.c
+int	get_env_size(t_env *lst);
+char	*super_strjoin(char const *s1, char const *s2, char const *s3);
+void	error_exit(char	*msg);
+void	recreate_env_array(t_env *env, t_shell	*shell);
+void	execute_cmd_child(char **args, t_shell *shell);
+int	execute_external_cmd(char	**args, t_shell *shell);
+int	check_command(t_ast *node, char *cmd, t_shell *shell);
+int	wait_children(pid_t *pids, int children_rem);
+void	execute_left_child(t_ast *node, t_shell *shell, int *pipefd);
+void	execute_right_child(t_ast *node, t_shell *shell, int *pipefd);
+void	execute_pipe(t_ast *node, t_shell *shell);
+int		execute_ast(t_ast *node, t_shell *shell);
 
 #endif

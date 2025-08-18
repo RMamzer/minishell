@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/17 17:48:37 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/18 16:41:50 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,6 @@ needs to be done:
 - make code more readable?
 - do i need to build whole env back before the execution?
 */
-
-void	error_exit(char *msg)
-{
-	perror(msg);
-	exit(errno);
-}
 
 void	error_env_exit(char *key, char *value, t_shell *shell)
 {

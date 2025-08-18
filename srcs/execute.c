@@ -6,17 +6,37 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/17 18:33:38 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/18 19:00:33 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+int	execute_builtin_echo(char	**args)
+{
+	bool	n_flag;
+	int i;
 
-/*
-Questions:
-- should we care if env -i input? Or ca we just brake on empty env
-- create function that will create env*/
+	i = 0;
+	n_flag = false;
+	while (ft_strcmp("-n",args[i]) == 0)
+	{
+		n_flag = true;
+		i++;
+	}
+	while(args[i])
+	{
+		ft_putstr_fd(args[i],STDOUT_FILENO);
+		i++;
+		if (args[i])
+			ft_putchar_fd(' ', STDOUT_FILENO);
+	}
+	if (n_flag == false)
+		ft_putchar_fd('\n', STDOUT_FILENO);
+	return (0);
+}
+
+
 
 int	get_env_size(t_env *lst)
 {
@@ -63,22 +83,22 @@ void	error_exit(char	*msg)
 }
 
 
-int	ft_strcmp( const char *s1, const char *s2)
-{
-	size_t i;
+// int	ft_strcmp( const char *s1, const char *s2)
+// {
+// 	size_t i;
 
-	i = 0;
-	while (s1[i] || s2[i])
-	{
-		if (s1[i] != s2[i])
-			return((unsigned char)s1[i] - (unsigned char)s2[i]);
-		i++;
-	}
-	return (0);
-}
+// 	i = 0;
+// 	while (s1[i] || s2[i])
+// 	{
+// 		if (s1[i] != s2[i])
+// 			return((unsigned char)s1[i] - (unsigned char)s2[i]);
+// 		i++;
+// 	}
+// 	return (0);
+// }
 
 
-void	recreate_env_array(const t_env *env, t_shell	*shell)
+void	recreate_env_array(t_env *env, t_shell	*shell)
 {
 	int i;
 	t_env *temp;
@@ -105,6 +125,7 @@ void	execute_cmd_child(char **args, t_shell *shell)
 	char	*joined_path;
 	int		i;
 
+	i = 0;
 	env_path = (get_env_value("PATH", shell->env, NO_ALLOC));
 	if (!env_path)
 		error_exit("minishell: cmd: not found");
@@ -117,9 +138,9 @@ void	execute_cmd_child(char **args, t_shell *shell)
 		joined_path = super_strjoin(shell->paths_array[i], "/", args[0]);
 		if (!joined_path)
 			error_exit ("minishell: malloc broke");  // malloc env_paths here
-		if (access(joined_path, F_OK))
+		if (access(joined_path, F_OK) == 0)
 		{
-			if (access(joined_path, X_OK))
+			if (access(joined_path, X_OK) == 0)
 			{
 				execve(joined_path, args, shell->env_array);
 				free(joined_path);
@@ -154,8 +175,8 @@ return (EXIT_FAILURE);
 // do i need to check empty cmd here?
 int	check_command(t_ast *node, char *cmd, t_shell *shell)
 {
-	// if (ft_strcmp(cmd, "echo"))
-	// 	execute_builtin_echo;
+	if (ft_strcmp(cmd, "echo") == 0)
+		shell->exit_code = execute_builtin_echo(node->value + 1);
 	// else if (ft_strcmp(cmd, "cd"))
 	// 	execute_builtin_cd;
 	// else if (ft_strcmp(cmd, "pwd"))
@@ -168,8 +189,8 @@ int	check_command(t_ast *node, char *cmd, t_shell *shell)
 	// 	execute_builtin_env;
 	// else if (ft_strcmp(cmd, "exit"))
 	// 	execute_builtin_exit;
-	// else
-	shell->exit_code = execute_external_cmd(node->value, shell);
+	 else
+		shell->exit_code = execute_external_cmd(node->value, shell);
 	return (shell->exit_code);
 }
 
