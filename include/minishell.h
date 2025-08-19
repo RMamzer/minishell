@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/18 18:14:28 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/19 15:52:07 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,11 +85,9 @@ bool				check_syntax(t_shell *data);
 // expansion
 void				expander(t_shell *data);
 char				*expand_content(char *content, t_shell *data);
-char				update_quote(char quote, char c);
-char				*process_content(char *content, size_t *i, char quote,
-						t_shell *data);
+char				*process_content(char *content, size_t *i, t_shell *data);
 char				*handle_dollar(char *content, size_t *i, t_shell *data);
-char				*handle_characters(char *content, size_t *i, char quote);
+char				*handle_characters(char *content, size_t *i);
 char				*expand_env_var(char *content, size_t *i, t_env *env);
 char				*get_env_value(char *name, t_env *env, bool alloc);
 char				*strjoin_free(char *new_content, char *temp);
