@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/19 15:52:07 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/19 18:17:19 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@
 
 # define SUCCESS 0
 # define FAILURE 1
+# define IN_DOUBLE_QUOTE true
+# define NO_QUOTE false
 
 # define ALLOC true
 # define NO_ALLOC false
@@ -87,11 +89,15 @@ void				expander(t_shell *data);
 char				*expand_content(char *content, t_shell *data);
 char				*process_content(char *content, size_t *i, t_shell *data);
 char				*handle_dollar(char *content, size_t *i, t_shell *data);
-char				*handle_characters(char *content, size_t *i);
+char				*handle_characters(char *content, size_t *i, bool in_dq);
 char				*expand_env_var(char *content, size_t *i, t_env *env);
 char				*get_env_value(char *name, t_env *env, bool alloc);
 char				*strjoin_free(char *new_content, char *temp);
 int					ft_strcmp(const char *s1, const char *s2);
+
+char				*handle_single_quote(char *content, size_t *i);
+char				*handle_double_quote(char *content, size_t *i,
+						t_shell *data);
 
 // helper functions
 bool				is_delimiter(int i);
