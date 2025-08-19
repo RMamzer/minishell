@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/18 18:39:14 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/19 16:07:33 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -354,17 +354,14 @@ char	*expand_content(char *content, t_shell *data)
 	size_t	i;
 	char	*new_content;
 	char	*temp;
-	char	quote;
 
 	i = 0;
-	quote = 0;
 	new_content = ft_strdup("");
 	if (new_content == NULL)
 		lexer_error(content, data);
 	while (content[i])
 	{
-		quote = update_quote(quote, content[i]);
-		temp = process_content(content, &i, quote, data);
+		temp = process_content(content, &i, data);
 		if (temp == NULL)
 		{
 			free(new_content);
@@ -379,40 +376,66 @@ char	*expand_content(char *content, t_shell *data)
 }
 
 /**
- * Updates the current quote state beased on the character.
- * @param quote Current quote state (0, '\'' or '"').
- * @param c Character to process.
- * @return Updated quote state.
- */
-char	update_quote(char quote, char c)
-{
-	if (c == '\'' || c == '"')
-	{
-		if (quote == 0)
-			return (c);
-		else if (quote == c)
-			return (0);
-	}
-	return (quote);
-}
-
-/**
  * Determens wether to handle a dollar variable or normal characters.
  * @param content The string being processed.
  * @param i Pointer to the current index in the string.
- * @param quote Current quote state.
  * @param data Pointer to the shell struct.
  * @return Newly allocated string for the processed part.
  */
-char	*process_content(char *content, size_t *i, char quote, t_shell *data)
+char	*process_content(char *content, size_t *i,  t_shell *data)
 {
-	if (content[*i] == '$' && quote != '\'')
-	{
-		(*i)++;
-		return (handle_dollar(content, i, data));
-	}
-	else
-		return (handle_characters(content, i, quote));
+	if(content[*i] == '\'')
+        return (handle_single_quote(content, i, data));
+    else if (content[*i] == '"')
+        return (handle_double_quote(content, i, data));
+    else if (content[*i] == '$')
+        return (handle_dollar(content, i, data));
+    else
+        return (handle_characters(content, i));
+}
+
+char *handle_single_quote(char *content, size_t *i)
+{
+    size_t start;
+    char *temp;
+    
+    (*i)++;
+    start = *i;
+    while (content[*i] && content[*i] != '\'')
+        (*i)++;
+    temp = ft_substr(content, start, *i - start);
+    if(temp == NULL)
+        return (NULL);
+    if(content[*i] == '\'')
+        (*i)++;
+    return (temp);
+}
+char *handle_double_quote(char *content, size_t *i, t_shell *data)
+{
+    
+    char *temp;
+    char *result;
+
+    (*i)++;
+    result = ft_strdup("");
+    if(result == NULL)
+        return (NULL);
+    while(content[*i] && content[*i] != '"')
+    {
+        if(content[*i] == '$')
+            temp = handle_dollar(content, i, data);
+        else
+            temp = handle_characters(content, i);
+        if(temp == NULL)
+        {
+            free(result);
+            return (NULL);
+        }
+        result = strjoin_free(result, temp);
+    }
+    if (content[*i] == '"')
+        (*i)++;
+    return (result);
 }
 
 /**
@@ -425,7 +448,8 @@ char	*process_content(char *content, size_t *i, char quote, t_shell *data)
 char	*handle_dollar(char *content, size_t *i, t_shell *data)
 {
 	char	*expanded;
-
+    
+    (*i)++;
 	if (ft_isalpha(content[*i]) || content[*i] == '_')
 	{
 		expanded = expand_env_var(content, i, data->env);
@@ -451,16 +475,13 @@ char	*handle_dollar(char *content, size_t *i, t_shell *data)
  * @param i Pointer to the current index (updated to the end of read chars.)
  * @return Newly allocated string containing the characters, or NULL.
  */
-char	*handle_characters(char *content, size_t *i, char quote)
+char	*handle_characters(char *content, size_t *i)
 {
 	size_t	start;
 	char	*chars;
 
-	(void)quote;
 	start = *i;
-	if (content[*i] == '$')
-		(*i)++;
-	while (content[*i] && content[*i] != '$')
+	while (content[*i] && content[*i] != '$' && content[*i] != '\'' && content[*i] != '"')
 		(*i)++;
 	chars = ft_substr(content, start, *i - start);
 	if (chars == NULL)
@@ -562,3 +583,5 @@ int	ft_strcmp(const char *s1, const char *s2)
 	}
 	return (0);
 }
+
+
