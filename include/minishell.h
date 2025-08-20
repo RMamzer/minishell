@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/20 16:36:07 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/20 18:12:48 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ typedef struct s_ast
 # define ALLOC true
 # define NO_ALLOC false
 
-
+# define EXIT_INVALID_OPTION 2
 
 // main things
 //int					main(int ac, char **av, char **env);

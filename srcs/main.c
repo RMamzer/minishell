@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/20 16:52:13 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/20 17:07:47 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -521,18 +521,17 @@ char	*get_env_value(char *name, t_env *env, bool alloc)
 	{
 		if (ft_strcmp(current->key, name) == 0)
 		{
-			if (alloc == ALLOC)
-			{
-				value = ft_strdup(current->value);
-				if (value == NULL)
-					return (NULL);
-				return (value);
-			}
-			else
+			if (alloc == NO_ALLOC)
 				return (current->value);
+			value = ft_strdup(current->value);
+			if (value == NULL)
+				return (NULL);
+			return (value);
 		}
 		current = current->next;
 	}
+	if (alloc == NO_ALLOC)
+		return (NULL);
 	value = ft_strdup("");
 	if (value == NULL)
 		return (NULL);
