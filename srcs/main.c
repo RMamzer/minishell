@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/18 19:01:07 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/20 15:31:26 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -598,7 +598,7 @@ int main(int argc,char **argv,char **envp)
 {
     t_shell *data;
     t_ast   *node;
-    char    *args[] = {"-n", "-n", "mama","papa", "-n", NULL};
+    char    *args[] = {NULL};
 
 	data = calloc(1, sizeof(t_shell));
 	(void)argc;
@@ -610,7 +610,7 @@ int main(int argc,char **argv,char **envp)
 
     // Create the AST node for "ls -l -a"
     printf("Creating AST node for command: ls -l -a\n");
-    node = create_single_word_node("echo", args);
+    node = create_single_word_node("env", args);
     if (!node)
     {
         perror("Failed to create AST node");

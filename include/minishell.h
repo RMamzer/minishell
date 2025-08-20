@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/18 17:07:19 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/20 15:53:44 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 # include <readline/history.h>  // add_history
 # include <readline/readline.h> // readline
 # include <stdbool.h>
-# include <stdio.h>
+# include <stdio.h>//printf in env builtin
 # include <stdlib.h>
 # include <unistd.h>
 
@@ -155,5 +155,9 @@ void	execute_left_child(t_ast *node, t_shell *shell, int *pipefd);
 void	execute_right_child(t_ast *node, t_shell *shell, int *pipefd);
 void	execute_pipe(t_ast *node, t_shell *shell);
 int		execute_ast(t_ast *node, t_shell *shell);
+
+//builtins
+int	execute_builtin_echo(char	**args);
+int	execute_builtin_env(char **args, t_shell *shell);
 
 #endif
