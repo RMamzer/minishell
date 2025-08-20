@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/20 16:10:25 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/20 16:41:33 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,17 @@ typedef struct s_env
 	char			*value;
 	struct s_env	*next;
 }					t_env;
+
+typedef struct s_ast
+{
+	t_token_type	type;
+	char			**value;
+	int				expand;
+	int				status;
+	int				fd[2];
+	struct s_ast	*left;
+	struct s_ast	*right;
+}					t_ast;
 
 // core
 typedef struct s_shell

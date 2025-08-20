@@ -6,14 +6,16 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/20 16:10:20 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/20 18:34:14 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 // FOR MAXIM BELOW
-// TODO: test var expansion. // need to redo
+// TODO: test var expansion. // echo $"PATH"
+//	->PATH in bash vs dirty_shell> $"PATH"
+//[TYPE: 3] "$PATH"
 // TODO: new branch for stuff below.
 // TODO: plan for heredoc(probably should be handeled before the expansion)
 // TODO: remove quotes.
@@ -339,7 +341,7 @@ void	expander(t_shell *data)
 	current = data->token_list;
 	while (current)
 	{
-		if (current->type == WORD && ft_strchr(current->content, '$'))
+		if (current->type == WORD) //&& ft_strchr(current->content, '$')
 			current->content = expand_content(current->content, data);
 		current = current->next;
 	}
@@ -536,6 +538,34 @@ char	*expand_env_var(char *content, size_t *i, t_env *env)
  * if not found or NULL.
  */
 
+// char	*get_env_value(char *name, t_env *env, bool alloc)
+// {
+// 	t_env	*current;
+// 	char	*value;
+
+// 	current = env;
+// 	while (current)
+// 	{
+// 		if (ft_strcmp(current->key, name) == 0)
+// 		{
+// 			if (alloc == ALLOC)
+// 			{
+// 				value = ft_strdup(current->value);
+// 				if (value == NULL)
+// 					return (NULL);
+// 				return (value);
+// 			}
+// 			else
+// 				return (current->value);
+// 		}
+// 		current = current->next;
+// 	}
+// 	value = ft_strdup("");
+// 	if (value == NULL)
+// 		return (NULL);
+// 	return (value);
+// }
+
 char	*get_env_value(char *name, t_env *env, bool alloc)
 {
 	t_env	*current;
@@ -546,18 +576,17 @@ char	*get_env_value(char *name, t_env *env, bool alloc)
 	{
 		if (ft_strcmp(current->key, name) == 0)
 		{
-			if (alloc == ALLOC)
-			{
-				value = ft_strdup(current->value);
-				if (value == NULL)
-					return (NULL);
-				return (value);
-			}
-			else
+			if (alloc == NO_ALLOC)
 				return (current->value);
+			value = ft_strdup(current->value);
+			if (value == NULL)
+				return (NULL);
+			return (value);
 		}
 		current = current->next;
 	}
+	if (alloc == NO_ALLOC)
+		return (NULL);
 	value = ft_strdup("");
 	if (value == NULL)
 		return (NULL);
