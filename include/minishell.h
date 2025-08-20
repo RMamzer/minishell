@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/19 19:35:32 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/20 12:38:02 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,9 @@ typedef enum e_token_type
 	OUT,
 	WORD,
 	HEREDOC,
-	APPEND
-
+	APPEND,
+    HEREDOC_DELIM_QT,
+    HEREDOC_DELIM_UQ
 }					t_token_type;
 
 typedef struct s_token
@@ -82,6 +83,7 @@ void				lexer(char *input_line, t_shell *data);
 size_t				handle_operator(char *input_line, size_t i, t_shell *data);
 size_t				handle_word(char *input_line, size_t start, t_shell *data);
 void				add_token(t_shell *data, t_token_type type, char *content);
+void check_heredoc(t_shell *data);
 bool				check_syntax(t_shell *data);
 
 // expansion
