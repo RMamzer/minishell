@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/20 15:53:17 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/20 16:41:11 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,13 +154,13 @@ int	check_command(t_ast *node, char *cmd, t_shell *shell)
 	// else if (ft_strcmp(cmd, "cd")== 0)
 	// 	execute_builtin_cd;
 	else if (ft_strcmp(cmd, "pwd")== 0)
-		execute_builtin_pwd(shell);
+		shell->exit_code = execute_builtin_pwd(node->value + 1 , shell);
 	// else if (ft_strcmp(cmd, "export")== 0)
 	// 	execute_builtin_export;
 	// else if (ft_strcmp(cmd, "unset")== 0)
 	// 	execute_builtin_unset;
 	else if (ft_strcmp(cmd, "env")== 0)
-		execute_builtin_env(node->value,shell);
+		shell->exit_code = execute_builtin_env(node->value + 1,shell);
 	// else if (ft_strcmp(cmd, "exit")== 0)
 	// 	execute_builtin_exit;
 	 else
