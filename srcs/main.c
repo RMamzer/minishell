@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/19 19:35:30 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/20 12:50:50 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,6 +109,7 @@ bool	process_input(char *input_line, t_shell *data)
 	free(data->input_line);
 	data->input_line = line;
 	lexer(data->input_line, data);
+    check_heredoc(data);
 	if (check_syntax(data) == FAILURE)
 	{
 		printf("OSHIBKA V CHECK SYNTAX DETECTED\n");
@@ -316,7 +317,7 @@ bool	check_syntax(t_shell *data)
 		if (current->type == IN || current->type == OUT
 			|| current->type == APPEND || current->type == HEREDOC)
 		{
-			if (current->next == NULL || current->next->type != WORD)
+			if (current->next == NULL || (current->next->type != WORD && current->next->type != HEREDOC_DELIM_QT && current->next->type != HEREDOC_DELIM_UQ))
 				return (show_error("syntax error near unexpected token", 258),
 					FAILURE);
 		}
@@ -590,4 +591,27 @@ int	ft_strcmp(const char *s1, const char *s2)
 		i++;
 	}
 	return (0);
+}
+// maybe add count for heredocs here ? 
+void check_heredoc(t_shell *data)
+{
+    t_token *current;
+    int count;
+    
+    count = 0;
+    current = data->token_list;
+    while (current)
+    {
+        if(current->type == HEREDOC && current->next)
+        {
+            count++;
+            if(current->next->content[0] == '\'' || current->next->content[0] == '"')
+                current->next->type = HEREDOC_DELIM_QT;
+            else
+                current->next->type = HEREDOC_DELIM_UQ;
+        }
+        current = current->next;
+    }
+    if(count > 16)
+        lexer_error("heredoc max count", data);
 }
