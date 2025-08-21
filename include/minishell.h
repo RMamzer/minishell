@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/20 16:41:33 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/21 18:41:09 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,7 @@ typedef struct s_shell
 	char			*input_line;
 	t_token			*token_list;
 	t_env			*env;
+    t_ast           *node;
 
 }					t_shell;
 
