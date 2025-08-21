@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/20 18:34:14 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/21 18:41:06 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,8 +65,64 @@ int	main(int ac, char **av, char **env)
 			test_tokens(data->token_list); // added for test
 			free_list(&data->token_list);  // added for test
 		}
+        if(parse_tokens(data->node) == SUCCESS)
 	}
 }
+
+bool parse_tokens(t_shell *data)
+{
+    if(!data || !data->token_list)
+        return (FAILURE);
+    data->node = parse_pipe(&data->token_list);
+    if(!data->node)
+        return (FAILURE);
+    return (SUCCESS);
+}
+
+t_ast *parse_pipe(t_token **token_list)
+{
+    t_token *head;
+    t_token *next_node;
+    t_ast *pipe_node;
+    
+    head = *token_list;
+    while(*token_list && (*token_list)->next)
+    {
+        next_node = (*token_list)->next;
+        if(next_node->type == PIPE)
+        {
+            pipe_node = add_ast_node(PIPE);
+            (*token_list)->next = NULL;
+            pipe_node->left = parse_redirection(&head);
+            pipe_node->right = parse_pipe(&(next_node->next));
+            free(next_node->content);
+            free(next_node);
+            return(pipe_node);
+        }
+        *token_list = next_node;
+    }
+    return (parse_redirection(&head));
+}
+
+
+t_ast *add_ast_node(t_token_type type)
+{
+    t_ast *node;
+    node = malloc(sizeof(t_ast));
+    if(node == NULL)
+        return (NULL); // probably need exit function
+    node->type = type;
+    node->value = NULL;
+    node->expand = 0; // for what ? 
+    node->status = 0; // for what ? 
+    node->fd[0] = -1; 
+    node->fd[1] = -1;
+    node->left = NULL;
+    node->right = NULL;
+    return (node);
+}
+
+
 t_shell	*init_data(void)
 {
 	t_shell	*data;
@@ -80,7 +136,8 @@ t_shell	*init_data(void)
 	data->exit_code = -1; // for now
 	data->input_line = NULL;
 	data->token_list = NULL;
-	data->env = NULL; // test
+	data->env = NULL;
+    data->node = NULL;
 	return (data);
 }
 
