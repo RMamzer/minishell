@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/22 19:00:46 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/22 19:14:18 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,116 +65,116 @@ int	main(int ac, char **av, char **env)
 			test_tokens(data->token_list); // added for test
 			free_list(&data->token_list);  // added for test
 		}
-		if (parse_tokens(data->node) == SUCCESS)
-		{
-		}
+		// if (parse_tokens(data->node) == SUCCESS)
+		// {
+		// }
 	}
 }
 
-bool	parse_tokens(t_shell *data)
-{
-	if (!data || !data->token_list)
-		return (FAILURE);
-	data->node = parse_pipe(&data->token_list);
-	if (!data->node)
-		return (FAILURE);
-	return (SUCCESS);
-}
+// bool	parse_tokens(t_shell *data)
+// {
+// 	if (!data || !data->token_list)
+// 		return (FAILURE);
+// 	data->node = parse_pipe(&data->token_list);
+// 	if (!data->node)
+// 		return (FAILURE);
+// 	return (SUCCESS);
+// }
 
-t_ast	*parse_pipe(t_token **token_list)
-{
-	t_token	*pipe_token;
-	t_token	*left_side;
-	t_token	*right_side;
-	t_ast	*pipe_node;
+// t_ast	*parse_pipe(t_token **token_list)
+// {
+// 	t_token	*pipe_token;
+// 	t_token	*left_side;
+// 	t_token	*right_side;
+// 	t_ast	*pipe_node;
 
-	pipe_token = find_pipe(*token_list);
-	if (pipe_token)
-	{
-		pipe_node = add_ast_node(PIPE);
-		left_side = *token_list;
-		right_side = pipe_token->next;
-		pipe_token->next = NULL;
-		pipe_node->left = parse_redirection(&left_side);
-		pipe_node->right = parse_pipe(&right_side);
-		return (pipe_node);
-	}
-	return (pase_redirection(token_list));
-}
+// 	pipe_token = find_pipe(*token_list);
+// 	if (pipe_token)
+// 	{
+// 		pipe_node = add_ast_node(PIPE);
+// 		left_side = *token_list;
+// 		right_side = pipe_token->next;
+// 		pipe_token->next = NULL;
+// 		pipe_node->left = parse_redirection(&left_side);
+// 		pipe_node->right = parse_pipe(&right_side);
+// 		return (pipe_node);
+// 	}
+// 	return (pase_redirection(token_list));
+// }
 
-t_ast	*parse_redirection(t_token **token_list)
-{
-	t_token	*current;
-	t_token	*temp_next;
-	t_ast	*redirect_node;
+// t_ast	*parse_redirection(t_token **token_list)
+// {
+// 	t_token	*current;
+// 	t_token	*temp_next;
+// 	t_ast	*redirect_node;
 
-	current = *token_list;
-	while (current && current->next)
-	{
-		if (current->next->type == IN || current->next->type == OUT
-			|| current->next->type == APPEND || current->next->type == HEREDOC)
-		{
-			redirect_node = add_ast_node(current->next->type);
-			temp_next = current->next->next;
-			redirect_node->left = parse_redirection(token_list);
-			redirect_node->right = add_file_node(current->next);
-			current->next = temp_next;
-			return (redirect_node);
-		}
-		current = current->next;
-	}
-	return (parse_command(token_list));
-}
+// 	current = *token_list;
+// 	while (current && current->next)
+// 	{
+// 		if (current->next->type == IN || current->next->type == OUT
+// 			|| current->next->type == APPEND || current->next->type == HEREDOC)
+// 		{
+// 			redirect_node = add_ast_node(current->next->type);
+// 			temp_next = current->next->next;
+// 			redirect_node->left = parse_redirection(token_list);
+// 			redirect_node->right = add_file_node(current->next);
+// 			current->next = temp_next;
+// 			return (redirect_node);
+// 		}
+// 		current = current->next;
+// 	}
+// 	return (parse_command(token_list));
+// }
 
-t_ast	*add_file_node(t_token *token)
-{
-	t_ast	*file_node;
+// t_ast	*add_file_node(t_token *token)
+// {
+// 	t_ast	*file_node;
 
-	file_node = add_ast_node(token->type);
-	file_node->value = malloc(sizeof(char *) * 2);
-	if (file_node == NULL)
-	{
-		free(file_node);
-		return (NULL); // for now, probably we need another exit.
-	}
-	file_node->value[0] = ft_strdup(token->content);
-	file_node->value[1] = NULL;
-	if (file_node->value[0] == NULL)
-	{
-		free(file_node);
-		return (NULL); // for now, probably we need another exit.
-	}
-	return (file_node);
-}
+// 	file_node = add_ast_node(token->type);
+// 	file_node->value = malloc(sizeof(char *) * 2);
+// 	if (file_node == NULL)
+// 	{
+// 		free(file_node);
+// 		return (NULL); // for now, probably we need another exit.
+// 	}
+// 	file_node->value[0] = ft_strdup(token->content);
+// 	file_node->value[1] = NULL;
+// 	if (file_node->value[0] == NULL)
+// 	{
+// 		free(file_node);
+// 		return (NULL); // for now, probably we need another exit.
+// 	}
+// 	return (file_node);
+// }
 
-t_token	*find_pipe(t_token *token_list)
-{
-	while (token_list)
-	{
-		if (token_list->type == PIPE)
-			return (token_list);
-		token_list = token_list->next;
-	}
-	return (NULL);
-}
+// t_token	*find_pipe(t_token *token_list)
+// {
+// 	while (token_list)
+// 	{
+// 		if (token_list->type == PIPE)
+// 			return (token_list);
+// 		token_list = token_list->next;
+// 	}
+// 	return (NULL);
+// }
 
-t_ast	*add_ast_node(t_token_type type)
-{
-	t_ast	*node;
+// t_ast	*add_ast_node(t_token_type type)
+// {
+// 	t_ast	*node;
 
-	node = malloc(sizeof(t_ast));
-	if (node == NULL)
-		return (NULL); // probably need exit function
-	node->type = type;
-	node->value = NULL;
-	node->expand = 0; // for what ?
-	node->status = 0; // for what ?
-	node->fd[0] = -1;
-	node->fd[1] = -1;
-	node->left = NULL;
-	node->right = NULL;
-	return (node);
-}
+// 	node = malloc(sizeof(t_ast));
+// 	if (node == NULL)
+// 		return (NULL); // probably need exit function
+// 	node->type = type;
+// 	node->value = NULL;
+// 	node->expand = 0; // for what ?
+// 	node->status = 0; // for what ?
+// 	node->fd[0] = -1;
+// 	node->fd[1] = -1;
+// 	node->left = NULL;
+// 	node->right = NULL;
+// 	return (node);
+// }
 
 t_shell	*init_data(void)
 {
