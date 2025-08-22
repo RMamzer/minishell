@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/21 18:41:06 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/22 14:40:05 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,28 +81,40 @@ bool parse_tokens(t_shell *data)
 
 t_ast *parse_pipe(t_token **token_list)
 {
-    t_token *head;
-    t_token *next_node;
+    t_token *pipe_token;
+    t_token *left_side;
+    t_token *right_side;
     t_ast *pipe_node;
     
-    head = *token_list;
-    while(*token_list && (*token_list)->next)
+    pipe_token = find_pipe(*token_list);
+    if(pipe_token)
     {
-        next_node = (*token_list)->next;
-        if(next_node->type == PIPE)
-        {
-            pipe_node = add_ast_node(PIPE);
-            (*token_list)->next = NULL;
-            pipe_node->left = parse_redirection(&head);
-            pipe_node->right = parse_pipe(&(next_node->next));
-            free(next_node->content);
-            free(next_node);
-            return(pipe_node);
-        }
-        *token_list = next_node;
+        pipe_node = add_ast_node(PIPE);
+        left_side = *token_list;
+        right_side = pipe_token->next;
+        pipe_token->next = NULL;
+        pipe_node->left = parse_redirection(&left_side);
+        pipe_node->right = parse_pipe(&right_side);
+        return (pipe_node);
     }
-    return (parse_redirection(&head));
+    return (pase_redirection(token_list));
+    
 }
+t_token *find_pipe(t_token *token_list)
+{
+    while(token_list)
+    {
+        if(token_list->type == PIPE)
+            return (token_list);
+        token_list = token_list->next;
+    }
+    return (NULL);
+}
+
+
+
+
+
 
 
 t_ast *add_ast_node(t_token_type type)
