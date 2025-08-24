@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/20 17:49:04 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/24 16:57:44 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/24 19:22:57 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,9 @@ int change_working_directory(char *path, t_shell *shell)
 		error_exit(path);
 	}
 	new_pwd = getcwd(NULL, 0);
-	if (!new_pwd) // check error message
+	if (!new_pwd) // check error message + MODIFY with max order in get and update env
 		error_exit("minishell: cd:");
-	update_env_value(&shell->env, "OLDPWD",get_env_value(&shell->env,"PWD", NO_ALLOC));
+	update_env_value(&shell->env, "OLDPWD",get_env_value("PWD", shell->env, NO_ALLOC));
 	update_env_value(&shell->env,"PWD", new_pwd);
 	return (EXIT_SUCCESS);
 }
@@ -38,7 +38,7 @@ int change_working_directory(char *path, t_shell *shell)
 int	execute_builtin_cd(char	**args , t_shell *shell)
 {
 	if (!args[0])
-		return (change_working_directory(get_env_value(&shell->env, "HOME", NO_ALLOC), shell));
+		return (change_working_directory(get_env_value("HOME", shell->env, NO_ALLOC), shell));
 	if (args[0][0] == '-')// undefined behavior? do we want to implement -?
 	{
 		ft_putstr_fd("minishell: cd:", STDERR_FILENO);
@@ -47,7 +47,7 @@ int	execute_builtin_cd(char	**args , t_shell *shell)
 		return(EXIT_INVALID_OPTION);
 	}
 
-	if (args[1]!= NULL)// check if it causes segfault or not?
+	if (get_args_len(args) > 1)
 	{
 		ft_putstr_fd("minishell: cd: too many arguments\n", STDERR_FILENO);
 		return (EXIT_FAILURE);

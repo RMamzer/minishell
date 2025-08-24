@@ -13,7 +13,8 @@ SRCS_DIR = srcs/
 
 HEADERS = -I ./include  -I $(LIBFT_DIR)
 
-SRCS = main.c execute.c env_functions.c builtin_echo.c builtin_env.c builtin_pwd.c builtin_cd.c
+SRCS = main.c execute.c env_functions.c builtin_echo.c builtin_env.c builtin_pwd.c builtin_cd.c \
+	   builtin_exit.c
 
 OBJS = $(addprefix $(OBJS_DIR), $(SRCS:.c=.o))
 .SECONDARY: ${OBJS}

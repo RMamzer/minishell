@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/20 17:50:56 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/24 18:05:16 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,16 @@ int	get_env_size(t_env *lst)
 		i++;
 	}
 	return (i);
+}
+
+int get_args_len(char **args)
+{
+	int len;
+
+	len = 0;
+	while (args[len] != NULL)
+		len++;
+	return (len);
 }
 
 char	*super_strjoin(char const *s1, char const *s2, char const *s3)
@@ -156,13 +166,13 @@ int	check_command(t_ast *node, char *cmd, t_shell *shell)
 	else if (ft_strcmp(cmd, "pwd")== 0)
 		shell->exit_code = execute_builtin_pwd(node->value + 1 , shell);
 	// else if (ft_strcmp(cmd, "export")== 0)
-	// 	execute_builtin_export;
+	// shell->exit_code = execute_builtin_export;
 	// else if (ft_strcmp(cmd, "unset")== 0)
-	// 	execute_builtin_unset;
+	// 	shell->exit_code = execute_builtin_unset;
 	else if (ft_strcmp(cmd, "env")== 0)
 		shell->exit_code = execute_builtin_env(node->value + 1,shell);
-	// else if (ft_strcmp(cmd, "exit")== 0)
-	// 	execute_builtin_exit;
+	else if (ft_strcmp(cmd, "exit")== 0)
+		execute_builtin_exit(node->value + 1, shell);
 	 else
 		shell->exit_code = execute_external_cmd(node->value, shell);
 	return (shell->exit_code);

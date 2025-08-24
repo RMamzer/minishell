@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/24 16:58:11 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/24 19:20:57 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,13 +155,15 @@ void	execute_left_child(t_ast *node, t_shell *shell, int *pipefd);
 void	execute_right_child(t_ast *node, t_shell *shell, int *pipefd);
 void	execute_pipe(t_ast *node, t_shell *shell);
 int		execute_ast(t_ast *node, t_shell *shell);
+int		get_args_len(char **args);
 
-//builtins
+//-------------------builtins
 int	execute_builtin_echo(char	**args);
 int	execute_builtin_env(char **args, t_shell *shell);
 int	execute_builtin_pwd(char **args, t_shell *shell);
-
 int	execute_builtin_cd(char	**args , t_shell *shell);
 int change_working_directory(char *path, t_shell *shell);
+int execute_builtin_exit(char **args, t_shell *shell);
+int	check_exit_code(char *nptr);
 
 #endif
