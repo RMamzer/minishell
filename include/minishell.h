@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/25 14:19:58 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/25 19:46:22 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ typedef struct s_shell
 	char			*input_line;
 	t_token			*token_list;
 	t_env			*env;
-    t_ast           *node;
+	t_ast			*node;
 
 }					t_shell;
 
@@ -135,14 +135,16 @@ void				set_minimal_env(t_shell *shell);
 void				create_env(t_shell *shell, char **envp);
 
 // ast
-void    free_ast(t_ast *node);
-bool	parse_tokens(t_shell *data);
-t_ast	*parse_pipe(t_token **token_list);
-t_ast	*parse_redirection(t_token **token_list);
-t_ast   *parse_command(t_token **token_list);
-t_ast	*add_file_node(t_token *token);
-t_token	*find_pipe(t_token *token_list);
-t_ast	*add_ast_node(t_token_type type);
-
+void				free_ast(t_ast *node);
+bool				parse_tokens(t_shell *data);
+t_ast				*parse_pipe(t_token **token_list);
+t_ast				*parse_redirection(t_token **token_list);
+t_ast				*parse_command(t_token **token_list);
+t_ast				*add_file_node(t_token *token);
+t_ast				*add_ast_node(t_token_type type);
+t_ast				*create_redirection(t_token **token_list, t_token *temp);
+int					count_args(t_token *tokens);
+void				load_args(t_ast *command_node, t_token **token_list,
+						int ac);
 
 #endif
