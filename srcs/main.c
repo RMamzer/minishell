@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/22 19:14:18 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/25 12:37:54 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,84 @@ void	test_env(t_env *envlist)
 		envlist = envlist->next;
 	}
 }
+// remove 
+void    print_ast(t_ast *node, int depth)
+{
+    int i;
+
+    if (!node)
+        return;
+
+    // indent for readability
+    for (i = 0; i < depth; i++)
+        printf("  ");
+
+    // print node type
+    if (node->type == PIPE)
+        printf("NODE: PIPE\n");
+    else if (node->type == IN)
+        printf("NODE: IN\n");
+    else if (node->type == OUT)
+        printf("NODE: OUT\n");
+    else if (node->type == APPEND)
+        printf("NODE: APPEND\n");
+    else if (node->type == HEREDOC)
+        printf("NODE: HEREDOC\n");
+    else if (node->type == WORD)
+    {
+        printf("NODE: CMD [");
+        if (node->value)
+        {
+            char **args = (char **)node->value;
+            while (*args)
+            {
+                printf("%s ", *args);
+                args++;
+            }
+        }
+        printf("]\n");
+    }
+    else
+        printf("NODE: UNKNOWN\n");
+
+    // recurse into left/right children
+    if (node->left)
+        print_ast(node->left, depth + 1);
+    if (node->right)
+        print_ast(node->right, depth + 1);
+}
+// remove 
+void    free_ast(t_ast *node)
+{
+    char **args;
+    int i;
+
+    if (!node)
+        return;
+
+    // free left and right children first
+    if (node->left)
+        free_ast(node->left);
+    if (node->right)
+        free_ast(node->right);
+
+    // free node->value (if it exists)
+    if (node->value)
+    {
+        args = (char **)node->value;
+        i = 0;
+        while (args[i])
+        {
+            free(args[i]);    // free each strdup’ed string
+            i++;
+        }
+        free(args);           // free the array itself
+    }
+
+    // finally free the node itself
+    free(node);
+}
+
 
 int	main(int ac, char **av, char **env)
 {
@@ -65,116 +143,157 @@ int	main(int ac, char **av, char **env)
 			test_tokens(data->token_list); // added for test
 			free_list(&data->token_list);  // added for test
 		}
-		// if (parse_tokens(data->node) == SUCCESS)
-		// {
-		// }
+		if (parse_tokens(data->node) == SUCCESS)
+		{
+            print_ast(data->node, 0);
+            free_ast(data->node);
+            data->node = NULL;
+		}
 	}
 }
 
-// bool	parse_tokens(t_shell *data)
-// {
-// 	if (!data || !data->token_list)
-// 		return (FAILURE);
-// 	data->node = parse_pipe(&data->token_list);
-// 	if (!data->node)
-// 		return (FAILURE);
-// 	return (SUCCESS);
-// }
+bool	parse_tokens(t_shell *data)
+{
+	if (!data || !data->token_list)
+		return (FAILURE);
+	data->node = parse_pipe(&data->token_list);
+	if (!data->node)
+		return (FAILURE);
+	return (SUCCESS);
+}
 
-// t_ast	*parse_pipe(t_token **token_list)
-// {
-// 	t_token	*pipe_token;
-// 	t_token	*left_side;
-// 	t_token	*right_side;
-// 	t_ast	*pipe_node;
+t_ast	*parse_pipe(t_token **token_list)
+{
+	t_token	*pipe_token;
+	t_token	*left_side;
+	t_token	*right_side;
+	t_ast	*pipe_node;
+    
+	pipe_token = find_pipe(*token_list);
+	if (pipe_token)
+	{
+		pipe_node = add_ast_node(PIPE);
+		left_side = *token_list;
+		right_side = pipe_token->next;
+		pipe_token->next = NULL;
+		pipe_node->left = parse_redirection(&left_side);
+		pipe_node->right = parse_pipe(&right_side);
+		return (pipe_node);
+	}
+	return (parse_redirection(token_list));
+}
 
-// 	pipe_token = find_pipe(*token_list);
-// 	if (pipe_token)
-// 	{
-// 		pipe_node = add_ast_node(PIPE);
-// 		left_side = *token_list;
-// 		right_side = pipe_token->next;
-// 		pipe_token->next = NULL;
-// 		pipe_node->left = parse_redirection(&left_side);
-// 		pipe_node->right = parse_pipe(&right_side);
-// 		return (pipe_node);
-// 	}
-// 	return (pase_redirection(token_list));
-// }
+t_ast	*parse_redirection(t_token **token_list)
+{
+	t_token	*current;
+	t_token	*temp_next;
+	t_ast	*redirect_node;
+	current = *token_list;
+    
+	while (current && current->next)
+	{
+		if (current->next->type == IN || current->next->type == OUT
+			|| current->next->type == APPEND || current->next->type == HEREDOC)
+		{
+			redirect_node = add_ast_node(current->next->type);
+			temp_next = current->next->next;
+			redirect_node->left = parse_redirection(token_list);
+			redirect_node->right = add_file_node(current->next);
+			current->next = temp_next;
+			return (redirect_node);
+		}
+		current = current->next;
+	}
+	return (parse_command(token_list));
+}
+t_ast   *parse_command(t_token **token_list)
+{
+    t_token *current;
+    t_ast *command_node;
+    int ac;
+    int i;
 
-// t_ast	*parse_redirection(t_token **token_list)
-// {
-// 	t_token	*current;
-// 	t_token	*temp_next;
-// 	t_ast	*redirect_node;
+    current = *token_list;
+    ac = 0;
+    i = 0;
+    while (current && current->type = WORD)
+    {
+        ac++;
+        current = current->next;
+    }
+    command_node = add_ast_node(WORD);
+    command_node->value = malloc(sizeof(char *) * (ac + 1));
+    if(command_node->value == NULL)
+        return (NULL); // for now, probably we need another exit.
+    current = *token_list;
+    while(i < ac)
+    {
+        command_node->value[i] = ft_strdup(current->content);
+        {
+            if(command_node->value[i] == NULL)
+            {
+                // free the hell out of this array of strings;
+                return (NULL); // for now, probably we need another exit.
+            }
+        }
+        current = current->next;
+        i++;
+    }
+    command_node->value[ac] = NULL;
+    *token_list = current;
+    return (command_node);
+}
 
-// 	current = *token_list;
-// 	while (current && current->next)
-// 	{
-// 		if (current->next->type == IN || current->next->type == OUT
-// 			|| current->next->type == APPEND || current->next->type == HEREDOC)
-// 		{
-// 			redirect_node = add_ast_node(current->next->type);
-// 			temp_next = current->next->next;
-// 			redirect_node->left = parse_redirection(token_list);
-// 			redirect_node->right = add_file_node(current->next);
-// 			current->next = temp_next;
-// 			return (redirect_node);
-// 		}
-// 		current = current->next;
-// 	}
-// 	return (parse_command(token_list));
-// }
 
-// t_ast	*add_file_node(t_token *token)
-// {
-// 	t_ast	*file_node;
 
-// 	file_node = add_ast_node(token->type);
-// 	file_node->value = malloc(sizeof(char *) * 2);
-// 	if (file_node == NULL)
-// 	{
-// 		free(file_node);
-// 		return (NULL); // for now, probably we need another exit.
-// 	}
-// 	file_node->value[0] = ft_strdup(token->content);
-// 	file_node->value[1] = NULL;
-// 	if (file_node->value[0] == NULL)
-// 	{
-// 		free(file_node);
-// 		return (NULL); // for now, probably we need another exit.
-// 	}
-// 	return (file_node);
-// }
+t_ast	*add_file_node(t_token *token)
+{
+	t_ast	*file_node;
+	file_node = add_ast_node(token->type);
+	file_node->value = malloc(sizeof(char *) * 2);
+	if (file_node == NULL)
+	{
+		free(file_node);
+		return (NULL); // for now, probably we need another exit.
+	}
+	file_node->value[0] = ft_strdup(token->content);
+	file_node->value[1] = NULL;
+	if (file_node->value[0] == NULL)
+	{
+		free(file_node);
+		return (NULL); // for now, probably we need another exit.
+	}
+	return (file_node);
+}
 
-// t_token	*find_pipe(t_token *token_list)
-// {
-// 	while (token_list)
-// 	{
-// 		if (token_list->type == PIPE)
-// 			return (token_list);
-// 		token_list = token_list->next;
-// 	}
-// 	return (NULL);
-// }
+t_token	*find_pipe(t_token *token_list)
+{
+	while (token_list)
+	{
+		if (token_list->type == PIPE)
+			return (token_list);
+		token_list = token_list->next;
+	}
+	return (NULL);
+}
 
-// t_ast	*add_ast_node(t_token_type type)
-// {
-// 	t_ast	*node;
-
-// 	node = malloc(sizeof(t_ast));
-// 	if (node == NULL)
-// 		return (NULL); // probably need exit function
-// 	node->type = type;
-// 	node->value = NULL;
-// 	node->expand = 0; // for what ?
-// 	node->status = 0; // for what ?
-// 	node->fd[0] = -1;
-// 	node->fd[1] = -1;
-// 	node->left = NULL;
-// 	node->right = NULL;
-// 	return (node);
-// }
+t_ast	*add_ast_node(t_token_type type)
+{
+	t_ast	*node;
+	node = malloc(sizeof(t_ast));
+	if (node == NULL)
+		return (NULL); // probably need exit function
+	node->type = type;
+	node->value = NULL;
+	node->expand = 0; 
+	node->status = 0; 
+	node->fd[0] = -1;
+	node->fd[1] = -1;
+	node->left = NULL;
+	node->right = NULL;
+	return (node);
+}
+ 
 
 t_shell	*init_data(void)
 {
