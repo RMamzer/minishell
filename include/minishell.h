@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/25 13:48:14 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/25 18:22:52 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,5 +167,12 @@ int	execute_builtin_cd(char	**args , t_shell *shell);
 int change_working_directory(char *path, t_shell *shell);
 int execute_builtin_exit(char **args, t_shell *shell);
 int	check_exit_code(char *nptr);
+int	exit_numeric_error(char *nptr);
+int	execute_builtin_unset(char **args, t_shell *shell);
+
+
+//  other exec
+void	remove_env_variable(t_env **env, char *key);
+void	free_env_node(t_env *env);
 
 #endif

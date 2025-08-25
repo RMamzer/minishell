@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/24 18:05:16 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/25 16:05:21 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,8 +167,8 @@ int	check_command(t_ast *node, char *cmd, t_shell *shell)
 		shell->exit_code = execute_builtin_pwd(node->value + 1 , shell);
 	// else if (ft_strcmp(cmd, "export")== 0)
 	// shell->exit_code = execute_builtin_export;
-	// else if (ft_strcmp(cmd, "unset")== 0)
-	// 	shell->exit_code = execute_builtin_unset;
+	else if (ft_strcmp(cmd, "unset")== 0)
+		shell->exit_code = execute_builtin_unset(node->value + 1 , shell);
 	else if (ft_strcmp(cmd, "env")== 0)
 		shell->exit_code = execute_builtin_env(node->value + 1,shell);
 	else if (ft_strcmp(cmd, "exit")== 0)
@@ -179,7 +179,7 @@ int	check_command(t_ast *node, char *cmd, t_shell *shell)
 }
 
 
-// check how to include 128 here? --> need to add extra signal return
+// check how to include 128+ exit here? --> need to add extra signal return
 int	wait_children(pid_t *pids, int children_rem)
 {
 	int		status;

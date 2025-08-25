@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/18 16:41:50 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/25 17:37:43 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,12 +28,46 @@ void	error_env_exit(char *key, char *value, t_shell *shell)
 	(void)shell;
 }
 
+void	free_env_node(t_env *env)
+{
+	if (env)
+	{
+		free(env->key);
+		free(env->value);
+		free(env);
+	}
+}
+
+void	remove_env_variable(t_env **env, char *key)
+{
+	t_env *current;
+	t_env *previous;
+
+	if (!key || !env || !(*env))
+		return ;
+	current = *env;
+	if ( ft_strcmp((*env)->key, key) == 0)
+	{
+		*env = current->next;
+		free_env_node(current);
+		return ;
+	}
+	while (current)
+	{
+		if (ft_strcmp(current->key, key)== 0)
+		{
+			previous->next = current->next;
+			free_env_node(current);
+			return ;
+		}
+		previous = current;
+		current = current->next;
+	}
+}
+
 // update the value of a key to a new value: do we need to send there strdup?
 // can add new_value check and error exit with malloc error here,
 // so we can send ft_strdup
-
-
-
 bool	update_env_value(t_env **env, char *key, char *new_value)
 {
 	t_env	*temp;

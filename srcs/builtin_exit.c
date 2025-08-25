@@ -6,19 +6,12 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 17:38:22 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/25 13:43:57 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/25 15:35:08 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-#include <limits.h>
-/*
-test:
-- update int overflow
-- update order of env get and update inputs to be consistent
-- update
-*/
 int	exit_numeric_error(char *nptr)
 {
 	ft_putstr_fd("minishell: exit: ", STDERR_FILENO);

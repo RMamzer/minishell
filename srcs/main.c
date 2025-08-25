@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/25 13:47:29 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/25 18:40:13 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -597,7 +597,8 @@ int main(int argc,char **argv,char **envp)
 {
     t_shell *data;
     t_ast   *node;
-    char    *args[] = {" -9223372036854775809  \t ",NULL};
+    char    *args[] = {"..", NULL};
+	char    *args2[] = {NULL};
 
 	data = calloc(1, sizeof(t_shell));
 	(void)argc;
@@ -609,7 +610,7 @@ int main(int argc,char **argv,char **envp)
 
     // Create the AST node for "ls -l -a"
     printf("Creating AST node for command: ls -l -a\n");
-    node = create_single_word_node("exit", args);
+    node = create_single_word_node("cd", args);
     if (!node)
     {
         perror("Failed to create AST node");
@@ -619,9 +620,12 @@ int main(int argc,char **argv,char **envp)
     // You can now use the 'node' pointer to call your execute_ast function
     // For example:
 	create_env(data, envp);
+	execute_builtin_env(args2, data);
+	printf("\n\n\n\n");
     data->exit_code = execute_ast(node, data);
 
     // Free the allocated memory when done
+	execute_builtin_env(args2, data);
     free_ast(node);
 
     printf("Node creation and initialization complete.\n");

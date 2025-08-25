@@ -1,0 +1,36 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   builtin_unset.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/25 16:05:01 by rmamzer           #+#    #+#             */
+/*   Updated: 2025/08/25 18:35:55 by rmamzer          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "minishell.h"
+
+
+
+int	execute_builtin_unset(char **args, t_shell *shell)
+{
+	int i;
+
+	if (*args && **args == '-')
+	{
+		ft_putstr_fd("minishell: unset: ", STDERR_FILENO);
+		ft_putstr_fd(*args, STDERR_FILENO);
+		ft_putstr_fd(": options are not supported\n", STDERR_FILENO);
+		return (EXIT_INVALID_OPTION);
+	}
+	i = 0;
+	while (args[i])
+	{
+		remove_env_variable( &shell->env, args[i]);
+		i++;
+	}
+
+	return(0);
+}
