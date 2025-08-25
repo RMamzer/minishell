@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/24 19:20:57 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/25 13:48:14 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <stdio.h>//printf in env builtin
 # include <stdlib.h>
 # include <unistd.h>
+#include <limits.h> // for exit limits
 
 
 
@@ -90,6 +91,7 @@ typedef struct s_ast
 # define NO_ALLOC false
 
 # define EXIT_INVALID_OPTION 2
+
 
 // main things
 //int					main(int ac, char **av, char **env);

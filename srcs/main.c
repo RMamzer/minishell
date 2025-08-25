@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/24 19:44:11 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/25 13:47:29 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -597,7 +597,7 @@ int main(int argc,char **argv,char **envp)
 {
     t_shell *data;
     t_ast   *node;
-    char    *args[] = {"  2147483649 \t ",NULL};
+    char    *args[] = {" -9223372036854775809  \t ",NULL};
 
 	data = calloc(1, sizeof(t_shell));
 	(void)argc;
