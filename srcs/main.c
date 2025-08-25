@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/25 14:20:01 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/25 15:11:02 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,6 +200,7 @@ t_ast	*parse_redirection(t_token **token_list)
             (*token_list)->next = next_token->next->next;
             redirect_node->left = parse_redirection(&temp);
             redirect_node->right = add_file_node(next_token->next);
+            return (redirect_node);
 		}
 		*token_list = next_token;
 	}
