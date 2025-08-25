@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/25 12:37:54 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/25 14:20:01 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,7 @@ int	main(int ac, char **av, char **env)
 		if (process_input(data->input_line, data) == SUCCESS)
 		{
 			test_tokens(data->token_list); // added for test
-			free_list(&data->token_list);  // added for test
+			//free_list(&data->token_list);  // added for test
 		}
 		if (parse_tokens(data->node) == SUCCESS)
 		{
@@ -185,26 +185,25 @@ t_ast	*parse_pipe(t_token **token_list)
 
 t_ast	*parse_redirection(t_token **token_list)
 {
-	t_token	*current;
-	t_token	*temp_next;
+	t_token	*temp;
+    t_token *next_token;
 	t_ast	*redirect_node;
-	current = *token_list;
     
-	while (current && current->next)
+	temp = *token_list;
+	while (*token_list && (*token_list)->next)
 	{
-		if (current->next->type == IN || current->next->type == OUT
-			|| current->next->type == APPEND || current->next->type == HEREDOC)
+        next_token = (*token_list)->next;
+		if ((*token_list)->next->type == IN || (*token_list)->next->type == OUT
+			|| (*token_list)->next->type == APPEND || (*token_list)->next->type == HEREDOC)
 		{
-			redirect_node = add_ast_node(current->next->type);
-			temp_next = current->next->next;
-			redirect_node->left = parse_redirection(token_list);
-			redirect_node->right = add_file_node(current->next);
-			current->next = temp_next;
-			return (redirect_node);
+            redirect_node = add_ast_node((*token_list)->next->type);
+            (*token_list)->next = next_token->next->next;
+            redirect_node->left = parse_redirection(&temp);
+            redirect_node->right = add_file_node(next_token->next);
 		}
-		current = current->next;
+		*token_list = next_token;
 	}
-	return (parse_command(token_list));
+	return (parse_command(&temp));
 }
 t_ast   *parse_command(t_token **token_list)
 {
@@ -216,7 +215,7 @@ t_ast   *parse_command(t_token **token_list)
     current = *token_list;
     ac = 0;
     i = 0;
-    while (current && current->type = WORD)
+    while (current && current->type == WORD)
     {
         ac++;
         current = current->next;
