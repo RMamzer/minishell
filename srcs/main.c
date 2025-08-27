@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/26 17:57:11 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/27 14:14:10 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,6 +179,7 @@ t_ast	*parse_pipe(t_token **token_list)
     }
     return (node);
 }
+/*
 t_ast *parse_redirection(t_token **token_list)
 {
     t_ast *node;
@@ -197,8 +198,6 @@ t_ast *parse_redirection(t_token **token_list)
             redirect_node = add_ast_node((*token_list)->type);
             redirect_token = *token_list;
             file_token = (*token_list)->next;
-            if (!file_token || (file_token->type != WORD && file_token->type != HEREDOC_DELIM_QT && file_token->type != HEREDOC_DELIM_UQ))
-                return (NULL); // syntax  error, no file after redirection
             *token_list = file_token->next;
             redirect_node->right = add_file_node(file_token);
             free(redirect_token->content);
@@ -213,8 +212,6 @@ t_ast *parse_redirection(t_token **token_list)
         redirect_node = add_ast_node((*token_list)->type);
         redirect_token = *token_list;
         file_token = (*token_list)->next;
-        if(!file_token || (file_token->type != WORD && file_token->type != HEREDOC_DELIM_QT && file_token->type != HEREDOC_DELIM_UQ))
-            return (NULL); // syntax error
         *token_list = file_token->next;
         redirect_node->right = add_file_node(file_token);
         free(redirect_token->content);
@@ -224,7 +221,55 @@ t_ast *parse_redirection(t_token **token_list)
     }
     return (NULL);
 }
+*/
 
+t_ast *parse_redirection(t_token **token_list)
+{
+    if (!*token_list)
+        return (NULL);
+    if ((*token_list)->type == WORD)
+        return (parse_command_with_redirections(token_list));
+    if((*token_list)->type == IN || (*token_list)->type == OUT || (*token_list)->type == APPEND || (*token_list)->type == HEREDOC)
+        return (parse_single_redirection(token_list));
+}
+t_ast *parse_command_with_redirections(t_token **token_list)
+{
+    t_ast *node;
+    t_ast *redirect_node;
+    t_token *redirect_token;
+    t_token *file_token;
+    
+    node = parse_command(token_list);
+    while(*token_list && ((*token_list)->type == IN || (*token_list)->type == OUT || (*token_list)->type == APPEND || (*token_list)->type == HEREDOC))
+    {
+        redirect_node = add_ast_node((*token_list)->type);
+        redirect_token = *token_list;
+        file_token = (*token_list)->next;
+        *token_list = file_token->next;
+        redirect_node->right = add_file_node(file_token);
+        free(redirect_token->content);
+        free(redirect_token);
+        redirect_node->left = node;
+        node = redirect_node;
+    }
+    return (node);
+}
+t_ast *parse_single_redirection(t_token **token_list)
+{
+    t_ast *redirect_node;
+    t_token *redirect_token;
+    t_token *file_token;
+    
+    redirect_node = add_ast_node((*token_list)->type);
+    redirect_token = *token_list;
+    file_token = (*token_list)->next;
+    *token_list = file_token->next;
+    redirect_node->right = add_file_node(file_token);
+    free(redirect_token->content);
+    free(redirect_token);
+    redirect_node->left = parse_redirection(token_list);
+    return (redirect_node);
+}
 
 int	count_args(t_token *tokens)
 {
