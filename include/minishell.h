@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/26 17:56:47 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/27 14:15:00 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,6 +139,8 @@ void				free_ast(t_ast *node);
 bool				parse_tokens(t_shell *data);
 t_ast				*parse_pipe(t_token **token_list);
 t_ast				*parse_redirection(t_token **token_list);
+t_ast *parse_command_with_redirections(t_token **token_list);
+t_ast *parse_single_redirection(t_token **token_list);
 t_ast				*parse_command(t_token **token_list);
 t_ast				*add_file_node(t_token *token);
 t_ast				*add_ast_node(t_token_type type);
