@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/27 17:16:10 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/27 17:20:47 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 // TODO: new branch for stuff below.
 // TODO: plan for heredoc(probably should be handeled before the expansion)
 // TODO: remove quotes.
-// TODO: AST situation. -- lgtm
+// TODO: AST situation. -- lgtm hello
 // TODO: ERROR MANAGEMENT
 
 // test function, remove later
