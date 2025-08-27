@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/27 14:15:00 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/27 16:28:28 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,8 @@ typedef struct s_env
 	struct s_env	*next;
 }					t_env;
 
+
+//args instead of 
 typedef struct s_ast
 {
 	t_token_type	type;
@@ -71,7 +73,7 @@ typedef struct s_ast
 	struct s_ast	*right;
 }					t_ast;
 
-// core
+// core ?? node v ast peredelaj
 typedef struct s_shell
 {
 	int				exit_code;

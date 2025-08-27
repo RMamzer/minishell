@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/27 14:14:10 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/27 16:29:11 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,15 +32,15 @@ void	test_tokens(t_token *list)
 	}
 }
 
-void	test_env(t_env *envlist)
-{
-	while (envlist)
-	{
-		// printf("KEY: %s VALUE:%s \n", envlist->key, envlist->value);
-		printf("%s=%s\n", envlist->key, envlist->value);
-		envlist = envlist->next;
-	}
-}
+// void	test_env(t_env *envlist)
+// {
+// 	while (envlist)
+// 	{
+// 		// printf("KEY: %s VALUE:%s \n", envlist->key, envlist->value);
+// 		printf("%s=%s\n", envlist->key, envlist->value);
+// 		envlist = envlist->next;
+// 	}
+// }
 // remove
 void	print_ast(t_ast *node, int depth)
 {
@@ -123,8 +123,8 @@ int	main(int ac, char **av, char **env)
 	(void)av; // addded for testing
 	data = init_data();
 	create_env(data, env);
-	test_env(data->env); // test
-	while (1)            // addded for testing
+	// test_env(data->env); // test
+	while (1) // addded for testing
 	{
 		input = readline("dirty_shell> ");
 		if (!input)
@@ -153,122 +153,128 @@ bool	parse_tokens(t_shell *data)
 		return (FAILURE);
 	data->node = parse_pipe(&data->token_list);
 	if (!data->node)
-		return (FAILURE); // think here 
+		return (FAILURE); // think here
 	return (SUCCESS);
 }
 
 t_ast	*parse_pipe(t_token **token_list)
 {
-    t_ast *node;
-    t_ast *pipe_node;
-    t_token *pipe_token;
-    
-    node = parse_redirection(token_list);
-    if (!node)
-        return (NULL); // think here
-    if(*token_list && (*token_list)->type == PIPE)
-    {
-        pipe_node = add_ast_node(PIPE);
-        pipe_node->left = node;
-        pipe_token = *token_list;
-        *token_list = (*token_list)->next;
-        free(pipe_token->content);
-        free(pipe_token);
-        pipe_node->right = parse_pipe(token_list);
-        return (pipe_node);
-    }
-    return (node);
+	t_ast	*node;
+	t_ast	*pipe_node;
+	t_token	*pipe_token;
+
+	node = parse_redirection(token_list);
+	if (!node)
+		return (NULL); // think here
+	if (*token_list && (*token_list)->type == PIPE)
+	{
+		pipe_node = add_ast_node(PIPE);
+		pipe_node->left = node;
+		pipe_token = *token_list;
+		*token_list = (*token_list)->next;
+		free(pipe_token->content);
+		free(pipe_token);
+		pipe_node->right = parse_pipe(token_list);
+		return (pipe_node);
+	}
+	return (node);
 }
 /*
-t_ast *parse_redirection(t_token **token_list)
+t_ast	*parse_redirection(t_token **token_list)
 {
-    t_ast *node;
-    t_ast *redirect_node;
-    t_token *redirect_token;
-    t_token *file_token;
-    
-    
-    if(!*token_list)
-        return (NULL); // do we need to check it ? 
-    if((*token_list)->type == WORD)
-    {
-        node = parse_command(token_list);
-        while(*token_list && ((*token_list)->type == IN || (*token_list)->type == OUT || (*token_list)->type == APPEND || (*token_list)->type == HEREDOC))
-        {
-            redirect_node = add_ast_node((*token_list)->type);
-            redirect_token = *token_list;
-            file_token = (*token_list)->next;
-            *token_list = file_token->next;
-            redirect_node->right = add_file_node(file_token);
-            free(redirect_token->content);
-            free(redirect_token);
-            redirect_node->left = node;
-            node = redirect_node;
-        }
-        return (node);
-    }
-    if ((*token_list)->type == IN || (*token_list)->type == OUT || (*token_list)->type == APPEND || (*token_list)->type == HEREDOC)
-    {
-        redirect_node = add_ast_node((*token_list)->type);
-        redirect_token = *token_list;
-        file_token = (*token_list)->next;
-        *token_list = file_token->next;
-        redirect_node->right = add_file_node(file_token);
-        free(redirect_token->content);
-        free(redirect_token);
-        redirect_node->left = parse_redirection(token_list);
-        return (redirect_node);
-    }
-    return (NULL);
+	t_ast	*node;
+	t_ast	*redirect_node;
+	t_token	*redirect_token;
+	t_token	*file_token;
+
+	if(!*token_list)
+		return (NULL); // do we need to check it ?
+	if((*token_list)->type == WORD)
+	{
+		node = parse_command(token_list);
+		while(*token_list && ((*token_list)->type == IN
+				|| (*token_list)->type == OUT || (*token_list)->type == APPEND
+				|| (*token_list)->type == HEREDOC))
+		{
+			redirect_node = add_ast_node((*token_list)->type);
+			redirect_token = *token_list;
+			file_token = (*token_list)->next;
+			*token_list = file_token->next;
+			redirect_node->right = add_file_node(file_token);
+			free(redirect_token->content);
+			free(redirect_token);
+			redirect_node->left = node;
+			node = redirect_node;
+		}
+		return (node);
+	}
+	if ((*token_list)->type == IN || (*token_list)->type == OUT
+		|| (*token_list)->type == APPEND || (*token_list)->type == HEREDOC)
+	{
+		redirect_node = add_ast_node((*token_list)->type);
+		redirect_token = *token_list;
+		file_token = (*token_list)->next;
+		*token_list = file_token->next;
+		redirect_node->right = add_file_node(file_token);
+		free(redirect_token->content);
+		free(redirect_token);
+		redirect_node->left = parse_redirection(token_list);
+		return (redirect_node);
+	}
+	return (NULL);
 }
 */
 
-t_ast *parse_redirection(t_token **token_list)
+t_ast	*parse_redirection(t_token **token_list)
 {
-    if (!*token_list)
-        return (NULL);
-    if ((*token_list)->type == WORD)
-        return (parse_command_with_redirections(token_list));
-    if((*token_list)->type == IN || (*token_list)->type == OUT || (*token_list)->type == APPEND || (*token_list)->type == HEREDOC)
-        return (parse_single_redirection(token_list));
+	if (!*token_list)
+		return (NULL);
+	if ((*token_list)->type == WORD)
+		return (parse_command_with_redirections(token_list));
+	if ((*token_list)->type == IN || (*token_list)->type == OUT
+		|| (*token_list)->type == APPEND || (*token_list)->type == HEREDOC)
+		return (parse_single_redirection(token_list));
+	return (NULL); // for now
 }
-t_ast *parse_command_with_redirections(t_token **token_list)
+t_ast	*parse_command_with_redirections(t_token **token_list)
 {
-    t_ast *node;
-    t_ast *redirect_node;
-    t_token *redirect_token;
-    t_token *file_token;
-    
-    node = parse_command(token_list);
-    while(*token_list && ((*token_list)->type == IN || (*token_list)->type == OUT || (*token_list)->type == APPEND || (*token_list)->type == HEREDOC))
-    {
-        redirect_node = add_ast_node((*token_list)->type);
-        redirect_token = *token_list;
-        file_token = (*token_list)->next;
-        *token_list = file_token->next;
-        redirect_node->right = add_file_node(file_token);
-        free(redirect_token->content);
-        free(redirect_token);
-        redirect_node->left = node;
-        node = redirect_node;
-    }
-    return (node);
+	t_ast	*node;
+	t_ast	*redirect_node;
+	t_token	*redirect_token;
+	t_token	*file_token;
+
+	node = parse_command(token_list);
+	while (*token_list && ((*token_list)->type == IN
+			|| (*token_list)->type == OUT || (*token_list)->type == APPEND
+			|| (*token_list)->type == HEREDOC))
+	{
+		redirect_node = add_ast_node((*token_list)->type);
+		redirect_token = *token_list;
+		file_token = (*token_list)->next;
+		*token_list = file_token->next;
+		redirect_node->right = add_file_node(file_token);
+		free(redirect_token->content);
+		free(redirect_token);
+		redirect_node->left = node;
+		node = redirect_node;
+	}
+	return (node);
 }
-t_ast *parse_single_redirection(t_token **token_list)
+t_ast	*parse_single_redirection(t_token **token_list)
 {
-    t_ast *redirect_node;
-    t_token *redirect_token;
-    t_token *file_token;
-    
-    redirect_node = add_ast_node((*token_list)->type);
-    redirect_token = *token_list;
-    file_token = (*token_list)->next;
-    *token_list = file_token->next;
-    redirect_node->right = add_file_node(file_token);
-    free(redirect_token->content);
-    free(redirect_token);
-    redirect_node->left = parse_redirection(token_list);
-    return (redirect_node);
+	t_ast	*redirect_node;
+	t_token	*redirect_token;
+	t_token	*file_token;
+
+	redirect_node = add_ast_node((*token_list)->type);
+	redirect_token = *token_list;
+	file_token = (*token_list)->next;
+	*token_list = file_token->next;
+	redirect_node->right = add_file_node(file_token);
+	free(redirect_token->content);
+	free(redirect_token);
+	redirect_node->left = parse_redirection(token_list);
+	return (redirect_node);
 }
 
 int	count_args(t_token *tokens)
