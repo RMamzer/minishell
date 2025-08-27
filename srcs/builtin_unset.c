@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 16:05:01 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/25 18:35:55 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/27 17:41:53 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,9 @@ int	execute_builtin_unset(char **args, t_shell *shell)
 	i = 0;
 	while (args[i])
 	{
-		remove_env_variable( &shell->env, args[i]);
+		if (ft_strcmp("_", args[i]) != 0)
+			remove_env_variable( &shell->env, args[i]);
 		i++;
 	}
-
 	return(0);
 }

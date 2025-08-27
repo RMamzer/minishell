@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/25 18:22:52 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/27 19:08:01 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ typedef struct s_env
 {
 	char			*key;
 	char			*value;
+	bool			assigned;
 	struct s_env	*next;
 }					t_env;
 

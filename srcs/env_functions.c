@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/25 17:37:43 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/27 19:22:00 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,14 +129,17 @@ t_env	*create_env_node(char *key, char *value)
 
 	// check later,
 	// would it mean that malloc broke or no input?
-	if (!key || !value)
+	if (!key)
 		return (NULL);
-	new_node = malloc(sizeof(t_env));
+	new_node = calloc(1, sizeof(t_env));
 	if (!new_node)
 		return (NULL);
 	new_node->key = key;
-	new_node->value = value;
-	new_node->next = NULL;
+	if (value)
+	{
+		new_node->value = value;
+		new_node->assigned = true;
+	}
 	return (new_node);
 }
 
@@ -151,7 +154,7 @@ void	process_env_line(t_shell *shell, const char *envp)
 	value = NULL;
 	equal = ft_strchr(envp, '=');
 	if (!equal)
-		error_env_exit(key, value, shell);
+		return;
 	key = ft_substr(envp, 0, equal - envp);
 	if (!key)
 		error_env_exit(key, value, shell);
@@ -168,6 +171,7 @@ void	set_minimal_env(t_shell *shell)
 {
 	char	*pwd_line;
 	char	*pwd;
+	t_env	*old_pwd_node;
 
 	pwd = getcwd(NULL, 0);
 	if (!pwd)
@@ -179,6 +183,10 @@ void	set_minimal_env(t_shell *shell)
 	process_env_line(shell, pwd_line);
 	process_env_line(shell, "SHLVL=0");
 	process_env_line(shell, "_=/usr/bin/env");
+	old_pwd_node = create_env_node(ft_strdup("OLDPWD"),NULL);
+	if (!old_pwd_node)
+		error_env_exit(NULL, NULL, shell);
+	add_env_node(&shell->env, old_pwd_node);
 }
 
 void	create_env(t_shell *shell, char **envp)

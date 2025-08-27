@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/25 16:05:21 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/27 15:02:27 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,24 +157,24 @@ return (EXIT_FAILURE);
 }
 
 // do i need to check empty cmd here?
-int	check_command(t_ast *node, char *cmd, t_shell *shell)
+int	check_command(t_ast *ast, char *cmd, t_shell *shell)
 {
 	if (ft_strcmp(cmd, "echo") == 0)
-		shell->exit_code = execute_builtin_echo(node->value + 1);
+		shell->exit_code = execute_builtin_echo(ast->value + 1);
 	else if (ft_strcmp(cmd, "cd")== 0)
-		execute_builtin_cd(node->value + 1, shell);
+		execute_builtin_cd(ast->value + 1, shell);
 	else if (ft_strcmp(cmd, "pwd")== 0)
-		shell->exit_code = execute_builtin_pwd(node->value + 1 , shell);
-	// else if (ft_strcmp(cmd, "export")== 0)
-	// shell->exit_code = execute_builtin_export;
+		shell->exit_code = execute_builtin_pwd(ast->value + 1 , shell);
+	else if (ft_strcmp(cmd, "export")== 0)
+		shell->exit_code = execute_builtin_export (ast->value, shell);
 	else if (ft_strcmp(cmd, "unset")== 0)
-		shell->exit_code = execute_builtin_unset(node->value + 1 , shell);
+		shell->exit_code = execute_builtin_unset(ast->value + 1 , shell);
 	else if (ft_strcmp(cmd, "env")== 0)
-		shell->exit_code = execute_builtin_env(node->value + 1,shell);
+		shell->exit_code = execute_builtin_env(ast->value + 1,shell);
 	else if (ft_strcmp(cmd, "exit")== 0)
-		execute_builtin_exit(node->value + 1, shell);
+		execute_builtin_exit(ast->value + 1, shell);
 	 else
-		shell->exit_code = execute_external_cmd(node->value, shell);
+		shell->exit_code = execute_external_cmd(ast->value, shell);
 	return (shell->exit_code);
 }
 
@@ -209,7 +209,7 @@ int	wait_children(pid_t *pids, int children_rem)
 	return(exit_code);
 }
 
-void	execute_left_child(t_ast *node, t_shell *shell, int *pipefd)
+void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 {
 	close (pipefd[READ_END]);
 	if (dup2(pipefd[WRITE_END], STDOUT_FILENO)== -1)
@@ -218,11 +218,11 @@ void	execute_left_child(t_ast *node, t_shell *shell, int *pipefd)
 		error_exit("minishell: fork failure");
 	}
 	close (pipefd[WRITE_END]);
-	shell->exit_code = execute_ast(node, shell);
+	shell->exit_code = execute_ast(ast, shell);
 	exit(shell->exit_code);
 }
 
-void	execute_right_child(t_ast *node, t_shell *shell, int *pipefd)
+void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
 {
 	close (pipefd[WRITE_END]);
 	if (dup2(pipefd[READ_END], STDIN_FILENO) == -1)
@@ -231,11 +231,11 @@ void	execute_right_child(t_ast *node, t_shell *shell, int *pipefd)
 		error_exit("minishelll: fork failure");
 	}
 	close (pipefd[READ_END]);
-	shell->exit_code = execute_ast(node, shell);
+	shell->exit_code = execute_ast(ast, shell);
 	exit (shell->exit_code);
 }
 
-void	execute_pipe(t_ast *node, t_shell *shell)
+void	execute_pipe(t_ast *ast, t_shell *shell)
 {
 	int	pipefd[2];
 	pid_t	pids[2];
@@ -246,25 +246,25 @@ void	execute_pipe(t_ast *node, t_shell *shell)
 	if (pids[0] == -1)
 		error_exit("minishell: fork falure");
 	if (pids[0] == 0)
-		execute_left_child(node->left, shell, pipefd);
+		execute_left_child(ast->left, shell, pipefd);
 	pids[1] = fork();
 	if (pids[1] == -1)
 		error_exit("minishell: fork falure");
 	if (pids[1] == 0)
-		execute_right_child(node->right, shell, pipefd);
+		execute_right_child(ast->right, shell, pipefd);
 	close(pipefd[WRITE_END]);
 	close(pipefd[READ_END]);
 	shell->exit_code = wait_children(pids, 2);
 }
 
-int		execute_ast(t_ast *node, t_shell *shell)
+int		execute_ast(t_ast *ast, t_shell *shell)
 {
-	if (!node || !shell)
+	if (!ast || !shell)
 		return(0);
-	if (node->type == PIPE)
-		execute_pipe(node, shell);
-	if (node->type == WORD)
-		check_command(node, node->value[0], shell);
+	if (ast->type == PIPE)
+		execute_pipe(ast, shell);
+	if (ast->type == WORD)
+		check_command(ast, ast->value[0], shell);
 
 	//check redicrection
 
