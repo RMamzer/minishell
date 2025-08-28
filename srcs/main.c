@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/27 19:02:57 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/28 16:52:03 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,14 +137,12 @@ int	main(int ac, char **av, char **env)
 		if (process_input(data->input_line, data) == SUCCESS)
 		{
 			test_tokens(data->token_list); // added for test
-											// free_list(&data->token_list);
-											// added for test
 		}
 		if (parse_tokens(data) == SUCCESS)
 		{
 			print_ast(data->node, 0);
 			test_tokens(data->token_list);
-			free_ast(data->node);
+			
 			data->node = NULL;
 		}
 	}
@@ -244,23 +242,7 @@ void	lexer_error(char *input_line, t_shell *data)
 	data->exit_code = 1;
 	exit(data->exit_code);
 }
-void	free_list(t_token **list)
-{
-	t_token	*temp;
 
-	if (!list)
-		return ;
-	while (*list)
-	{
-		temp = *list;
-		*list = (*list)->next;
-		free(temp->content);
-		temp->content = NULL;
-		free(temp);
-		temp = NULL;
-	}
-	*list = NULL;
-}
 
 void	lexer(char *input_line, t_shell *data)
 {
@@ -614,41 +596,6 @@ char	*expand_env_var(char *content, size_t *i, t_env *env)
 	free(name);
 	return (value);
 }
-/**
- * Finds the value of an environment variable.
- * @param name Name of the environment variable.
- * @param env Pointer to the environment list.
- * @return Newly allocated string with value, or an empty string
- * if not found or NULL.
- */
-
-// char	*get_env_value(char *name, t_env *env, bool alloc)
-// {
-// 	t_env	*current;
-// 	char	*value;
-
-// 	current = env;
-// 	while (current)
-// 	{
-// 		if (ft_strcmp(current->key, name) == 0)
-// 		{
-// 			if (alloc == ALLOC)
-// 			{
-// 				value = ft_strdup(current->value);
-// 				if (value == NULL)
-// 					return (NULL);
-// 				return (value);
-// 			}
-// 			else
-// 				return (current->value);
-// 		}
-// 		current = current->next;
-// 	}
-// 	value = ft_strdup("");
-// 	if (value == NULL)
-// 		return (NULL);
-// 	return (value);
-// }
 
 char	*get_env_value(char *name, t_env *env, bool alloc)
 {
