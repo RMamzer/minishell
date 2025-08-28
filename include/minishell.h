@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/27 16:28:28 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/28 16:20:15 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,6 +123,11 @@ bool				is_operator(char c);
 void				show_error(char *msg, int exit_code);
 void				lexer_error(char *input_line, t_shell *data);
 void				free_list(t_token **list);
+void free_ast(t_ast **node);
+void free_shell_data(t_shell *data);
+void free_shell(t_shell *data);
+void free_array(char **arr);
+void fatality(char *msg, t_shell *data, int exit_code);
 
 // env
 void				error_exit(char *msg);
@@ -137,17 +142,17 @@ void				set_minimal_env(t_shell *shell);
 void				create_env(t_shell *shell, char **envp);
 
 // ast
-void				free_ast(t_ast *node);
 bool				parse_tokens(t_shell *data);
-t_ast				*parse_pipe(t_token **token_list);
-t_ast				*parse_redirection(t_token **token_list);
-t_ast *parse_command_with_redirections(t_token **token_list);
-t_ast *parse_single_redirection(t_token **token_list);
-t_ast				*parse_command(t_token **token_list);
-t_ast				*add_file_node(t_token *token);
-t_ast				*add_ast_node(t_token_type type);
-int					count_args(t_token *tokens);
-void				load_args(t_ast *command_node, t_token **token_list,
-						int ac);
+t_ast	*parse_pipe(t_token **token_list, t_shell *data);
+t_ast	*parse_redirection(t_token **token_list, t_shell *data);
+t_ast	*parse_command_with_redirections(t_token **token_list, t_shell *data);
+t_ast	*parse_single_redirection(t_token **token_list, t_shell *data);
+int	count_args(t_token *tokens);
+void	load_args(t_ast *command_node, t_token **token_list, int ac, t_shell *data);
+t_ast	*parse_command(t_token **token_list, t_shell *data);
+t_ast	*add_file_node(t_token *token, t_shell *data);
+t_ast	*add_ast_node(t_token_type type, t_shell *data);
+
+
 
 #endif
