@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/28 16:20:15 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/29 19:23:41 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,8 @@ typedef struct s_token
 	t_token_type	type;
 	struct s_token	*next;
 	char			*content;
+    bool            quoted;
+    bool            expanded;
 }					t_token;
 
 // env struct
@@ -102,9 +104,9 @@ bool				check_syntax(t_shell *data);
 
 // expansion
 void				expander(t_shell *data);
-char				*expand_content(char *content, t_shell *data);
-char				*process_content(char *content, size_t *i, t_shell *data);
-char				*handle_dollar(char *content, size_t *i, t_shell *data);
+char				*expand_content(char *content, t_shell *data,  t_token *token);
+char				*process_content(char *content, size_t *i, t_shell *data, t_token *token);
+char				*handle_dollar(char *content, size_t *i, t_shell *data, t_token *token);
 char				*handle_characters(char *content, size_t *i, bool in_dq);
 char				*expand_env_var(char *content, size_t *i, t_env *env);
 char				*get_env_value(char *name, t_env *env, bool alloc);
@@ -112,8 +114,7 @@ char				*strjoin_free(char *new_content, char *temp);
 int					ft_strcmp(const char *s1, const char *s2);
 
 char				*handle_single_quote(char *content, size_t *i);
-char				*handle_double_quote(char *content, size_t *i,
-						t_shell *data);
+char				*handle_double_quote(char *content, size_t *i, t_shell *data, t_token *token);
 
 // helper functions
 bool				is_delimiter(int i);
