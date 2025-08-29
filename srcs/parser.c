@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 18:05:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/08/28 16:56:43 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/29 19:23:46 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ t_ast	*parse_pipe(t_token **token_list, t_shell *data)
 	node = parse_redirection(token_list, data);
 	if (*token_list && (*token_list)->type == PIPE)
 	{
-		pipe_node = add_ast_node(PIPE);
+		pipe_node = add_ast_node(PIPE, data);
 		pipe_node->left = node;
 		pipe_token = *token_list;
 		*token_list = (*token_list)->next;
