@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/28 16:52:03 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/29 19:23:39 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,13 @@
 // TODO: test var expansion. // echo $"PATH"
 //	->PATH in bash vs dirty_shell> $"PATH"
 //[TYPE: 3] "$PATH"
-// TODO: new branch for stuff below.
 // TODO: plan for heredoc(probably should be handeled before the expansion)
-// TODO: remove quotes.
-// TODO: AST situation. -- lgtm hello
-// TODO: ERROR MANAGEMENT
+
+// What i did : quote flag, expanded flag 
+// now TODO below: 
+// word splitter 
+// ambiguous redirection 
+
 
 // test function, remove later
 void	test_tokens(t_token *list)
@@ -88,33 +90,7 @@ void	print_ast(t_ast *node, int depth)
 		print_ast(node->right, depth + 1);
 }
 // remove
-void	free_ast(t_ast *node)
-{
-	char	**args;
-	int		i;
 
-	if (!node)
-		return ;
-	// free left and right children first
-	if (node->left)
-		free_ast(node->left);
-	if (node->right)
-		free_ast(node->right);
-	// free node->value (if it exists)
-	if (node->value)
-	{
-		args = (char **)node->value;
-		i = 0;
-		while (args[i])
-		{
-			free(args[i]); // free each strdup’ed string
-			i++;
-		}
-		free(args); // free the array itself
-	}
-	// finally free the node itself
-	free(node);
-}
 
 int	main(int ac, char **av, char **env)
 {
@@ -142,11 +118,52 @@ int	main(int ac, char **av, char **env)
 		{
 			print_ast(data->node, 0);
 			test_tokens(data->token_list);
-			
+			free_ast(data->node);
 			data->node = NULL;
 		}
 	}
 }
+
+void    split_variables(t_shell *data)
+{
+    
+}
+
+
+
+bool    ambiguous_redirection(t_shell *data)
+{
+    t_token *current;
+    
+    current = data->token_list;
+}
+
+void    quote_flag(t_shell *data)
+{
+    t_token *current;
+    size_t i;
+    
+    current = data->token_list;
+    
+    while (current)
+    {
+        if(current->type == WORD)
+        {
+            i = 0;
+            while(current->content[i])
+            {
+                if(current->content[i] == '\'' || current->content[i] == '"')
+                {
+                    current->quoted = true;
+                    break;
+                }
+                i++;
+            }
+        }
+        current = current->next;
+    }
+}
+
 
 t_shell	*init_data(void)
 {
@@ -193,10 +210,10 @@ bool	process_input(char *input_line, t_shell *data)
 	free(data->input_line);
 	data->input_line = line;
 	lexer(data->input_line, data);
+    quote_flag(data);
 	check_heredoc(data);
 	if (check_syntax(data) == FAILURE)
 	{
-		printf("OSHIBKA V CHECK SYNTAX DETECTED\n");
 		free_list(&data->token_list);
 		return (FAILURE);
 	}
@@ -333,6 +350,8 @@ void	add_token(t_shell *data, t_token_type type, char *content)
 		lexer_error(data->input_line, data);
 	token->type = type;
 	token->next = NULL;
+    token->quoted = false;
+    token->expanded = false;
 	token->content = ft_strdup(content);
 	if (token->content == NULL)
 	{
@@ -408,10 +427,11 @@ void	expander(t_shell *data)
 	while (current)
 	{
 		if (current->type == WORD) //&& ft_strchr(current->content, '$')
-			current->content = expand_content(current->content, data);
+			current->content = expand_content(current->content, data, current);
 		current = current->next;
 	}
 }
+
 
 /**
  * Expands environment variables, the $? variable,
@@ -420,7 +440,7 @@ void	expander(t_shell *data)
  * @param data Pointer to the shell struct(conteins env and exit code).
  * @return Newly allocated expanded string.
  */
-char	*expand_content(char *content, t_shell *data)
+char	*expand_content(char *content, t_shell *data, t_token *token)
 {
 	size_t	i;
 	char	*new_content;
@@ -432,7 +452,7 @@ char	*expand_content(char *content, t_shell *data)
 		lexer_error(content, data);
 	while (content[i])
 	{
-		temp = process_content(content, &i, data);
+		temp = process_content(content, &i, data, token);
 		if (temp == NULL)
 		{
 			free(new_content);
@@ -453,14 +473,14 @@ char	*expand_content(char *content, t_shell *data)
  * @param data Pointer to the shell struct.
  * @return Newly allocated string for the processed part.
  */
-char	*process_content(char *content, size_t *i, t_shell *data)
+char	*process_content(char *content, size_t *i, t_shell *data, t_token *token)
 {
 	if (content[*i] == '\'')
 		return (handle_single_quote(content, i));
 	else if (content[*i] == '"')
-		return (handle_double_quote(content, i, data));
+		return (handle_double_quote(content, i, data, token));
 	else if (content[*i] == '$')
-		return (handle_dollar(content, i, data));
+		return (handle_dollar(content, i, data, token));
 	else
 		return (handle_characters(content, i, NO_QUOTE));
 }
@@ -481,7 +501,7 @@ char	*handle_single_quote(char *content, size_t *i)
 		(*i)++;
 	return (temp);
 }
-char	*handle_double_quote(char *content, size_t *i, t_shell *data)
+char	*handle_double_quote(char *content, size_t *i, t_shell *data, t_token *token)
 {
 	char	*temp;
 	char	*result;
@@ -493,7 +513,7 @@ char	*handle_double_quote(char *content, size_t *i, t_shell *data)
 	while (content[*i] && content[*i] != '"')
 	{
 		if (content[*i] == '$')
-			temp = handle_dollar(content, i, data);
+			temp = handle_dollar(content, i, data, token);
 		else
 			temp = handle_characters(content, i, IN_DOUBLE_QUOTE);
 		if (temp == NULL)
@@ -515,7 +535,7 @@ char	*handle_double_quote(char *content, size_t *i, t_shell *data)
  * @param data Pointer to the shell struct(conteins env and exit code).
  * @return Newly allocated string for the processed part.
  */
-char	*handle_dollar(char *content, size_t *i, t_shell *data)
+char	*handle_dollar(char *content, size_t *i, t_shell *data, t_token *token)
 {
 	char	*expanded;
 
@@ -523,6 +543,7 @@ char	*handle_dollar(char *content, size_t *i, t_shell *data)
 	if (ft_isalpha(content[*i]) || content[*i] == '_')
 	{
 		expanded = expand_env_var(content, i, data->env);
+        token->expanded = true;
 		return (expanded);
 	}
 	else if (content[*i] == '?')
@@ -530,6 +551,7 @@ char	*handle_dollar(char *content, size_t *i, t_shell *data)
 		(*i)++;
 		// or functon which updates exitcode idk yet
 		expanded = ft_itoa(data->exit_code);
+        token->expanded = true; // not sure yet
 		return (expanded);
 	}
 	else
@@ -678,3 +700,17 @@ void	check_heredoc(t_shell *data)
 	if (count > 16)
 		lexer_error("heredoc max count", data);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
