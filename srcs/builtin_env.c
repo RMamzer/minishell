@@ -6,12 +6,13 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/20 15:10:59 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/27 17:52:48 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/30 14:40:15 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+//check if it works for dup"""
 int	execute_builtin_env(char **args, t_shell *shell)
 {
 	t_env *temp;
@@ -25,7 +26,8 @@ int	execute_builtin_env(char **args, t_shell *shell)
 	temp = shell->env;
 	while (temp)
 	{
-		printf("%s=%s\n", temp->key, temp->value);
+		if (temp->assigned == true)
+			printf("%s=%s\n", temp->key, temp->value);
 		temp = temp->next;
 	}
 	return (0);

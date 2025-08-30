@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/27 19:08:01 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/30 14:39:49 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,9 +171,14 @@ int	check_exit_code(char *nptr);
 int	exit_numeric_error(char *nptr);
 int	execute_builtin_unset(char **args, t_shell *shell);
 
+void	print_env_export(t_env **temp_env);
+void	bubble_sort_env(t_env **env, int len);
+int	sort_and_print_export(t_env *env);
+int	execute_builtin_export(char	**args, t_shell *shell);
 
 //  other exec
 void	remove_env_variable(t_env **env, char *key);
 void	free_env_node(t_env *env);
+void	memory_error();
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/27 19:22:00 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/30 14:14:47 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,8 @@ void	free_env_node(t_env *env)
 	if (env)
 	{
 		free(env->key);
-		free(env->value);
+		if (env->assigned == true)
+			free(env->value);
 		free(env);
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/27 15:02:27 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/30 14:53:03 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,7 +166,7 @@ int	check_command(t_ast *ast, char *cmd, t_shell *shell)
 	else if (ft_strcmp(cmd, "pwd")== 0)
 		shell->exit_code = execute_builtin_pwd(ast->value + 1 , shell);
 	else if (ft_strcmp(cmd, "export")== 0)
-		shell->exit_code = execute_builtin_export (ast->value, shell);
+		shell->exit_code = execute_builtin_export (ast->value + 1, shell);
 	else if (ft_strcmp(cmd, "unset")== 0)
 		shell->exit_code = execute_builtin_unset(ast->value + 1 , shell);
 	else if (ft_strcmp(cmd, "env")== 0)
