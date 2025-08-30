@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/29 19:23:39 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/08/30 13:32:29 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 
 // What i did : quote flag, expanded flag 
 // now TODO below: 
-// word splitter 
+// word splitter  -> added, was not tested
 // ambiguous redirection 
 
 
@@ -89,7 +89,6 @@ void	print_ast(t_ast *node, int depth)
 	if (node->right)
 		print_ast(node->right, depth + 1);
 }
-// remove
 
 
 int	main(int ac, char **av, char **env)
@@ -126,17 +125,125 @@ int	main(int ac, char **av, char **env)
 
 void    split_variables(t_shell *data)
 {
+    t_token *current;
+    char    **split_result;
+    int i;
+    int str_qty;
     
+    current = data->token_list;
+    while(current)
+    {
+        if(current->type == WORD && !current->quoted && current->expanded)
+        {
+            split_result = ft_split(current->content, ' '); // we need split from piscine to handle space, tab, new_line
+            if(!split_result)
+                fatality("Malloc failed", data, 1);
+            str_qty = check_qty(split_result);
+            if (str_qty == 0)
+            {
+                free(current->content);
+                current->content = ft_strdup("");
+                if(!current->content)
+                {
+                    free_split(split_result);
+                    fatality("Malloc failed", data, 1);
+                }
+            }
+            else if (str_qty == 1)
+            {
+                free(current->content);
+                current->content = ft_strdup(split_result[0]);
+                if(!current->content)
+                {
+                    free_split(split_result);
+                    fatality("Malloc failed", data, 1);
+                }
+            }
+            else if (str_qty > 1)
+            {
+                free(current->content);
+                current->content = ft_strdup(split_result[0]);
+                if(!current->content)
+                {
+                    free_split(split_result);
+                    fatality("Malloc failed", data, 1);
+                }
+                i = 1;
+                while(i < str_qty)
+                {
+                    current = add_expanded_token(current, WORD, split_result[i]);
+                    if (!current)
+                    {
+                        free_split(split_result);
+                        fatality("malloc fasiled", data, 1);
+                    }
+                    i++;
+                }
+            }
+            free_split(split_result);
+        }
+        current = current->next;
+    }
+}
+t_token *add_expanded_token(t_token *current, t_token_type type, char *content)
+{
+    t_token *new_token;
+    
+    if(!current || !content)
+        return (NULL);
+    new_token = malloc(sizeof(t_token));
+    if(!new_token)
+        return (NULL);
+    new_token->expanded = false;
+    new_token->quoted = false;
+    new_token->type = type;
+    new_token->content = ft_strdup(content);
+    if (!new_token->content)
+    {
+        free(new_token);
+        return (NULL);
+    }
+    new_token->next = current->next;
+    current->next = new_token;
+    return (new_token);
+}
+
+void free_split(char **split)
+{
+    int i;
+    
+    i = 0;
+    if(!split)
+        return ;
+    while (split[i])
+    {
+        free(split[i]);
+        i++;
+    }
+    free(split);
+}
+
+int check_qty(char **split_result)
+{
+    int i;
+    
+    i = 0;
+    if(!split_result)
+        return (0);
+    while(split_result[i])
+        i++;
+    return (i);
 }
 
 
-
+/*
 bool    ambiguous_redirection(t_shell *data)
 {
     t_token *current;
     
     current = data->token_list;
 }
+*/
 
 void    quote_flag(t_shell *data)
 {
@@ -419,6 +526,8 @@ bool	check_syntax(t_shell *data)
  *  Expands all environment variables in the shell's token list.
  *  @param data Pointer to the shell struct containing tokens.
  */
+
+// might gonna add quote remover here 
 void	expander(t_shell *data)
 {
 	t_token	*current;
