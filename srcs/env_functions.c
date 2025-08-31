@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/30 14:14:47 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/30 22:30:57 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,8 +80,10 @@ bool	update_env_value(t_env **env, char *key, char *new_value)
 	{
 		if (ft_strcmp(temp->key, key) == 0)
 		{
-			free(temp->value);
+			if(temp->value)
+				free(temp->value);
 			temp->value = new_value;
+			temp->assigned = true;
 			return (true);
 		}
 		temp = temp->next;
@@ -144,6 +146,30 @@ t_env	*create_env_node(char *key, char *value)
 	return (new_node);
 }
 
+// void	process_env_line(t_shell *shell, const char *envp)
+// {
+// 	char	*key;
+// 	char	*value;
+// 	char	*equal;
+// 	t_env	*new_node;
+
+// 	key = NULL;
+// 	value = NULL;
+// 	equal = ft_strchr(envp, '=');
+// 	if (!equal)
+// 		return;
+// 	key = ft_substr(envp, 0, equal - envp);
+// 	if (!key)
+// 		error_env_exit(key, value, shell);
+// 	value = ft_strdup(equal + 1);
+// 	if (!value)
+// 		error_env_exit(key, value, shell);
+// 	new_node = create_env_node(key, value);
+// 	if (!new_node)
+// 		error_env_exit(key, value, shell);
+// 	add_env_node(&shell->env, new_node);
+// }
+
 void	process_env_line(t_shell *shell, const char *envp)
 {
 	char	*key;
@@ -167,6 +193,7 @@ void	process_env_line(t_shell *shell, const char *envp)
 		error_env_exit(key, value, shell);
 	add_env_node(&shell->env, new_node);
 }
+
 
 void	set_minimal_env(t_shell *shell)
 {

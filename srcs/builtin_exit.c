@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 17:38:22 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/25 15:35:08 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/31 23:55:32 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,10 +79,3 @@ int execute_builtin_exit(char **args, t_shell *shell)
 	//free_minishell_here
 	exit(shell->exit_code);
 }
-
-/*
-
-if no args --> exit with the last exit status + clean
-if arg: parse as a number
-if non-num arg-> exit 2
-*/

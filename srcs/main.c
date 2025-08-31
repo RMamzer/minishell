@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/30 14:51:12 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/31 23:45:40 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -597,8 +597,8 @@ int main(int argc,char **argv,char **envp)
 {
     t_shell *data;
     t_ast   *node;
-    char    *args[] = {NULL};
-	//char    *args2[] = {NULL};
+    char    *args[] = {"ZAZA", "ZIZU=", "ZIZZ=mama", NULL};
+	char    *args2[] = {NULL};
 
 	data = calloc(1, sizeof(t_shell));
 	(void)argc;
@@ -620,12 +620,15 @@ int main(int argc,char **argv,char **envp)
     // You can now use the 'node' pointer to call your execute_ast function
     // For example:
 	create_env(data, envp);
-	// execute_builtin_env(args2, data);
-	printf("\n\n\n\n");
+	execute_builtin_env(args2, data);
+    execute_builtin_export(args2, data);
+	printf("1\n\n\n\n");
     data->exit_code = execute_ast(node, data);
 
     // Free the allocated memory when done
-	// execute_builtin_env(args2, data);
+    printf("2\n\n\n\n");
+	execute_builtin_env(args2, data);
+    execute_builtin_export(args2, data);
     free_ast(node);
 
     printf("Node creation and initialization complete.\n");
@@ -659,7 +662,7 @@ t_ast *create_single_word_node(char *cmd, char **args)
     value = (char **)malloc(sizeof(char *) * (arg_count + 2));
     if (!value)
         return (NULL);
-    value[0] = strdup(cmd);
+    value[0] = ft_strdup(cmd);
     if (!value[0])
     {
         free(value);
@@ -668,7 +671,7 @@ t_ast *create_single_word_node(char *cmd, char **args)
     i = 0;
     while (i < arg_count)
     {
-        value[i + 1] = strdup(args[i]);
+        value[i + 1] = ft_strdup(args[i]);
         if (!value[i + 1])
         {
             while (i >= 0)

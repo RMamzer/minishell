@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/30 14:39:49 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/30 22:15:58 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,5 +180,5 @@ int	execute_builtin_export(char	**args, t_shell *shell);
 void	remove_env_variable(t_env **env, char *key);
 void	free_env_node(t_env *env);
 void	memory_error();
-
+void	write_bulitin_error( char *str1,  char *str2, char *str3, char *str4);
 #endif

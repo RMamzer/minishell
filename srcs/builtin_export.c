@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 15:05:10 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/30 16:33:21 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/30 22:33:47 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ Next steps:
 1. update the error message when issue detected in export var
 2. update process line code
 3. check that reguar execution works correctly;
+4. if no cd, i should recreate it.
 */
 
 void	memory_error()
@@ -25,6 +26,19 @@ void	memory_error()
 	exit (EXIT_FAILURE);
 }
 
+void	process_valueless_export_node(t_shell *shell, char *str)
+{
+	char	*key;
+	t_env	*new_node;
+
+	key = ft_strdup(str);
+	if (!key)
+		error_env_exit(key, NULL, shell);
+	new_node = create_env_node(key, NULL);
+	if (!new_node)
+		error_env_exit(key, NULL, shell);
+	add_env_node(&shell->env, new_node);
+}
 
 bool is_identifier_valid(char *str)
 {
@@ -108,33 +122,34 @@ int	sort_and_print_export(t_env *env)
 	return (0);
 }
 
+
 int	execute_builtin_export(char	**args, t_shell *shell)
 {
 	int i;
 
 	if (args[0] == NULL)
 		return(sort_and_print_export(shell->env));
-	i = 0;
-	if (args[i] == '-')
+	if (args[0][0] == '-')
 	{
-		ft_putstr_fd("minishell: export: ", STDERR_FILENO);
-		ft_putstr_fd(*args, STDERR_FILENO);
-		ft_putstr_fd(": options are not supported\n", STDERR_FILENO);
-		ft_putstr_fd("export:  usage: [name ...]\n", STDERR_FILENO);
+		write_bulitin_error("minishell: export: ", *args,
+			": options are not supported\n","export:  usage: [name ...]\n");
 		return (EXIT_INVALID_OPTION);
 	}
-	while(args[i])
+	i = -1;
+	while(args[++i])
 	{
 		if (is_identifier_valid(args[i]) == false)
 		{
-			ft_putstr_fd("minishell: export: `", STDERR_FILENO);
-			ft_putstr_fd(args[i], STDERR_FILENO);
-			ft_putstr_fd("': not a valid identifier\n", STDERR_FILENO);
-			//update error code
+			write_bulitin_error("minishell: export: `", args[i],
+				"': not a valid identifier\n", NULL);
+			shell->exit_code = EXIT_FAILURE;
 		}
-		i++;
+		if (ft_strchr(args[i],'='))
+			process_env_line(shell, args[i]); // check
+		else
+			process_valueless_export_node(shell, args[i]);
 	}
-	return (0);
+	return (shell->exit_code);
 }
 
 

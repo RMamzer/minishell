@@ -6,11 +6,23 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/30 14:53:03 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/08/30 22:15:15 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+void	write_bulitin_error( char *str1,  char *str2, char *str3, char *str4)
+{
+	if (str1)
+		ft_putstr_fd(str1, STDERR_FILENO);
+	if (str2)
+		ft_putstr_fd(str2, STDERR_FILENO);
+	if (str3)
+		ft_putstr_fd(str3, STDERR_FILENO);
+	if (str4)
+		ft_putstr_fd(str4, STDERR_FILENO);
+}
 
 int	get_env_size(t_env *lst)
 {
