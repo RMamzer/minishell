@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/30 13:32:31 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/01 12:56:29 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,11 +119,15 @@ char				*handle_double_quote(char *content, size_t *i, t_shell *data, t_token *t
 
 // split vars
 void    split_variables(t_shell *data);
+void process_split_result(t_shell *data, t_token *current, char **split_result);
+void replace_token_content(t_token *current, char *new_content, t_shell *data, char **split_result);
 t_token *add_expanded_token(t_token *current, t_token_type type, char *content);
 void free_split(char **split);
 int check_qty(char **split_result);
-void    quote_flag(t_shell *data);
 
+
+// ambiguous and validation of redirection 
+bool    validate_redirection(t_token *redirection, t_shell *data);
 
 
 // helper functions
