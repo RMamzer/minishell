@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 18:05:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/08/29 19:23:46 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/01 12:56:31 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,8 @@ t_ast	*parse_command_with_redirections(t_token **token_list, t_shell *data)
 			|| (*token_list)->type == OUT || (*token_list)->type == APPEND
 			|| (*token_list)->type == HEREDOC))
 	{
+        if(!validate_redirection(*token_list, data))
+            fatality(NULL, data, 2);
 		redirect_node = add_ast_node((*token_list)->type, data);
 		redirect_token = *token_list;
 		file_token = (*token_list)->next;
@@ -82,6 +84,8 @@ t_ast	*parse_single_redirection(t_token **token_list, t_shell *data)
 	t_token	*redirect_token;
 	t_token	*file_token;
 
+    if(!validate_redirection(*token_list, data))
+            fatality(NULL, data, 2);
 	redirect_node = add_ast_node((*token_list)->type, data);
 	redirect_token = *token_list;
 	file_token = (*token_list)->next;
