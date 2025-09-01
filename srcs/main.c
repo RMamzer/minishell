@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/30 13:32:29 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/01 12:56:27 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,64 +127,61 @@ void    split_variables(t_shell *data)
 {
     t_token *current;
     char    **split_result;
-    int i;
-    int str_qty;
     
     current = data->token_list;
-    while(current)
+    while (current)
     {
-        if(current->type == WORD && !current->quoted && current->expanded)
-        {
-            split_result = ft_split(current->content, ' '); // we need split from piscine to handle space, tab, new_line
+       if (current->type == WORD && !current->quoted && current->expanded)
+       {
+            split_result = ft_split(current->content, ' '); // need piscine split
             if(!split_result)
-                fatality("Malloc failed", data, 1);
-            str_qty = check_qty(split_result);
-            if (str_qty == 0)
-            {
-                free(current->content);
-                current->content = ft_strdup("");
-                if(!current->content)
-                {
-                    free_split(split_result);
-                    fatality("Malloc failed", data, 1);
-                }
-            }
-            else if (str_qty == 1)
-            {
-                free(current->content);
-                current->content = ft_strdup(split_result[0]);
-                if(!current->content)
-                {
-                    free_split(split_result);
-                    fatality("Malloc failed", data, 1);
-                }
-            }
-            else if (str_qty > 1)
-            {
-                free(current->content);
-                current->content = ft_strdup(split_result[0]);
-                if(!current->content)
-                {
-                    free_split(split_result);
-                    fatality("Malloc failed", data, 1);
-                }
-                i = 1;
-                while(i < str_qty)
-                {
-                    current = add_expanded_token(current, WORD, split_result[i]);
-                    if (!current)
-                    {
-                        free_split(split_result);
-                        fatality("malloc fasiled", data, 1);
-                    }
-                    i++;
-                }
-            }
+                fatality("malloc failed", data, 1);
+            process_split_result(data, current, split_result);
             free_split(split_result);
-        }
-        current = current->next;
+       }
+       current = current->next;
     }
 }
+
+void process_split_result(t_shell *data, t_token *current, char **split_result)
+{
+    int str_qty;
+    int i;
+    
+    i = 0;
+    str_qty = check_qty(split_result);
+    if(str_qty == 0)
+        replace_token_content(current, "", data, split_result);
+    else if(str_qty == 1)
+        replace_token_content(current, split_result[0], data, split_result);
+    else
+    {
+        replace_token_content(current, split_result[i], data, split_result);
+        i++;
+        while (i < str_qty)
+        {
+            current = add_expanded_token(current, WORD, split_result[i]);
+             if (!current)
+            {
+                free_split(split_result);
+                fatality("malloc failed", data, 1);
+            }
+            i++;
+        }
+    }
+}
+
+void replace_token_content(t_token *current, char *new_content, t_shell *data, char **split_result)
+{
+    free(current->content);
+    current->content = ft_strdup(new_content);
+    if(!current->content)
+    {
+        free_split(split_result);
+        fatality("Malloc failed", data, 1);
+    }
+}
+
 t_token *add_expanded_token(t_token *current, t_token_type type, char *content)
 {
     t_token *new_token;
@@ -235,15 +232,40 @@ int check_qty(char **split_result)
     return (i);
 }
 
-
-/*
-bool    ambiguous_redirection(t_shell *data)
+bool    validate_redirection(t_token *redirection, t_shell *data)
 {
-    t_token *current;
+    t_token *token;
     
-    current = data->token_list;
+    token = redirection->next;
+    if(!redirection || !redirection->next)
+    {
+        ft_putendl_fd("minishell: syntax error near unexpected token `newline'", 2)
+        return (false);
+    }
+    if(token->type != WORD)
+    {
+        ft_putstr_fd("minishell: syntax error near unexpected token `", 2);
+        ft_putstr_fd(token->content, 2);
+        ft_putendl_fd("'", 2);
+        return (false);
+    }
+    if(token->expanded && token->content[0] == '\0')
+    {
+        ft_putstr_fd("minishell: ", 2);
+        ft_putstr_fd(token->content, 2);
+        ft_putendl_fd(": ambiguous redirection", 2);
+        return (false);
+    }
+    if(token->expanded && token->next && token->next->type == WORD)
+    {
+        ft_putstr_fd("minishell: ", 2);
+        ft_putstr_fd(token->content, 2);
+        ft_putendl_fd(": ambiguous redirection", 2);
+        return (false);
+    }
+    return (true);
 }
-*/
+
 
 void    quote_flag(t_shell *data)
 {
