@@ -3,30 +3,30 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_echo.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 15:37:48 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/20 15:30:38 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/01 17:20:31 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	execute_builtin_echo(char	**args)
+int	execute_builtin_echo(char **args)
 {
 	bool	n_flag;
-	int i;
+	int		i;
 
 	i = 0;
 	n_flag = false;
-	while (ft_strcmp("-n",args[i]) == 0)
+	while (ft_strcmp("-n", args[i]) == 0)
 	{
 		n_flag = true;
 		i++;
 	}
-	while(args[i])
+	while (args[i])
 	{
-		ft_putstr_fd(args[i],STDOUT_FILENO);
+		ft_putstr_fd(args[i], STDOUT_FILENO);
 		i++;
 		if (args[i])
 			ft_putchar_fd(' ', STDOUT_FILENO);

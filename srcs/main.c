@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/01 16:54:32 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/01 18:34:34 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,14 +23,14 @@
 // TODO: ERROR MANAGEMENT
 
 // test function, remove later
-void	test_tokens(t_token *list)
-{
-	while (list)
-	{
-		printf("[TYPE: %d] \"%s\"\n", list->type, list->content);
-		list = list->next;
-	}
-}
+// void	test_tokens(t_token *list)
+// {
+// 	while (list)
+// 	{
+// 		printf("[TYPE: %d] \"%s\"\n", list->type, list->content);
+// 		list = list->next;
+// 	}
+// }
 
 // void	test_env(t_env *envlist)
 // {
@@ -42,77 +42,49 @@ void	test_tokens(t_token *list)
 // 	}
 // }
 // remove
-void	print_ast(t_ast *node, int depth)
-{
-	int		i;
-	char	**args;
+// void	print_ast(t_ast *node, int depth)
+// {
+// 	int		i;
+// 	char	**args;
 
-	if (!node)
-		return ;
-	// indent for readability
-	for (i = 0; i < depth; i++)
-		printf("  ");
-	// print node type
-	if (node->type == PIPE)
-		printf("NODE: PIPE\n");
-	else if (node->type == IN)
-		printf("NODE: IN\n");
-	else if (node->type == OUT)
-		printf("NODE: OUT\n");
-	else if (node->type == APPEND)
-		printf("NODE: APPEND\n");
-	else if (node->type == HEREDOC)
-		printf("NODE: HEREDOC\n");
-	else if (node->type == WORD)
-	{
-		printf("NODE: CMD [");
-		if (node->value)
-		{
-			args = (char **)node->value;
-			while (*args)
-			{
-				printf("%s ", *args);
-				args++;
-			}
-		}
-		printf("]\n");
-	}
-	else
-		printf("NODE: UNKNOWN\n");
-	// recurse into left/right children
-	if (node->left)
-		print_ast(node->left, depth + 1);
-	if (node->right)
-		print_ast(node->right, depth + 1);
-}
-// remove
-void	free_ast(t_ast *node)
-{
-	char	**args;
-	int		i;
-
-	if (!node)
-		return ;
-	// free left and right children first
-	if (node->left)
-		free_ast(node->left);
-	if (node->right)
-		free_ast(node->right);
-	// free node->value (if it exists)
-	if (node->value)
-	{
-		args = (char **)node->value;
-		i = 0;
-		while (args[i])
-		{
-			free(args[i]); // free each strdup’ed string
-			i++;
-		}
-		free(args); // free the array itself
-	}
-	// finally free the node itself
-	free(node);
-}
+// 	if (!node)
+// 		return ;
+// 	// indent for readability
+// 	for (i = 0; i < depth; i++)
+// 		printf("  ");
+// 	// print node type
+// 	if (node->type == PIPE)
+// 		printf("NODE: PIPE\n");
+// 	else if (node->type == IN)
+// 		printf("NODE: IN\n");
+// 	else if (node->type == OUT)
+// 		printf("NODE: OUT\n");
+// 	else if (node->type == APPEND)
+// 		printf("NODE: APPEND\n");
+// 	else if (node->type == HEREDOC)
+// 		printf("NODE: HEREDOC\n");
+// 	else if (node->type == WORD)
+// 	{
+// 		printf("NODE: CMD [");
+// 		if (node->value)
+// 		{
+// 			args = (char **)node->value;
+// 			while (*args)
+// 			{
+// 				printf("%s ", *args);
+// 				args++;
+// 			}
+// 		}
+// 		printf("]\n");
+// 	}
+// 	else
+// 		printf("NODE: UNKNOWN\n");
+// 	// recurse into left/right children
+// 	if (node->left)
+// 		print_ast(node->left, depth + 1);
+// 	if (node->right)
+// 		print_ast(node->right, depth + 1);
+// }
 
 int	main(int ac, char **av, char **env)
 {
@@ -134,9 +106,7 @@ int	main(int ac, char **av, char **env)
 		data->input_line = input;
 		if (process_input(data->input_line, data) == SUCCESS)
 		{
-			test_tokens(data->token_list); // added for test
-											// free_list(&data->token_list);
-											// added for test
+			// test_tokens(data->token_list);
 		}
 		if (parse_tokens(data) == SUCCESS)
 		{
@@ -148,224 +118,64 @@ int	main(int ac, char **av, char **env)
 	}
 }
 
-bool	parse_tokens(t_shell *data)
+bool	validate_redirection(t_token *redirection)
 {
-	if (!data || !data->token_list)
-		return (FAILURE);
-	data->node = parse_pipe(&data->token_list);
-	if (!data->node)
-		return (FAILURE); // think here
-	return (SUCCESS);
-}
+	t_token	*token;
 
-t_ast	*parse_pipe(t_token **token_list)
-{
-	t_ast	*node;
-	t_ast	*pipe_node;
-	t_token	*pipe_token;
-
-	node = parse_redirection(token_list);
-	if (!node)
-		return (NULL); // think here
-	if (*token_list && (*token_list)->type == PIPE)
+	token = redirection->next;
+	if (!redirection || !redirection->next)
 	{
-		pipe_node = add_ast_node(PIPE);
-		pipe_node->left = node;
-		pipe_token = *token_list;
-		*token_list = (*token_list)->next;
-		free(pipe_token->content);
-		free(pipe_token);
-		pipe_node->right = parse_pipe(token_list);
-		return (pipe_node);
+		ft_putendl_fd("minishell: syntax error near unexpected token `newline'",
+			2);
+		return (false);
 	}
-	return (node);
-}
-/*
-t_ast	*parse_redirection(t_token **token_list)
-{
-	t_ast	*node;
-	t_ast	*redirect_node;
-	t_token	*redirect_token;
-	t_token	*file_token;
-
-	if(!*token_list)
-		return (NULL); // do we need to check it ?
-	if((*token_list)->type == WORD)
+	if (token->type != WORD)
 	{
-		node = parse_command(token_list);
-		while(*token_list && ((*token_list)->type == IN
-				|| (*token_list)->type == OUT || (*token_list)->type == APPEND
-				|| (*token_list)->type == HEREDOC))
+		ft_putstr_fd("minishell: syntax error near unexpected token `", 2);
+		ft_putstr_fd(token->content, 2);
+		ft_putendl_fd("'", 2);
+		return (false);
+	}
+	if (token->expanded && token->content[0] == '\0')
+	{
+		ft_putstr_fd("minishell: ", 2);
+		ft_putstr_fd(token->content, 2);
+		ft_putendl_fd(": ambiguous redirection", 2);
+		return (false);
+	}
+	if (token->expanded && token->next && token->next->type == WORD)
+	{
+		ft_putstr_fd("minishell: ", 2);
+		ft_putstr_fd(token->content, 2);
+		ft_putendl_fd(": ambiguous redirection", 2);
+		return (false);
+	}
+	return (true);
+}
+
+void	quote_flag(t_shell *data)
+{
+	t_token	*current;
+	size_t	i;
+
+	current = data->token_list;
+	while (current)
+	{
+		if (current->type == WORD)
 		{
-			redirect_node = add_ast_node((*token_list)->type);
-			redirect_token = *token_list;
-			file_token = (*token_list)->next;
-			*token_list = file_token->next;
-			redirect_node->right = add_file_node(file_token);
-			free(redirect_token->content);
-			free(redirect_token);
-			redirect_node->left = node;
-			node = redirect_node;
+			i = 0;
+			while (current->content[i])
+			{
+				if (current->content[i] == '\'' || current->content[i] == '"')
+				{
+					current->quoted = true;
+					break ;
+				}
+				i++;
+			}
 		}
-		return (node);
+		current = current->next;
 	}
-	if ((*token_list)->type == IN || (*token_list)->type == OUT
-		|| (*token_list)->type == APPEND || (*token_list)->type == HEREDOC)
-	{
-		redirect_node = add_ast_node((*token_list)->type);
-		redirect_token = *token_list;
-		file_token = (*token_list)->next;
-		*token_list = file_token->next;
-		redirect_node->right = add_file_node(file_token);
-		free(redirect_token->content);
-		free(redirect_token);
-		redirect_node->left = parse_redirection(token_list);
-		return (redirect_node);
-	}
-	return (NULL);
-}
-*/
-
-t_ast	*parse_redirection(t_token **token_list)
-{
-	if (!*token_list)
-		return (NULL);
-	if ((*token_list)->type == WORD)
-		return (parse_command_with_redirections(token_list));
-	if ((*token_list)->type == IN || (*token_list)->type == OUT
-		|| (*token_list)->type == APPEND || (*token_list)->type == HEREDOC)
-		return (parse_single_redirection(token_list));
-	return (NULL); // for now
-}
-t_ast	*parse_command_with_redirections(t_token **token_list)
-{
-	t_ast	*node;
-	t_ast	*redirect_node;
-	t_token	*redirect_token;
-	t_token	*file_token;
-
-	node = parse_command(token_list);
-	while (*token_list && ((*token_list)->type == IN
-			|| (*token_list)->type == OUT || (*token_list)->type == APPEND
-			|| (*token_list)->type == HEREDOC))
-	{
-		redirect_node = add_ast_node((*token_list)->type);
-		redirect_token = *token_list;
-		file_token = (*token_list)->next;
-		*token_list = file_token->next;
-		redirect_node->right = add_file_node(file_token);
-		free(redirect_token->content);
-		free(redirect_token);
-		redirect_node->left = node;
-		node = redirect_node;
-	}
-	return (node);
-}
-t_ast	*parse_single_redirection(t_token **token_list)
-{
-	t_ast	*redirect_node;
-	t_token	*redirect_token;
-	t_token	*file_token;
-
-	redirect_node = add_ast_node((*token_list)->type);
-	redirect_token = *token_list;
-	file_token = (*token_list)->next;
-	*token_list = file_token->next;
-	redirect_node->right = add_file_node(file_token);
-	free(redirect_token->content);
-	free(redirect_token);
-	redirect_node->left = parse_redirection(token_list);
-	return (redirect_node);
-}
-
-int	count_args(t_token *tokens)
-{
-	int	counter;
-
-	counter = 0;
-	while (tokens && tokens->type == WORD)
-	{
-		counter++;
-		tokens = tokens->next;
-	}
-	return (counter);
-}
-void	load_args(t_ast *command_node, t_token **token_list, int ac)
-{
-	int		i;
-	t_token	*temp;
-
-	i = 0;
-	while (i < ac)
-	{
-		command_node->value[i] = ft_strdup((*token_list)->content);
-		if (command_node->value[i] == NULL)
-		{
-			// free the hell out of this array of strings;
-			// return (NULL); // for now, probably we need another exit.
-		}
-		temp = *token_list;
-		*token_list = (*token_list)->next;
-		free(temp->content);
-		free(temp);
-		i++;
-	}
-	command_node->value[ac] = NULL;
-}
-
-t_ast	*parse_command(t_token **token_list)
-{
-	t_ast	*command_node;
-	int		ac;
-
-	command_node = add_ast_node((*token_list)->type);
-	ac = count_args(*token_list);
-	command_node->value = malloc(sizeof(char *) * (ac + 1));
-	if (command_node->value == NULL)
-		return (NULL); // for now, probably we need another exit.
-	load_args(command_node, token_list, ac);
-	return (command_node);
-}
-
-t_ast	*add_file_node(t_token *token)
-{
-	t_ast	*file_node;
-
-	file_node = add_ast_node(token->type);
-	file_node->value = malloc(sizeof(char *) * 2);
-	if (file_node == NULL)
-	{
-		free(file_node);
-		return (NULL); // for now, probably we need another exit.
-	}
-	file_node->value[0] = ft_strdup(token->content);
-	file_node->value[1] = NULL;
-	if (file_node->value[0] == NULL)
-	{
-		free(file_node);
-		return (NULL); // for now, probably we need another exit.
-	}
-	free(token->content);
-	free(token);
-	return (file_node);
-}
-
-t_ast	*add_ast_node(t_token_type type)
-{
-	t_ast	*node;
-
-	node = malloc(sizeof(t_ast));
-	if (node == NULL)
-		return (NULL); // probably need exit function
-	node->type = type;
-	node->value = NULL;
-	node->expand = 0;
-	node->status = 0;
-	node->fd[0] = -1;
-	node->fd[1] = -1;
-	node->left = NULL;
-	node->right = NULL;
-	return (node);
 }
 
 t_shell	*init_data(void)
@@ -421,6 +231,7 @@ bool	process_input(char *input_line, t_shell *data)
 		return (FAILURE);
 	}
 	expander(data); // test
+	split_variables(data);
 	return (SUCCESS);
 }
 
@@ -461,23 +272,6 @@ void	lexer_error(char *input_line, t_shell *data)
 	ft_putendl_fd("malloc: Memory allocation failed", 2);
 	data->exit_code = 1;
 	exit(data->exit_code);
-}
-void	free_list(t_token **list)
-{
-	t_token	*temp;
-
-	if (!list)
-		return ;
-	while (*list)
-	{
-		temp = *list;
-		*list = (*list)->next;
-		free(temp->content);
-		temp->content = NULL;
-		free(temp);
-		temp = NULL;
-	}
-	*list = NULL;
 }
 
 void	lexer(char *input_line, t_shell *data)
@@ -832,41 +626,6 @@ char	*expand_env_var(char *content, size_t *i, t_env *env)
 	free(name);
 	return (value);
 }
-/**
- * Finds the value of an environment variable.
- * @param name Name of the environment variable.
- * @param env Pointer to the environment list.
- * @return Newly allocated string with value, or an empty string
- * if not found or NULL.
- */
-
-// char	*get_env_value(char *name, t_env *env, bool alloc)
-// {
-// 	t_env	*current;
-// 	char	*value;
-
-// 	current = env;
-// 	while (current)
-// 	{
-// 		if (ft_strcmp(current->key, name) == 0)
-// 		{
-// 			if (alloc == ALLOC)
-// 			{
-// 				value = ft_strdup(current->value);
-// 				if (value == NULL)
-// 					return (NULL);
-// 				return (value);
-// 			}
-// 			else
-// 				return (current->value);
-// 		}
-// 		current = current->next;
-// 	}
-// 	value = ft_strdup("");
-// 	if (value == NULL)
-// 		return (NULL);
-// 	return (value);
-// }
 
 char	*get_env_value(char *name, t_env *env, bool alloc)
 {

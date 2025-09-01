@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env_functions.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/30 22:30:57 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/01 17:20:42 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,13 +41,13 @@ void	free_env_node(t_env *env)
 
 void	remove_env_variable(t_env **env, char *key)
 {
-	t_env *current;
-	t_env *previous;
+	t_env	*current;
+	t_env	*previous;
 
 	if (!key || !env || !(*env))
 		return ;
 	current = *env;
-	if ( ft_strcmp((*env)->key, key) == 0)
+	if (ft_strcmp((*env)->key, key) == 0)
 	{
 		*env = current->next;
 		free_env_node(current);
@@ -55,7 +55,7 @@ void	remove_env_variable(t_env **env, char *key)
 	}
 	while (current)
 	{
-		if (ft_strcmp(current->key, key)== 0)
+		if (ft_strcmp(current->key, key) == 0)
 		{
 			previous->next = current->next;
 			free_env_node(current);
@@ -80,7 +80,7 @@ bool	update_env_value(t_env **env, char *key, char *new_value)
 	{
 		if (ft_strcmp(temp->key, key) == 0)
 		{
-			if(temp->value)
+			if (temp->value)
 				free(temp->value);
 			temp->value = new_value;
 			temp->assigned = true;
@@ -90,7 +90,6 @@ bool	update_env_value(t_env **env, char *key, char *new_value)
 	}
 	return (false);
 }
-
 
 // updates shllvl value in environment. Increments it by 1 compared to the previous value
 void	update_shllvl_value(t_shell *shell)
@@ -157,7 +156,7 @@ t_env	*create_env_node(char *key, char *value)
 // 	value = NULL;
 // 	equal = ft_strchr(envp, '=');
 // 	if (!equal)
-// 		return;
+// 		return ;
 // 	key = ft_substr(envp, 0, equal - envp);
 // 	if (!key)
 // 		error_env_exit(key, value, shell);
@@ -181,7 +180,7 @@ void	process_env_line(t_shell *shell, const char *envp)
 	value = NULL;
 	equal = ft_strchr(envp, '=');
 	if (!equal)
-		return;
+		return ;
 	key = ft_substr(envp, 0, equal - envp);
 	if (!key)
 		error_env_exit(key, value, shell);
@@ -193,7 +192,6 @@ void	process_env_line(t_shell *shell, const char *envp)
 		error_env_exit(key, value, shell);
 	add_env_node(&shell->env, new_node);
 }
-
 
 void	set_minimal_env(t_shell *shell)
 {
@@ -211,7 +209,7 @@ void	set_minimal_env(t_shell *shell)
 	process_env_line(shell, pwd_line);
 	process_env_line(shell, "SHLVL=0");
 	process_env_line(shell, "_=/usr/bin/env");
-	old_pwd_node = create_env_node(ft_strdup("OLDPWD"),NULL);
+	old_pwd_node = create_env_node(ft_strdup("OLDPWD"), NULL);
 	if (!old_pwd_node)
 		error_env_exit(NULL, NULL, shell);
 	add_env_node(&shell->env, old_pwd_node);
@@ -219,7 +217,7 @@ void	set_minimal_env(t_shell *shell)
 
 void	create_env(t_shell *shell, char **envp)
 {
-	char	*shell_name;
+	char *shell_name;
 
 	if (!envp || !envp[0])
 		set_minimal_env(shell);

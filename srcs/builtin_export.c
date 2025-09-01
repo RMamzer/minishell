@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 15:05:10 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/30 22:33:47 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/01 18:33:32 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,10 @@ Next steps:
 4. if no cd, i should recreate it.
 */
 
-void	memory_error()
+void	memory_error(void)
 {
 	perror("memory error");
-	exit (EXIT_FAILURE);
+	exit(EXIT_FAILURE);
 }
 
 void	process_valueless_export_node(t_shell *shell, char *str)
@@ -40,41 +40,40 @@ void	process_valueless_export_node(t_shell *shell, char *str)
 	add_env_node(&shell->env, new_node);
 }
 
-bool is_identifier_valid(char *str)
+bool	is_identifier_valid(char *str)
 {
-	if (!str || *str =='\0' || ft_isdigit(*str) || *str =='=')
+	if (!str || *str == '\0' || ft_isdigit(*str) || *str == '=')
 		return (false);
 	while (*str && *str != '=')
 	{
-		if (!ft_isalnum(*str) && *str !='_')
+		if (!ft_isalnum(*str) && *str != '_')
 			return (false);
 		str++;
 	}
 	return (true);
 }
 
-
 void	print_env_export(t_env **temp_env)
 {
-	int i;
+	int	i;
 
 	i = 0;
-	while(temp_env[i])
+	while (temp_env[i])
 	{
 		ft_putstr_fd("declare -x ", STDOUT_FILENO);
 		if (temp_env[i]->assigned == false)
 			printf("%s\n", temp_env[i]->key);
 		else
-			printf("%s=\"%s\"\n",temp_env[i]->key, temp_env[i]->value);
+			printf("%s=\"%s\"\n", temp_env[i]->key, temp_env[i]->value);
 		i++;
 	}
 }
 
 void	bubble_sort_env(t_env **env, int len)
 {
-	int i;
-	int j;
-	t_env *temp;
+	int		i;
+	int		j;
+	t_env	*temp;
 
 	i = 0;
 	while (i < len - 1)
@@ -82,7 +81,7 @@ void	bubble_sort_env(t_env **env, int len)
 		j = i + 1;
 		while (j < len)
 		{
-			if (ft_strcmp(env[i]->key,env[j]->key)>0)
+			if (ft_strcmp(env[i]->key, env[j]->key) > 0)
 			{
 				temp = env[j];
 				env[j] = env[i];
@@ -96,19 +95,19 @@ void	bubble_sort_env(t_env **env, int len)
 
 int	sort_and_print_export(t_env *env)
 {
-	t_env **temp_env;
-	t_env *current;
-	int i;
+	t_env	**temp_env;
+	t_env	*current;
+	int		i;
 
 	i = get_env_size(env);
-	temp_env = calloc(i, sizeof (t_env *));
+	temp_env = calloc(i, sizeof(t_env *));
 	if (!temp_env)
-		memory_error();//check what to do
+		memory_error(); // check what to do
 	current = env;
 	i = 0;
-	while(current)
+	while (current)
 	{
-		if (ft_strcmp("_", current->key) != 0 )
+		if (ft_strcmp("_", current->key) != 0)
 		{
 			temp_env[i] = current;
 			i++;
@@ -122,21 +121,20 @@ int	sort_and_print_export(t_env *env)
 	return (0);
 }
 
-
-int	execute_builtin_export(char	**args, t_shell *shell)
+int	execute_builtin_export(char **args, t_shell *shell)
 {
-	int i;
+	int	i;
 
 	if (args[0] == NULL)
-		return(sort_and_print_export(shell->env));
+		return (sort_and_print_export(shell->env));
 	if (args[0][0] == '-')
 	{
 		write_bulitin_error("minishell: export: ", *args,
-			": options are not supported\n","export:  usage: [name ...]\n");
+			": options are not supported\n", "export:  usage: [name ...]\n");
 		return (EXIT_INVALID_OPTION);
 	}
 	i = -1;
-	while(args[++i])
+	while (args[++i])
 	{
 		if (is_identifier_valid(args[i]) == false)
 		{
@@ -144,12 +142,10 @@ int	execute_builtin_export(char	**args, t_shell *shell)
 				"': not a valid identifier\n", NULL);
 			shell->exit_code = EXIT_FAILURE;
 		}
-		if (ft_strchr(args[i],'='))
+		else if (ft_strchr(args[i], '='))
 			process_env_line(shell, args[i]); // check
 		else
 			process_valueless_export_node(shell, args[i]);
 	}
 	return (shell->exit_code);
 }
-
-
