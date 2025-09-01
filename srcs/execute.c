@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/30 22:15:15 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/01 16:13:37 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,13 +71,26 @@ char	*super_strjoin(char const *s1, char const *s2, char const *s3)
 	return (joinedstr);
 }
 
-
+//use a main error exit when parent breaks:
+// draw the exit path for functions 
 void	error_exit(char	*msg)
 {
 	perror(msg);
+	//free env,
+	//if (shell->env)
+		//free env
+	//free ast?
+
+	
 	exit(errno);
 }
 
+error_close_and_exit(char *msg, int *pipefd)
+{
+	close(pipefd[WRITE_END]);
+	close(pipefd[READ_END]);
+	error_exit(msg);
+}
 
 // int	ft_strcmp( const char *s1, const char *s2)
 // {
@@ -227,7 +240,8 @@ void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 	if (dup2(pipefd[WRITE_END], STDOUT_FILENO)== -1)
 	{
 		close(pipefd[WRITE_END]);
-		error_exit("minishell: fork failure");
+		ft_putchar_fd("minishell: fork failure\n", STDERR_FILENO);
+		exit(perror);
 	}
 	close (pipefd[WRITE_END]);
 	shell->exit_code = execute_ast(ast, shell);
@@ -240,28 +254,29 @@ void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
 	if (dup2(pipefd[READ_END], STDIN_FILENO) == -1)
 	{
 		close (pipefd[READ_END]);
-		error_exit("minishelll: fork failure");
+		ft_putchar_fd("minishelll: fork failure\n", STDERR_FILENO);
+		exit(perror);
 	}
 	close (pipefd[READ_END]);
 	shell->exit_code = execute_ast(ast, shell);
 	exit (shell->exit_code);
 }
-
+//need to close read and write ends of pipe 
 void	execute_pipe(t_ast *ast, t_shell *shell)
 {
 	int	pipefd[2];
 	pid_t	pids[2];
 
 	if (pipe(pipefd) == -1)
-		error_exit ("minishell: pipe failure");
+		error_exit("minishell: pipe failure");
 	pids[0] = fork();
 	if (pids[0] == -1)
-		error_exit("minishell: fork falure");
+		error_close_and_exit("minishell: fork falure", pipefd);
 	if (pids[0] == 0)
 		execute_left_child(ast->left, shell, pipefd);
 	pids[1] = fork();
 	if (pids[1] == -1)
-		error_exit("minishell: fork falure");
+		error_close_and_exit("minishell: fork falure", pipefd);
 	if (pids[1] == 0)
 		execute_right_child(ast->right, shell, pipefd);
 	close(pipefd[WRITE_END]);
