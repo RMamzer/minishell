@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/01 12:56:27 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/01 15:47:29 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,10 @@
 //[TYPE: 3] "$PATH"
 // TODO: plan for heredoc(probably should be handeled before the expansion)
 
-// What i did : quote flag, expanded flag 
-// now TODO below: 
+// What i did : quote flag, expanded flag
+// now TODO below:
 // word splitter  -> added, was not tested
-// ambiguous redirection 
-
+// ambiguous redirection
 
 // test function, remove later
 void	test_tokens(t_token *list)
@@ -90,7 +89,6 @@ void	print_ast(t_ast *node, int depth)
 		print_ast(node->right, depth + 1);
 }
 
-
 int	main(int ac, char **av, char **env)
 {
 	t_shell	*data;
@@ -117,182 +115,183 @@ int	main(int ac, char **av, char **env)
 		{
 			print_ast(data->node, 0);
 			test_tokens(data->token_list);
-			free_ast(data->node);
+			free_ast(&data->node);
 			data->node = NULL;
 		}
 	}
 }
 
-void    split_variables(t_shell *data)
+void	split_variables(t_shell *data)
 {
-    t_token *current;
-    char    **split_result;
-    
-    current = data->token_list;
-    while (current)
-    {
-       if (current->type == WORD && !current->quoted && current->expanded)
-       {
-            split_result = ft_split(current->content, ' '); // need piscine split
-            if(!split_result)
-                fatality("malloc failed", data, 1);
-            process_split_result(data, current, split_result);
-            free_split(split_result);
-       }
-       current = current->next;
-    }
+	t_token	*current;
+	char	**split_result;
+
+	current = data->token_list;
+	while (current)
+	{
+		if (current->type == WORD && !current->quoted && current->expanded)
+		{
+			split_result = ft_split(current->content, ' ');
+			// need piscine split
+			if (!split_result)
+				fatality("malloc failed", data, 1);
+			process_split_result(data, current, split_result);
+			free_split(split_result);
+		}
+		current = current->next;
+	}
 }
 
-void process_split_result(t_shell *data, t_token *current, char **split_result)
+void	process_split_result(t_shell *data, t_token *current,
+		char **split_result)
 {
-    int str_qty;
-    int i;
-    
-    i = 0;
-    str_qty = check_qty(split_result);
-    if(str_qty == 0)
-        replace_token_content(current, "", data, split_result);
-    else if(str_qty == 1)
-        replace_token_content(current, split_result[0], data, split_result);
-    else
-    {
-        replace_token_content(current, split_result[i], data, split_result);
-        i++;
-        while (i < str_qty)
-        {
-            current = add_expanded_token(current, WORD, split_result[i]);
-             if (!current)
-            {
-                free_split(split_result);
-                fatality("malloc failed", data, 1);
-            }
-            i++;
-        }
-    }
+	int	str_qty;
+	int	i;
+
+	i = 0;
+	str_qty = check_qty(split_result);
+	if (str_qty == 0)
+		replace_token_content(current, "", data, split_result);
+	else if (str_qty == 1)
+		replace_token_content(current, split_result[0], data, split_result);
+	else
+	{
+		replace_token_content(current, split_result[i], data, split_result);
+		i++;
+		while (i < str_qty)
+		{
+			current = add_expanded_token(current, WORD, split_result[i]);
+			if (!current)
+			{
+				free_split(split_result);
+				fatality("malloc failed", data, 1);
+			}
+			i++;
+		}
+	}
 }
 
-void replace_token_content(t_token *current, char *new_content, t_shell *data, char **split_result)
+void	replace_token_content(t_token *current, char *new_content,
+		t_shell *data, char **split_result)
 {
-    free(current->content);
-    current->content = ft_strdup(new_content);
-    if(!current->content)
-    {
-        free_split(split_result);
-        fatality("Malloc failed", data, 1);
-    }
+	free(current->content);
+	current->content = ft_strdup(new_content);
+	if (!current->content)
+	{
+		free_split(split_result);
+		fatality("Malloc failed", data, 1);
+	}
 }
 
-t_token *add_expanded_token(t_token *current, t_token_type type, char *content)
+t_token	*add_expanded_token(t_token *current, t_token_type type, char *content)
 {
-    t_token *new_token;
-    
-    if(!current || !content)
-        return (NULL);
-    new_token = malloc(sizeof(t_token));
-    if(!new_token)
-        return (NULL);
-    new_token->expanded = false;
-    new_token->quoted = false;
-    new_token->type = type;
-    new_token->content = ft_strdup(content);
-    if (!new_token->content)
-    {
-        free(new_token);
-        return (NULL);
-    }
-    new_token->next = current->next;
-    current->next = new_token;
-    return (new_token);
+	t_token	*new_token;
+
+	if (!current || !content)
+		return (NULL);
+	new_token = malloc(sizeof(t_token));
+	if (!new_token)
+		return (NULL);
+	new_token->expanded = false;
+	new_token->quoted = false;
+	new_token->type = type;
+	new_token->content = ft_strdup(content);
+	if (!new_token->content)
+	{
+		free(new_token);
+		return (NULL);
+	}
+	new_token->next = current->next;
+	current->next = new_token;
+	return (new_token);
 }
 
-void free_split(char **split)
+void	free_split(char **split)
 {
-    int i;
-    
-    i = 0;
-    if(!split)
-        return ;
-    while (split[i])
-    {
-        free(split[i]);
-        i++;
-    }
-    free(split);
+	int	i;
+
+	i = 0;
+	if (!split)
+		return ;
+	while (split[i])
+	{
+		free(split[i]);
+		i++;
+	}
+	free(split);
 }
 
-int check_qty(char **split_result)
+int	check_qty(char **split_result)
 {
-    int i;
-    
-    i = 0;
-    if(!split_result)
-        return (0);
-    while(split_result[i])
-        i++;
-    return (i);
+	int	i;
+
+	i = 0;
+	if (!split_result)
+		return (0);
+	while (split_result[i])
+		i++;
+	return (i);
 }
 
-bool    validate_redirection(t_token *redirection, t_shell *data)
+bool	validate_redirection(t_token *redirection)
 {
-    t_token *token;
-    
-    token = redirection->next;
-    if(!redirection || !redirection->next)
-    {
-        ft_putendl_fd("minishell: syntax error near unexpected token `newline'", 2)
-        return (false);
-    }
-    if(token->type != WORD)
-    {
-        ft_putstr_fd("minishell: syntax error near unexpected token `", 2);
-        ft_putstr_fd(token->content, 2);
-        ft_putendl_fd("'", 2);
-        return (false);
-    }
-    if(token->expanded && token->content[0] == '\0')
-    {
-        ft_putstr_fd("minishell: ", 2);
-        ft_putstr_fd(token->content, 2);
-        ft_putendl_fd(": ambiguous redirection", 2);
-        return (false);
-    }
-    if(token->expanded && token->next && token->next->type == WORD)
-    {
-        ft_putstr_fd("minishell: ", 2);
-        ft_putstr_fd(token->content, 2);
-        ft_putendl_fd(": ambiguous redirection", 2);
-        return (false);
-    }
-    return (true);
+	t_token	*token;
+
+	token = redirection->next;
+	if (!redirection || !redirection->next)
+	{
+		ft_putendl_fd("minishell: syntax error near unexpected token `newline'",
+			2);
+		return (false);
+	}
+	if (token->type != WORD)
+	{
+		ft_putstr_fd("minishell: syntax error near unexpected token `", 2);
+		ft_putstr_fd(token->content, 2);
+		ft_putendl_fd("'", 2);
+		return (false);
+	}
+	if (token->expanded && token->content[0] == '\0')
+	{
+		ft_putstr_fd("minishell: ", 2);
+		ft_putstr_fd(token->content, 2);
+		ft_putendl_fd(": ambiguous redirection", 2);
+		return (false);
+	}
+	if (token->expanded && token->next && token->next->type == WORD)
+	{
+		ft_putstr_fd("minishell: ", 2);
+		ft_putstr_fd(token->content, 2);
+		ft_putendl_fd(": ambiguous redirection", 2);
+		return (false);
+	}
+	return (true);
 }
 
-
-void    quote_flag(t_shell *data)
+void	quote_flag(t_shell *data)
 {
-    t_token *current;
-    size_t i;
-    
-    current = data->token_list;
-    
-    while (current)
-    {
-        if(current->type == WORD)
-        {
-            i = 0;
-            while(current->content[i])
-            {
-                if(current->content[i] == '\'' || current->content[i] == '"')
-                {
-                    current->quoted = true;
-                    break;
-                }
-                i++;
-            }
-        }
-        current = current->next;
-    }
-}
+	t_token	*current;
+	size_t	i;
 
+	current = data->token_list;
+	while (current)
+	{
+		if (current->type == WORD)
+		{
+			i = 0;
+			while (current->content[i])
+			{
+				if (current->content[i] == '\'' || current->content[i] == '"')
+				{
+					current->quoted = true;
+					break ;
+				}
+				i++;
+			}
+		}
+		current = current->next;
+	}
+}
 
 t_shell	*init_data(void)
 {
@@ -339,7 +338,7 @@ bool	process_input(char *input_line, t_shell *data)
 	free(data->input_line);
 	data->input_line = line;
 	lexer(data->input_line, data);
-    quote_flag(data);
+	quote_flag(data);
 	check_heredoc(data);
 	if (check_syntax(data) == FAILURE)
 	{
@@ -347,6 +346,7 @@ bool	process_input(char *input_line, t_shell *data)
 		return (FAILURE);
 	}
 	expander(data); // test
+	split_variables(data);
 	return (SUCCESS);
 }
 
@@ -388,7 +388,6 @@ void	lexer_error(char *input_line, t_shell *data)
 	data->exit_code = 1;
 	exit(data->exit_code);
 }
-
 
 void	lexer(char *input_line, t_shell *data)
 {
@@ -479,8 +478,8 @@ void	add_token(t_shell *data, t_token_type type, char *content)
 		lexer_error(data->input_line, data);
 	token->type = type;
 	token->next = NULL;
-    token->quoted = false;
-    token->expanded = false;
+	token->quoted = false;
+	token->expanded = false;
 	token->content = ft_strdup(content);
 	if (token->content == NULL)
 	{
@@ -549,7 +548,7 @@ bool	check_syntax(t_shell *data)
  *  @param data Pointer to the shell struct containing tokens.
  */
 
-// might gonna add quote remover here 
+// might gonna add quote remover here
 void	expander(t_shell *data)
 {
 	t_token	*current;
@@ -562,7 +561,6 @@ void	expander(t_shell *data)
 		current = current->next;
 	}
 }
-
 
 /**
  * Expands environment variables, the $? variable,
@@ -604,7 +602,8 @@ char	*expand_content(char *content, t_shell *data, t_token *token)
  * @param data Pointer to the shell struct.
  * @return Newly allocated string for the processed part.
  */
-char	*process_content(char *content, size_t *i, t_shell *data, t_token *token)
+char	*process_content(char *content, size_t *i, t_shell *data,
+		t_token *token)
 {
 	if (content[*i] == '\'')
 		return (handle_single_quote(content, i));
@@ -632,7 +631,8 @@ char	*handle_single_quote(char *content, size_t *i)
 		(*i)++;
 	return (temp);
 }
-char	*handle_double_quote(char *content, size_t *i, t_shell *data, t_token *token)
+char	*handle_double_quote(char *content, size_t *i, t_shell *data,
+		t_token *token)
 {
 	char	*temp;
 	char	*result;
@@ -674,7 +674,7 @@ char	*handle_dollar(char *content, size_t *i, t_shell *data, t_token *token)
 	if (ft_isalpha(content[*i]) || content[*i] == '_')
 	{
 		expanded = expand_env_var(content, i, data->env);
-        token->expanded = true;
+		token->expanded = true;
 		return (expanded);
 	}
 	else if (content[*i] == '?')
@@ -682,7 +682,7 @@ char	*handle_dollar(char *content, size_t *i, t_shell *data, t_token *token)
 		(*i)++;
 		// or functon which updates exitcode idk yet
 		expanded = ft_itoa(data->exit_code);
-        token->expanded = true; // not sure yet
+		token->expanded = true; // not sure yet
 		return (expanded);
 	}
 	else
@@ -831,17 +831,3 @@ void	check_heredoc(t_shell *data)
 	if (count > 16)
 		lexer_error("heredoc max count", data);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
