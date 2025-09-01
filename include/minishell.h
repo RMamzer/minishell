@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/27 16:28:28 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/01 16:58:48 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
+#include <limits.h> // for exit limits
 
 # define SUCCESS 0
 # define FAILURE 1
@@ -58,10 +59,11 @@ typedef struct s_env
 	char			*key;
 	char			*value;
 	struct s_env	*next;
+	bool			assigned;
 }					t_env;
 
 
-//args instead of 
+//args instead of
 typedef struct s_ast
 {
 	t_token_type	type;
@@ -81,8 +83,31 @@ typedef struct s_shell
 	t_token			*token_list;
 	t_env			*env;
 	t_ast			*node;
-
+	char			**env_array;
+	char			**paths_array;
 }					t_shell;
+
+
+// lib and macro for execution
+# include <sys/wait.h>
+# define READ_END 0
+# define WRITE_END 1
+
+
+
+# define SUCCESS 0
+# define FAILURE 1
+
+# define ALLOC true
+# define NO_ALLOC false
+
+# define EXIT_INVALID_OPTION 2
+
+
+
+
+
+
 
 // main things
 int					main(int ac, char **av, char **env);
@@ -141,13 +166,52 @@ void				free_ast(t_ast *node);
 bool				parse_tokens(t_shell *data);
 t_ast				*parse_pipe(t_token **token_list);
 t_ast				*parse_redirection(t_token **token_list);
-t_ast *parse_command_with_redirections(t_token **token_list);
-t_ast *parse_single_redirection(t_token **token_list);
+t_ast		*parse_command_with_redirections(t_token **token_list);
+t_ast	*parse_single_redirection(t_token **token_list);
 t_ast				*parse_command(t_token **token_list);
 t_ast				*add_file_node(t_token *token);
 t_ast				*add_ast_node(t_token_type type);
 int					count_args(t_token *tokens);
 void				load_args(t_ast *command_node, t_token **token_list,
 						int ac);
+		//execute.c
+void	write_bulitin_error( char *str1,  char *str2, char *str3, char *str4);
+void 	error_close_and_exit(char *msg, int *pipefd);
+int	get_env_size(t_env *lst);
+char	*super_strjoin(char const *s1, char const *s2, char const *s3);
+void	error_exit(char	*msg);
+void	recreate_env_array(t_env *env, t_shell	*shell);
+void	execute_cmd_child(char **args, t_shell *shell);
+int	execute_external_cmd(char	**args, t_shell *shell);
+int	check_command(t_ast *node, char *cmd, t_shell *shell);
+int	wait_children(pid_t *pids, int children_rem);
+void	execute_left_child(t_ast *node, t_shell *shell, int *pipefd);
+void	execute_right_child(t_ast *node, t_shell *shell, int *pipefd);
+void	execute_pipe(t_ast *node, t_shell *shell);
+int		execute_ast(t_ast *node, t_shell *shell);
+int		get_args_len(char **args);
 
+//-------------------builtins
+int	execute_builtin_echo(char	**args);
+int	execute_builtin_env(char **args, t_shell *shell);
+int	execute_builtin_pwd(char **args, t_shell *shell);
+int	execute_builtin_cd(char	**args , t_shell *shell);
+int change_working_directory(char *path, t_shell *shell);
+int execute_builtin_exit(char **args, t_shell *shell);
+int	check_exit_code(char *nptr);
+int	exit_numeric_error(char *nptr);
+int	execute_builtin_unset(char **args, t_shell *shell);
+
+void	process_valueless_export_node(t_shell *shell, char *str);
+bool	is_identifier_valid(char *str);
+void	print_env_export(t_env **temp_env);
+void	bubble_sort_env(t_env **env, int len);
+int	sort_and_print_export(t_env *env);
+int	execute_builtin_export(char	**args, t_shell *shell);
+
+//  other exec
+void	remove_env_variable(t_env **env, char *key);
+void	free_env_node(t_env *env);
+void	memory_error();
+void	write_bulitin_error( char *str1,  char *str2, char *str3, char *str4);
 #endif

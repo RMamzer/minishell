@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/01 16:30:10 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/01 16:54:32 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,9 +140,10 @@ int	main(int ac, char **av, char **env)
 		}
 		if (parse_tokens(data) == SUCCESS)
 		{
-			print_ast(data->node, 0);
-			free_ast(data->node);
-			data->node = NULL;
+			execute_ast(data->node, data);
+			// print_ast(data->node, 0);
+			// free_ast(data->node);
+			// data->node = NULL;
 		}
 	}
 }
