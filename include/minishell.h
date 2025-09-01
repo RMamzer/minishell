@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/30 22:15:58 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/01 16:28:25 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,6 +146,8 @@ void				create_env(t_shell *shell, char **envp);
 
 
 //execute.c
+void	write_bulitin_error( char *str1,  char *str2, char *str3, char *str4);
+error_close_and_exit(char *msg, int *pipefd);
 int	get_env_size(t_env *lst);
 char	*super_strjoin(char const *s1, char const *s2, char const *s3);
 void	error_exit(char	*msg);
@@ -171,6 +173,8 @@ int	check_exit_code(char *nptr);
 int	exit_numeric_error(char *nptr);
 int	execute_builtin_unset(char **args, t_shell *shell);
 
+void	process_valueless_export_node(t_shell *shell, char *str);
+bool	is_identifier_valid(char *str);
 void	print_env_export(t_env **temp_env);
 void	bubble_sort_env(t_env **env, int len);
 int	sort_and_print_export(t_env *env);
