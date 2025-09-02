@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:26:38 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/01 17:27:38 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/02 15:57:03 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,7 @@ void	split_variables(t_shell *data)
 	{
 		if (current->type == WORD && !current->quoted && current->expanded)
 		{
-			split_result = ft_split(current->content, ' ');
-			// need piscine split
+			split_result = ft_split_IFS(current->content," \t\n");
 			if (!split_result)
 				fatality("malloc failed", data, 1);
 			process_split_result(data, current, split_result);
