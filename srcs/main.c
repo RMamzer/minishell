@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/02 15:56:57 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/02 16:09:19 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,7 @@ int	main(int ac, char **av, char **env)
 		}
 		if (parse_tokens(shell) == SUCCESS)
 		{
-			execute_ast(shell->node, shell);
+			execute_ast(shell->ast, shell);
 			// print_ast(shell->node, 0);
 			// free_ast(shell->node);
 			// shell->node = NULL;
@@ -192,7 +192,7 @@ t_shell	*init_data(void)
 	shell->input_line = NULL;
 	shell->token_list = NULL;
 	shell->env = NULL;
-	shell->node = NULL;
+	shell->ast = NULL;
 	return (shell);
 }
 
