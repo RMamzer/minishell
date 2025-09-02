@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/01 17:35:00 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/02 15:55:30 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,9 +37,9 @@
 typedef enum e_token_type
 {
 	PIPE,
+    WORD,
 	IN,
 	OUT,
-	WORD,
 	HEREDOC,
 	APPEND,
 	HEREDOC_DELIM_QT,
@@ -83,7 +83,7 @@ typedef struct s_shell
 	char			*input_line;
 	t_token			*token_list;
 	t_env			*env;
-	t_ast			*node;
+	t_ast			*ast;
 	char			**env_array;
 	char			**paths_array;
 }					t_shell;
@@ -106,22 +106,22 @@ int					main(int ac, char **av, char **env);
 t_shell				*init_data(void);
 
 // pre processing of input
-bool				process_input(char *input_line, t_shell *data);
+bool				process_input(char *input_line, t_shell *shell);
 char				check_quote(char *line, int index);
 
 // lexer
-void				lexer(char *input_line, t_shell *data);
-size_t				handle_operator(char *input_line, size_t i, t_shell *data);
-size_t				handle_word(char *input_line, size_t start, t_shell *data);
-void				add_token(t_shell *data, t_token_type type, char *content);
-void				check_heredoc(t_shell *data);
-bool				check_syntax(t_shell *data);
+void				lexer(char *input_line, t_shell *shell);
+size_t				handle_operator(char *input_line, size_t i, t_shell *shell);
+size_t				handle_word(char *input_line, size_t start, t_shell *shell);
+void				add_token(t_shell *shell, t_token_type type, char *content);
+void				check_heredoc(t_shell *shell);
+bool				check_syntax(t_shell *shell);
 
 // expansion
-void				expander(t_shell *data);
-char				*expand_content(char *content, t_shell *data);
-char				*process_content(char *content, size_t *i, t_shell *data);
-char				*handle_dollar(char *content, size_t *i, t_shell *data);
+void				expander(t_shell *shell);
+char				*expand_content(char *content, t_shell *shell);
+char				*process_content(char *content, size_t *i, t_shell *shell);
+char				*handle_dollar(char *content, size_t *i, t_shell *shell);
 char				*handle_characters(char *content, size_t *i, bool in_dq);
 char				*expand_env_var(char *content, size_t *i, t_env *env);
 char				*get_env_value(char *name, t_env *env, bool alloc);
@@ -130,7 +130,7 @@ int					ft_strcmp(const char *s1, const char *s2);
 
 char				*handle_single_quote(char *content, size_t *i);
 char				*handle_double_quote(char *content, size_t *i,
-						t_shell *data);
+						t_shell *shell);
 
 // helper functions
 bool				is_delimiter(int i);
@@ -138,7 +138,7 @@ bool				is_operator(char c);
 
 // errors
 void				show_error(char *msg, int exit_code);
-void				lexer_error(char *input_line, t_shell *data);
+void				lexer_error(char *input_line, t_shell *shell);
 void				free_list(t_token **list);
 
 // env
@@ -154,43 +154,44 @@ void				set_minimal_env(t_shell *shell);
 void				create_env(t_shell *shell, char **envp);
 
 // ast
-bool				parse_tokens(t_shell *data);
-t_ast				*parse_pipe(t_token **token_list, t_shell *data);
-t_ast				*parse_redirection(t_token **token_list, t_shell *data);
+bool				parse_tokens(t_shell *shell);
+t_ast				*parse_pipe(t_token **token_list, t_shell *shell);
+t_ast				*parse_redirection(t_token **token_list, t_shell *shell);
 t_ast				*parse_command_with_redirections(t_token **token_list,
-						t_shell *data);
+						t_shell *shell);
 t_ast				*parse_single_redirection(t_token **token_list,
-						t_shell *data);
+						t_shell *shell);
 int					count_args(t_token *tokens);
 void				load_args(t_ast *command_node, t_token **token_list, int ac,
-						t_shell *data);
-t_ast				*parse_command(t_token **token_list, t_shell *data);
-t_ast				*add_file_node(t_token *token, t_shell *data);
-t_ast				*add_ast_node(t_token_type type, t_shell *data);
+						t_shell *shell);
+t_ast				*parse_command(t_token **token_list, t_shell *shell);
+t_ast				*add_file_node(t_token *token, t_shell *shell);
+t_ast				*add_ast_node(t_token_type type, t_shell *shell);
 
 // split vars
-void				split_variables(t_shell *data);
-void				process_split_result(t_shell *data, t_token *current,
+void				split_variables(t_shell *shell);
+void				process_split_result(t_shell *shell, t_token *current,
 						char **split_result);
 void				replace_token_content(t_token *current, char *new_content,
-						t_shell *data, char **split_result);
+						t_shell *shell, char **split_result);
 t_token				*add_expanded_token(t_token *current, t_token_type type,
 						char *content);
 void				free_split(char **split);
 int					check_qty(char **split_result);
+char	**ft_split_IFS(char *str, char *charset);
 
 // ambiguous and validation of redirection
 bool				validate_redirection(t_token *redirection);
 
 // errors
 void				show_error(char *msg, int exit_code);
-void				lexer_error(char *input_line, t_shell *data);
+void				lexer_error(char *input_line, t_shell *shell);
 void				free_list(t_token **list);
 void				free_ast(t_ast **node);
-void				free_shell_data(t_shell *data);
-void				free_shell(t_shell *data);
+void				free_shell_data(t_shell *shell);
+void				free_shell(t_shell *shell);
 void				free_array(char **arr);
-void				fatality(char *msg, t_shell *data, int exit_code);
+void				fatality(char *msg, t_shell *shell, int exit_code);
 
 // execute.c
 void				write_bulitin_error(char *str1, char *str2, char *str3,
