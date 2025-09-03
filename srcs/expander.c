@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:28:42 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/02 12:45:12 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/03 12:13:18 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ void	expander(t_shell *shell)
 	while (current)
 	{
 		if (current->type == WORD) //&& ft_strchr(current->content, '$')
-			current->content = expand_content(current->content, shell);
+			current->content = expand_content(current->content, shell, current);
 		current = current->next;
 	}
 }
@@ -36,7 +36,7 @@ void	expander(t_shell *shell)
  * @param shell Pointer to the shell struct(conteins env and exit code).
  * @return Newly allocated expanded string.
  */
-char	*expand_content(char *content, t_shell *shell)
+char	*expand_content(char *content, t_shell *shell, t_token *token)
 {
 	size_t	i;
 	char	*new_content;
@@ -48,7 +48,7 @@ char	*expand_content(char *content, t_shell *shell)
 		lexer_error(content, shell);
 	while (content[i])
 	{
-		temp = process_content(content, &i, shell);
+		temp = process_content(content, &i, shell, token);
 		if (temp == NULL)
 		{
 			free(new_content);
@@ -69,14 +69,14 @@ char	*expand_content(char *content, t_shell *shell)
  * @param shell Pointer to the shell struct.
  * @return Newly allocated string for the processed part.
  */
-char	*process_content(char *content, size_t *i, t_shell *shell)
+char	*process_content(char *content, size_t *i, t_shell *shell, t_token *token)
 {
 	if (content[*i] == '\'')
 		return (handle_single_quote(content, i));
 	else if (content[*i] == '"')
-		return (handle_double_quote(content, i, shell));
+		return (handle_double_quote(content, i, shell, token));
 	else if (content[*i] == '$')
-		return (handle_dollar(content, i, shell));
+		return (handle_dollar(content, i, shell, token));
 	else
 		return (handle_characters(content, i, NO_QUOTE));
 }
@@ -97,7 +97,7 @@ char	*handle_single_quote(char *content, size_t *i)
 		(*i)++;
 	return (temp);
 }
-char	*handle_double_quote(char *content, size_t *i, t_shell *shell)
+char	*handle_double_quote(char *content, size_t *i, t_shell *shell, t_token *token)
 {
 	char	*temp;
 	char	*result;
@@ -109,7 +109,7 @@ char	*handle_double_quote(char *content, size_t *i, t_shell *shell)
 	while (content[*i] && content[*i] != '"')
 	{
 		if (content[*i] == '$')
-			temp = handle_dollar(content, i, shell);
+			temp = handle_dollar(content, i, shell, token);
 		else
 			temp = handle_characters(content, i, IN_DOUBLE_QUOTE);
 		if (temp == NULL)
@@ -131,7 +131,7 @@ char	*handle_double_quote(char *content, size_t *i, t_shell *shell)
  * @param shell Pointer to the shell struct(conteins env and exit code).
  * @return Newly allocated string for the processed part.
  */
-char	*handle_dollar(char *content, size_t *i, t_shell *shell)
+char	*handle_dollar(char *content, size_t *i, t_shell *shell, t_token *token)
 {
 	char	*expanded;
 
@@ -139,6 +139,7 @@ char	*handle_dollar(char *content, size_t *i, t_shell *shell)
 	if (ft_isalpha(content[*i]) || content[*i] == '_')
 	{
 		expanded = expand_env_var(content, i, shell->env);
+        token->expanded = true;
 		return (expanded);
 	}
 	else if (content[*i] == '?')
@@ -146,6 +147,7 @@ char	*handle_dollar(char *content, size_t *i, t_shell *shell)
 		(*i)++;
 		// or functon which updates exitcode idk yet
 		expanded = ft_itoa(shell->exit_code);
+        token->expanded = true; // not sure yet
 		return (expanded);
 	}
 	else
