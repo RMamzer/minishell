@@ -285,10 +285,9 @@ int	execute_ast(t_ast *ast, t_shell *shell)
 		return (0);
 	if (ast->type == PIPE)
 		execute_pipe(ast, shell);
-	if (ast->type == WORD)
+	else if (ast->type == WORD)
 		check_command(ast, ast->value[0], shell);
-
-	// check redicrection
-
+	else if (ast->type >= IN && ast->type <= APPEND)
+		shell->exit_code = check_redirection (ast, shell);
 	return (shell->exit_code); // < do i need it if i modify using pointers?
 }
