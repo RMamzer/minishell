@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/01 16:13:37 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/01 17:20:44 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	write_bulitin_error( char *str1,  char *str2, char *str3, char *str4)
+void	write_bulitin_error(char *str1, char *str2, char *str3, char *str4)
 {
 	if (str1)
 		ft_putstr_fd(str1, STDERR_FILENO);
@@ -39,9 +39,9 @@ int	get_env_size(t_env *lst)
 	return (i);
 }
 
-int get_args_len(char **args)
+int	get_args_len(char **args)
 {
-	int len;
+	int	len;
 
 	len = 0;
 	while (args[len] != NULL)
@@ -71,21 +71,19 @@ char	*super_strjoin(char const *s1, char const *s2, char const *s3)
 	return (joinedstr);
 }
 
-//use a main error exit when parent breaks:
-// draw the exit path for functions 
-void	error_exit(char	*msg)
+// use a main error exit when parent breaks:
+// draw the exit path for functions
+void	error_exit(char *msg)
 {
 	perror(msg);
-	//free env,
-	//if (shell->env)
-		//free env
-	//free ast?
-
-	
+	// free env,
+	// if (shell->env)
+	// free env
+	// free ast?
 	exit(errno);
 }
 
-error_close_and_exit(char *msg, int *pipefd)
+void	error_close_and_exit(char *msg, int *pipefd)
 {
 	close(pipefd[WRITE_END]);
 	close(pipefd[READ_END]);
@@ -106,15 +104,14 @@ error_close_and_exit(char *msg, int *pipefd)
 // 	return (0);
 // }
 
-
-void	recreate_env_array(t_env *env, t_shell	*shell)
+void	recreate_env_array(t_env *env, t_shell *shell)
 {
-	int i;
-	t_env *temp;
+	int		i;
+	t_env	*temp;
 
 	i = 0;
 	temp = env;
-	shell->env_array = malloc (sizeof(char *) * (get_env_size(env) + 1));
+	shell->env_array = malloc(sizeof(char *) * (get_env_size(env) + 1));
 	if (!shell->env_array)
 		error_exit("minishell: malloc broke");
 	while (temp)
@@ -138,15 +135,15 @@ void	execute_cmd_child(char **args, t_shell *shell)
 	env_path = (get_env_value("PATH", shell->env, NO_ALLOC));
 	if (!env_path)
 		error_exit("minishell: cmd: not found");
-	shell->paths_array = ft_split(env_path,':');
+	shell->paths_array = ft_split(env_path, ':');
 	if (!shell->paths_array)
 		error_exit("minishell: malloc broke"); // malloc env_paths here
 	recreate_env_array(shell->env, shell);
-	while(shell->paths_array[i])
+	while (shell->paths_array[i])
 	{
 		joined_path = super_strjoin(shell->paths_array[i], "/", args[0]);
 		if (!joined_path)
-			error_exit ("minishell: malloc broke");  // malloc env_paths here
+			error_exit("minishell: malloc broke"); // malloc env_paths here
 		if (access(joined_path, F_OK) == 0)
 		{
 			if (access(joined_path, X_OK) == 0)
@@ -155,7 +152,7 @@ void	execute_cmd_child(char **args, t_shell *shell)
 				free(joined_path);
 				error_exit("minishell: execution error");
 			}
-			free (joined_path);
+			free(joined_path);
 			error_exit("minishell: cannot execute cmd");
 		}
 		free(joined_path);
@@ -166,19 +163,19 @@ void	execute_cmd_child(char **args, t_shell *shell)
 // check envp or args?
 // will need exstra signal check?
 // what should i return if not WIFEXITED?
-int	execute_external_cmd(char	**args, t_shell *shell)
+int	execute_external_cmd(char **args, t_shell *shell)
 {
-pid_t	pid;
+	pid_t	pid;
 
-pid = fork();
-if (pid == -1)
-	error_exit("minishell: fork failure");
-if (pid == 0)
-	execute_cmd_child(args, shell);
-waitpid(pid, &shell->exit_code, 0);
-if (WIFEXITED(shell->exit_code))
-	return(WEXITSTATUS(shell->exit_code));
-return (EXIT_FAILURE);
+	pid = fork();
+	if (pid == -1)
+		error_exit("minishell: fork failure");
+	if (pid == 0)
+		execute_cmd_child(args, shell);
+	waitpid(pid, &shell->exit_code, 0);
+	if (WIFEXITED(shell->exit_code))
+		return (WEXITSTATUS(shell->exit_code));
+	return (EXIT_FAILURE);
 }
 
 // do i need to check empty cmd here?
@@ -186,23 +183,22 @@ int	check_command(t_ast *ast, char *cmd, t_shell *shell)
 {
 	if (ft_strcmp(cmd, "echo") == 0)
 		shell->exit_code = execute_builtin_echo(ast->value + 1);
-	else if (ft_strcmp(cmd, "cd")== 0)
+	else if (ft_strcmp(cmd, "cd") == 0)
 		execute_builtin_cd(ast->value + 1, shell);
-	else if (ft_strcmp(cmd, "pwd")== 0)
-		shell->exit_code = execute_builtin_pwd(ast->value + 1 , shell);
-	else if (ft_strcmp(cmd, "export")== 0)
-		shell->exit_code = execute_builtin_export (ast->value + 1, shell);
-	else if (ft_strcmp(cmd, "unset")== 0)
-		shell->exit_code = execute_builtin_unset(ast->value + 1 , shell);
-	else if (ft_strcmp(cmd, "env")== 0)
-		shell->exit_code = execute_builtin_env(ast->value + 1,shell);
-	else if (ft_strcmp(cmd, "exit")== 0)
+	else if (ft_strcmp(cmd, "pwd") == 0)
+		shell->exit_code = execute_builtin_pwd(ast->value + 1, shell);
+	else if (ft_strcmp(cmd, "export") == 0)
+		shell->exit_code = execute_builtin_export(ast->value + 1, shell);
+	else if (ft_strcmp(cmd, "unset") == 0)
+		shell->exit_code = execute_builtin_unset(ast->value + 1, shell);
+	else if (ft_strcmp(cmd, "env") == 0)
+		shell->exit_code = execute_builtin_env(ast->value + 1, shell);
+	else if (ft_strcmp(cmd, "exit") == 0)
 		execute_builtin_exit(ast->value + 1, shell);
-	 else
+	else
 		shell->exit_code = execute_external_cmd(ast->value, shell);
 	return (shell->exit_code);
 }
-
 
 // check how to include 128+ exit here? --> need to add extra signal return
 int	wait_children(pid_t *pids, int children_rem)
@@ -217,7 +213,6 @@ int	wait_children(pid_t *pids, int children_rem)
 		term_pid = waitpid(*pids, &status, 0);
 		if (term_pid == -1)
 			error_exit("minishell: waitpd failed");
-
 	}
 	while (children_rem > 0)
 	{
@@ -231,40 +226,40 @@ int	wait_children(pid_t *pids, int children_rem)
 				exit_code = WEXITSTATUS(status);
 		}
 	}
-	return(exit_code);
+	return (exit_code);
 }
 
 void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 {
-	close (pipefd[READ_END]);
-	if (dup2(pipefd[WRITE_END], STDOUT_FILENO)== -1)
+	close(pipefd[READ_END]);
+	if (dup2(pipefd[WRITE_END], STDOUT_FILENO) == -1)
 	{
 		close(pipefd[WRITE_END]);
-		ft_putchar_fd("minishell: fork failure\n", STDERR_FILENO);
-		exit(perror);
+		ft_putstr_fd("minishell: fork failure\n", STDERR_FILENO);
+		exit(errno);
 	}
-	close (pipefd[WRITE_END]);
+	close(pipefd[WRITE_END]);
 	shell->exit_code = execute_ast(ast, shell);
 	exit(shell->exit_code);
 }
 
 void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
 {
-	close (pipefd[WRITE_END]);
+	close(pipefd[WRITE_END]);
 	if (dup2(pipefd[READ_END], STDIN_FILENO) == -1)
 	{
-		close (pipefd[READ_END]);
-		ft_putchar_fd("minishelll: fork failure\n", STDERR_FILENO);
-		exit(perror);
+		close(pipefd[READ_END]);
+		ft_putstr_fd("minishelll: fork failure\n", STDERR_FILENO);
+		exit(errno);
 	}
-	close (pipefd[READ_END]);
+	close(pipefd[READ_END]);
 	shell->exit_code = execute_ast(ast, shell);
-	exit (shell->exit_code);
+	exit(shell->exit_code);
 }
-//need to close read and write ends of pipe 
+// need to close read and write ends of pipe
 void	execute_pipe(t_ast *ast, t_shell *shell)
 {
-	int	pipefd[2];
+	int		pipefd[2];
 	pid_t	pids[2];
 
 	if (pipe(pipefd) == -1)
@@ -284,16 +279,16 @@ void	execute_pipe(t_ast *ast, t_shell *shell)
 	shell->exit_code = wait_children(pids, 2);
 }
 
-int		execute_ast(t_ast *ast, t_shell *shell)
+int	execute_ast(t_ast *ast, t_shell *shell)
 {
 	if (!ast || !shell)
-		return(0);
+		return (0);
 	if (ast->type == PIPE)
 		execute_pipe(ast, shell);
 	if (ast->type == WORD)
 		check_command(ast, ast->value[0], shell);
 
-	//check redicrection
+	// check redicrection
 
 	return (shell->exit_code); // < do i need it if i modify using pointers?
 }

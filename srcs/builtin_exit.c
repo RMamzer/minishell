@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_exit.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 17:38:22 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/31 23:55:32 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/01 17:20:35 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,14 +17,13 @@ int	exit_numeric_error(char *nptr)
 	ft_putstr_fd("minishell: exit: ", STDERR_FILENO);
 	ft_putstr_fd(nptr, STDERR_FILENO);
 	ft_putstr_fd(": numeric argument required\n", STDERR_FILENO);
-	return(EXIT_INVALID_OPTION);
+	return (EXIT_INVALID_OPTION);
 }
-
 
 int	process_exit_num(char *nptr)
 {
-	int		sign;
-	int		i;
+	int					sign;
+	int					i;
 	unsigned long long	num;
 
 	sign = 1;
@@ -41,33 +40,33 @@ int	process_exit_num(char *nptr)
 	while (nptr[i] >= '0' && nptr[i] <= '9')
 	{
 		num = num * 10 + (nptr[i] - '0');
-		if ((num >LLONG_MAX && sign == 1) || (num > (unsigned long long)LLONG_MAX +1 && sign == -1))
+		if ((num > LLONG_MAX && sign == 1)
+			|| (num > (unsigned long long)LLONG_MAX + 1 && sign == -1))
 			return (exit_numeric_error(nptr));
 		i++;
 	}
-		return ((int)(num * sign % 256));
+	return ((int)(num * sign % 256));
 }
 
 int	check_exit_code(char *nptr)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while ((nptr[i] >= 9 && nptr[i] <= 13) || nptr[i] == 32)
 		i++;
 	if (nptr[i] == '-' || nptr[i] == '+')
 		i++;
-	while(ft_isdigit(nptr[i]))
+	while (ft_isdigit(nptr[i]))
 		i++;
 	while ((nptr[i] >= 9 && nptr[i] <= 13) || nptr[i] == 32)
 		i++;
 	if (nptr[i] != '\0')
-		return(exit_numeric_error(nptr));
+		return (exit_numeric_error(nptr));
 	return (process_exit_num(nptr));
 }
 
-
-int execute_builtin_exit(char **args, t_shell *shell)
+int	execute_builtin_exit(char **args, t_shell *shell)
 {
 	if (get_args_len(args) > 1)
 	{
@@ -76,6 +75,6 @@ int execute_builtin_exit(char **args, t_shell *shell)
 	}
 	if (*args)
 		shell->exit_code = check_exit_code(args[0]);
-	//free_minishell_here
+	// free_minishell_here
 	exit(shell->exit_code);
 }

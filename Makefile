@@ -1,4 +1,5 @@
 NAME = minishell
+NAME = minishell
 
 CC = cc
 
@@ -11,16 +12,30 @@ LIBFT = $(LIBFT_DIR)/libft.a
 OBJS_DIR = objs/
 SRCS_DIR = srcs/
 
+RESET =	\033[0m
+RED = \033[31m
+
 HEADERS = -I ./include  -I $(LIBFT_DIR)
 
-SRCS = main.c execute.c env_functions.c builtin_echo.c builtin_env.c builtin_pwd.c builtin_cd.c \
-	builtin_exit.c builtin_unset.c builtin_export.c
+SRCS = builtin_cd.c builtin_echo.c builtin_env.c builtin_exit.c builtin_export.c builtin_pwd.c \
+builtin_unset.c env_functions.c execute.c expander.c ft_split_IFS.c lexer.c  parser.c \
+split_variables.c main.c
+	
 
 OBJS = $(addprefix $(OBJS_DIR), $(SRCS:.c=.o))
-.SECONDARY: ${OBJS}
+.SECONDARY: $(OBJS)
 
 all: $(NAME)
-
+	@printf "$(RED)▓█████▄  ██▓ ██▀███  ▄▄▄█████▓▓██   ██▓        ██████  ██░ ██ ▓█████  ██▓     ██▓           ██▀███  ▓█████ ▄▄▄      ▓█████▄▓██   ██▓   \n$(RESET)"
+	@printf "$(RED)▒██▀ ██▌▓██▒▓██ ▒ ██▒▓  ██▒ ▓▒ ▒██  ██▒      ▒██    ▒ ▓██░ ██▒▓█   ▀ ▓██▒    ▓██▒          ▓██ ▒ ██▒▓█   ▀▒████▄    ▒██▀ ██▌▒██  ██▒   \n$(RESET)"
+	@printf "$(RED)░██   █▌▒██▒▓██ ░▄█ ▒▒ ▓██░ ▒░  ▒██ ██░      ░ ▓██▄   ▒██▀▀██░▒███   ▒██░    ▒██░          ▓██ ░▄█ ▒▒███  ▒██  ▀█▄  ░██   █▌ ▒██ ██░   \n$(RESET)"
+	@printf "$(RED)░▓█▄   ▌░██░▒██▀▀█▄  ░ ▓██▓ ░   ░ ▐██▓░        ▒   ██▒░▓█ ░██ ▒▓█  ▄ ▒██░    ▒██░          ▒██▀▀█▄  ▒▓█  ▄░██▄▄▄▄██ ░▓█▄   ▌ ░ ▐██▓░   \n$(RESET)"
+	@printf "$(RED)░▒████▓ ░██░░██▓ ▒██▒  ▒██▒ ░   ░ ██▒▓░      ▒██████▒▒░▓█▒░██▓░▒████▒░██████▒░██████▒      ░██▓ ▒██▒░▒████▒▓█   ▓██▒░▒████▓  ░ ██▒▓░   \n$(RESET)"
+	@printf "$(RED) ▒▒▓  ▒ ░▓  ░ ▒▓ ░▒▓░  ▒ ░░      ██▒▒▒       ▒ ▒▓▒ ▒ ░ ▒ ░░▒░▒░░ ▒░ ░░ ▒░▓  ░░ ▒░▓  ░      ░ ▒▓ ░▒▓░░░ ▒░ ░▒▒   ▓▒█░ ▒▒▓  ▒   ██▒▒▒    \n$(RESET)"
+	@printf "$(RED) ░ ▒  ▒  ▒ ░  ░▒ ░ ▒░    ░     ▓██ ░▒░       ░ ░▒  ░ ░ ▒ ░▒░ ░ ░ ░  ░░ ░ ▒  ░░ ░ ▒  ░        ░▒ ░ ▒░ ░ ░  ░ ▒   ▒▒ ░ ░ ▒  ▒ ▓██ ░▒░    \n$(RESET)"
+	@printf "$(RED) ░ ░  ░  ▒ ░  ░░   ░   ░       ▒ ▒ ░░        ░  ░  ░   ░  ░░ ░   ░     ░ ░     ░ ░           ░░   ░    ░    ░   ▒    ░ ░  ░ ▒ ▒ ░░     \n$(RESET)"
+	@printf "$(RED)   ░     ░     ░               ░ ░                 ░   ░  ░  ░   ░  ░    ░  ░    ░  ░         ░        ░  ░     ░  ░   ░    ░ ░        \n$(RESET)"
+	@printf "$(RED) ░                             ░ ░                                                                                   ░      ░ ░     \n$(RESET)"
 $(LIBFT):
 	make -C $(LIBFT_DIR)
 
@@ -29,7 +44,7 @@ $(OBJS_DIR)%.o: $(SRCS_DIR)%.c
 	$(CC) $(C_FLAGS) -c $< -o $@ $(HEADERS)
 
 $(NAME): $(OBJS) $(LIBFT)
-	$(CC) $(C_FLAGS) $(OBJS) $(LIBFT) -lreadline -o $(NAME)
+	$(CC) $(C_FLAGS) $(OBJS) $(LIBFT)  -lreadline -o $(NAME)
 
 clean:
 	rm -rf $(OBJS_DIR)

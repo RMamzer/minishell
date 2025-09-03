@@ -3,20 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_unset.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 16:05:01 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/03 22:02:57 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/01 17:20:40 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-
-
 int	execute_builtin_unset(char **args, t_shell *shell)
 {
-	int i;
+	int	i;
 
 	if (*args && **args == '-')
 	{
@@ -28,9 +26,8 @@ int	execute_builtin_unset(char **args, t_shell *shell)
 	while (args[i])
 	{
 		if (ft_strcmp("_", args[i]) != 0)
-			remove_env_variable( &shell->env, args[i]);
+			remove_env_variable(&shell->env, args[i]);
 		i++;
 	}
-	return(0);
+	return (0);
 }
-

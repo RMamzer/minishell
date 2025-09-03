@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_env.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/20 15:10:59 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/30 14:40:15 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/01 17:20:33 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-//check if it works for dup"""
+// check if it works for dup"""
 int	execute_builtin_env(char **args, t_shell *shell)
 {
 	t_env *temp;
