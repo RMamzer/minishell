@@ -6,25 +6,25 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 14:47:35 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/02 15:56:59 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/03 15:32:35 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static int		separator(char c, const char *sep);
-static int		number_of_words(const char *str, const char *sep);
+static int	separator(char c, const char *sep);
+static int	number_of_words(const char *str, const char *sep);
 static char	*separating_words(const char *str, const char *sep);
-static void *free_sp_ifs(char **arr); 
+static void	*free_sp_ifs(char **arr);
 
 char	**ft_split_IFS(char *str, char *charset)
 {
 	char	**arr;
 	int		i;
-    
+
 	i = 0;
-    if(!str || !charset || *charset == '\0')
-        return (NULL);
+	if (!str || !charset || *charset == '\0')
+		return (NULL);
 	arr = malloc(sizeof(char *) * (number_of_words(str, charset) + 1));
 	if (arr == NULL)
 		return (NULL);
@@ -33,9 +33,9 @@ char	**ft_split_IFS(char *str, char *charset)
 		if (!separator(*str, charset))
 		{
 			arr[i] = separating_words(str, charset);
-			if(!arr[i])
-                return (free_sp_ifs(arr));
-            i++;
+			if (!arr[i])
+				return (free_sp_ifs(arr));
+			i++;
 			while (*str && !separator(*str, charset))
 				str++;
 		}
@@ -82,10 +82,10 @@ static int	number_of_words(const char *str, const char *sep)
 }
 
 static char	*separating_words(const char *str, const char *sep)
-{	
-	char		*separated;
-	int			i;
-	int			k;
+{
+	char	*separated;
+	int		i;
+	int		k;
 
 	i = 0;
 	k = 0;
@@ -103,13 +103,13 @@ static char	*separating_words(const char *str, const char *sep)
 	return (separated);
 }
 
-static void *free_sp_ifs(char **arr)
+static void	*free_sp_ifs(char **arr)
 {
-    int i;
-    
-    i = 0;
-    while(arr[i])
-        free(arr[i++]);
-    free(arr);
-    return (NULL);
+	int i;
+
+	i = 0;
+	while (arr[i])
+		free(arr[i++]);
+	free(arr);
+	return (NULL);
 }

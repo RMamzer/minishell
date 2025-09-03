@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/03 12:13:23 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/03 15:46:06 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,14 +23,14 @@
 // TODO: ERROR MANAGEMENT
 
 // test function, remove later
-// void	test_tokens(t_token *list)
-// {
-// 	while (list)
-// 	{
-// 		printf("[TYPE: %d] \"%s\"\n", list->type, list->content);
-// 		list = list->next;
-// 	}
-// }
+void	test_tokens(t_token *list)
+{
+	while (list)
+	{
+		printf("[TYPE: %d] \"%s\"\n", list->type, list->content);
+		list = list->next;
+	}
+}
 
 // void	test_env(t_env *envlist)
 // {
@@ -42,49 +42,49 @@
 // 	}
 // }
 // remove
-// void	print_ast(t_ast *node, int depth)
-// {
-// 	int		i;
-// 	char	**args;
+void	print_ast(t_ast *node, int depth)
+{
+	int		i;
+	char	**args;
 
-// 	if (!node)
-// 		return ;
-// 	// indent for readability
-// 	for (i = 0; i < depth; i++)
-// 		printf("  ");
-// 	// print node type
-// 	if (node->type == PIPE)
-// 		printf("NODE: PIPE\n");
-// 	else if (node->type == IN)
-// 		printf("NODE: IN\n");
-// 	else if (node->type == OUT)
-// 		printf("NODE: OUT\n");
-// 	else if (node->type == APPEND)
-// 		printf("NODE: APPEND\n");
-// 	else if (node->type == HEREDOC)
-// 		printf("NODE: HEREDOC\n");
-// 	else if (node->type == WORD)
-// 	{
-// 		printf("NODE: CMD [");
-// 		if (node->value)
-// 		{
-// 			args = (char **)node->value;
-// 			while (*args)
-// 			{
-// 				printf("%s ", *args);
-// 				args++;
-// 			}
-// 		}
-// 		printf("]\n");
-// 	}
-// 	else
-// 		printf("NODE: UNKNOWN\n");
-// 	// recurse into left/right children
-// 	if (node->left)
-// 		print_ast(node->left, depth + 1);
-// 	if (node->right)
-// 		print_ast(node->right, depth + 1);
-// }
+	if (!node)
+		return ;
+	// indent for readability
+	for (i = 0; i < depth; i++)
+		printf("  ");
+	// print node type
+	if (node->type == PIPE)
+		printf("NODE: PIPE\n");
+	else if (node->type == IN)
+		printf("NODE: IN\n");
+	else if (node->type == OUT)
+		printf("NODE: OUT\n");
+	else if (node->type == APPEND)
+		printf("NODE: APPEND\n");
+	else if (node->type == HEREDOC)
+		printf("NODE: HEREDOC\n");
+	else if (node->type == WORD)
+	{
+		printf("NODE: CMD [");
+		if (node->value)
+		{
+			args = (char **)node->value;
+			while (*args)
+			{
+				printf("%s ", *args);
+				args++;
+			}
+		}
+		printf("]\n");
+	}
+	else
+		printf("NODE: UNKNOWN\n");
+	// recurse into left/right children
+	if (node->left)
+		print_ast(node->left, depth + 1);
+	if (node->right)
+		print_ast(node->right, depth + 1);
+}
 
 int	main(int ac, char **av, char **env)
 {
@@ -106,14 +106,14 @@ int	main(int ac, char **av, char **env)
 		shell->input_line = input;
 		if (process_input(shell->input_line, shell) == SUCCESS)
 		{
-			// test_tokens(shell->token_list);
+			test_tokens(shell->token_list);
 		}
 		if (parse_tokens(shell) == SUCCESS)
 		{
 			execute_ast(shell->ast, shell);
-			// print_ast(shell->node, 0);
-			// free_ast(shell->node);
-			// shell->node = NULL;
+			print_ast(shell->ast, 0);
+			free_ast(&shell->ast);
+			shell->ast = NULL;
 		}
 	}
 }
@@ -223,6 +223,7 @@ bool	process_input(char *input_line, t_shell *shell)
 	free(shell->input_line);
 	shell->input_line = line;
 	lexer(shell->input_line, shell);
+	quote_flag(shell);
 	check_heredoc(shell);
 	if (check_syntax(shell) == FAILURE)
 	{
@@ -273,8 +274,6 @@ void	lexer_error(char *input_line, t_shell *shell)
 	exit(shell->exit_code);
 }
 
-
-
 bool	check_syntax(t_shell *shell)
 {
 	t_token	*current;
@@ -306,7 +305,6 @@ bool	check_syntax(t_shell *shell)
 	}
 	return (SUCCESS);
 }
-
 
 // maybe add count for heredocs here ?
 void	check_heredoc(t_shell *shell)
