@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/03 12:07:16 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/03 22:22:34 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@
 # include <stdbool.h>
 # include <stdio.h>
 # include <stdlib.h>
-# include <unistd.h>
+# include <unistd.h> //open and close
+#include <fcntl.h> // O_RDONLY abd others
 
 # define SUCCESS 0
 # define FAILURE 1
@@ -238,4 +239,7 @@ void				memory_error(void);
 void				write_bulitin_error(char *str1, char *str2, char *str3,
 						char *str4);
 
+
+// redir
+int   check_redirection(t_ast *ast, t_shell *shell);
 #endif

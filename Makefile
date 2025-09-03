@@ -18,7 +18,7 @@ RED = \033[31m
 HEADERS = -I ./include  -I $(LIBFT_DIR)
 
 SRCS = builtin_cd.c builtin_echo.c builtin_env.c builtin_exit.c builtin_export.c builtin_pwd.c \
-builtin_unset.c env_functions.c execute.c expander.c ft_split_IFS.c lexer.c  parser.c \
+builtin_unset.c env_functions.c execute.c redirection.c expander.c ft_split_IFS.c lexer.c  parser.c \
 split_variables.c main.c
 	
 
