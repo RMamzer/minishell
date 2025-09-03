@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 16:05:01 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/08/31 23:55:06 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/03 22:02:57 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,3 +33,4 @@ int	execute_builtin_unset(char **args, t_shell *shell)
 	}
 	return(0);
 }
+
