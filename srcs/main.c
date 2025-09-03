@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/03 15:46:06 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/03 18:41:18 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,21 +16,23 @@
 // TODO: test var expansion. // echo $"PATH"
 //	->PATH in bash vs dirty_shell> $"PATH"
 //[TYPE: 3] "$PATH"
-// TODO: new branch for stuff below.
 // TODO: plan for heredoc(probably should be handeled before the expansion)
 // TODO: remove quotes.
-// TODO: AST situation.
-// TODO: ERROR MANAGEMENT
 
 // test function, remove later
-void	test_tokens(t_token *list)
-{
-	while (list)
-	{
-		printf("[TYPE: %d] \"%s\"\n", list->type, list->content);
-		list = list->next;
-	}
-}
+// void	test_tokens(t_token *list)
+// {
+// 	if (!list)
+// 	{
+// 		printf("token_list clean\n");
+// 		return ;
+// 	}
+// 	while (list)
+// 	{
+// 		printf("[TYPE: %d] \"%s\"\n", list->type, list->content);
+// 		list = list->next;
+// 	}
+// }
 
 // void	test_env(t_env *envlist)
 // {
@@ -42,49 +44,52 @@ void	test_tokens(t_token *list)
 // 	}
 // }
 // remove
-void	print_ast(t_ast *node, int depth)
-{
-	int		i;
-	char	**args;
+// void	print_ast(t_ast *node, int depth)
+// {
+// 	int		i;
+// 	char	**args;
 
-	if (!node)
-		return ;
-	// indent for readability
-	for (i = 0; i < depth; i++)
-		printf("  ");
-	// print node type
-	if (node->type == PIPE)
-		printf("NODE: PIPE\n");
-	else if (node->type == IN)
-		printf("NODE: IN\n");
-	else if (node->type == OUT)
-		printf("NODE: OUT\n");
-	else if (node->type == APPEND)
-		printf("NODE: APPEND\n");
-	else if (node->type == HEREDOC)
-		printf("NODE: HEREDOC\n");
-	else if (node->type == WORD)
-	{
-		printf("NODE: CMD [");
-		if (node->value)
-		{
-			args = (char **)node->value;
-			while (*args)
-			{
-				printf("%s ", *args);
-				args++;
-			}
-		}
-		printf("]\n");
-	}
-	else
-		printf("NODE: UNKNOWN\n");
-	// recurse into left/right children
-	if (node->left)
-		print_ast(node->left, depth + 1);
-	if (node->right)
-		print_ast(node->right, depth + 1);
-}
+// 	if (!node)
+// 	{
+// 		printf("ast clean\n");
+// 		return ;
+// 	}
+// 	// indent for readability
+// 	for (i = 0; i < depth; i++)
+// 		printf("  ");
+// 	// print node type
+// 	if (node->type == PIPE)
+// 		printf("NODE: PIPE\n");
+// 	else if (node->type == IN)
+// 		printf("NODE: IN\n");
+// 	else if (node->type == OUT)
+// 		printf("NODE: OUT\n");
+// 	else if (node->type == APPEND)
+// 		printf("NODE: APPEND\n");
+// 	else if (node->type == HEREDOC)
+// 		printf("NODE: HEREDOC\n");
+// 	else if (node->type == WORD)
+// 	{
+// 		printf("NODE: CMD [");
+// 		if (node->value)
+// 		{
+// 			args = (char **)node->value;
+// 			while (*args)
+// 			{
+// 				printf("%s ", *args);
+// 				args++;
+// 			}
+// 		}
+// 		printf("]\n");
+// 	}
+// 	else
+// 		printf("NODE: UNKNOWN\n");
+// 	// recurse into left/right children
+// 	if (node->left)
+// 		print_ast(node->left, depth + 1);
+// 	if (node->right)
+// 		print_ast(node->right, depth + 1);
+// }
 
 int	main(int ac, char **av, char **env)
 {
@@ -106,13 +111,15 @@ int	main(int ac, char **av, char **env)
 		shell->input_line = input;
 		if (process_input(shell->input_line, shell) == SUCCESS)
 		{
-			test_tokens(shell->token_list);
+			// test_tokens(shell->token_list);
 		}
 		if (parse_tokens(shell) == SUCCESS)
 		{
 			execute_ast(shell->ast, shell);
-			print_ast(shell->ast, 0);
+			// print_ast(shell->ast, 0);
 			free_ast(&shell->ast);
+			// print_ast(shell->ast, 0);
+			// test_tokens(shell->token_list);
 			shell->ast = NULL;
 		}
 	}
