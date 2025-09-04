@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/04 17:31:50 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/04 19:42:36 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,14 +23,14 @@
 // TODO: ERROR MANAGEMENT
 
 // test function, remove later
-// void	test_tokens(t_token *list)
-// {
-// 	while (list)
-// 	{
-// 		printf("[TYPE: %d] \"%s\"\n", list->type, list->content);
-// 		list = list->next;
-// 	}
-// }
+void	test_tokens(t_token *list)
+{
+	while (list)
+	{
+		printf("[TYPE: %d] \"%s\"\n", list->type, list->content);
+		list = list->next;
+	}
+}
 
 // void	test_env(t_env *envlist)
 // {
@@ -66,7 +66,10 @@ const char	*type_to_str(t_token_type t)
 void	print_ast(t_ast *node, int depth)
 {
 	if (!node)
+	{
+		printf("ast is clean\n");
 		return ;
+	}
 	// indentation for readability
 	for (int i = 0; i < depth; i++)
 		printf("  ");
@@ -100,14 +103,15 @@ int	main(int ac, char **av, char **env)
 		shell->input_line = input;
 		if (process_input(shell->input_line, shell) == SUCCESS)
 		{
-			// test_tokens(shell->token_list);
+			test_tokens(shell->token_list);
 		}
 		if (parse_tokens(shell) == SUCCESS)
 		{
+			print_ast(shell->ast, 0);
 			execute_ast(shell->ast, shell);
-			// print_ast(shell->node, 0);
-			// free_ast(shell->node);
-			// shell->node = NULL;
+			free_ast(&shell->ast);
+			print_ast(shell->ast, 0);
+			shell->ast = NULL;
 		}
 	}
 }
