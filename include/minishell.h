@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/03 18:35:42 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/04 16:40:32 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,14 @@
 
 # include "libft.h"
 # include <errno.h>
+# include <fcntl.h>             // O_RDONLY abd others
 # include <limits.h>            // for exit limits
 # include <readline/history.h>  // add_history
 # include <readline/readline.h> // readline
 # include <stdbool.h>
 # include <stdio.h>
 # include <stdlib.h>
-# include <unistd.h>
+# include <unistd.h> //open and close
 
 # define SUCCESS 0
 # define FAILURE 1
@@ -242,4 +243,6 @@ void				memory_error(void);
 void				write_bulitin_error(char *str1, char *str2, char *str3,
 						char *str4);
 
+// redir
+int					check_redirection(t_ast *ast, t_shell *shell);
 #endif
