@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 18:05:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/04 17:56:56 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/04 18:00:26 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,13 +107,10 @@ t_ast	*parse_command_with_redirections(t_token **token_list, t_shell *shell)
 	t_token	*file_token;
 	t_ast	*root;
 	t_ast	*last;
-	t_ast	*root;
-	t_ast	*last;
 
 	root = NULL;
 	last = NULL;
-	root = NULL;
-	last = NULL;
+
 	node = parse_command(token_list, shell);
 	while (*token_list && ((*token_list)->type == IN
 			|| (*token_list)->type == OUT || (*token_list)->type == APPEND
@@ -138,27 +135,14 @@ t_ast	*parse_command_with_redirections(t_token **token_list, t_shell *shell)
 			last->left = redirect_node;
 			last = redirect_node;
 		}
-		if (!root)
-		{
-			root = redirect_node;
-			last = redirect_node;
-		}
-		else
-		{
-			last->left = redirect_node;
-			last = redirect_node;
-		}
 	}
-	if (last)
-		last->left = node;
-	if (root)
-		return (root);
 	if (last)
 		last->left = node;
 	if (root)
 		return (root);
 	return (node);
 }
+
 t_ast	*parse_single_redirection(t_token **token_list, t_shell *shell)
 {
 	t_ast	*redirect_node;
@@ -166,36 +150,8 @@ t_ast	*parse_single_redirection(t_token **token_list, t_shell *shell)
 	t_token	*file_token;
 	t_ast	*root;
 	t_ast	*last;
-	t_ast	*root;
-	t_ast	*last;
 
-	root = NULL;
-	last = NULL;
-	while (*token_list && ((*token_list)->type == IN
-			|| (*token_list)->type == OUT || (*token_list)->type == APPEND
-			|| (*token_list)->type == HEREDOC))
-	{
-		if (!validate_redirection(*token_list))
-			fatality(NULL, shell, 2);
-		redirect_node = add_ast_node((*token_list)->type, shell);
-		redirect_token = *token_list;
-		file_token = (*token_list)->next;
-		*token_list = file_token->next;
-		redirect_node->right = add_file_node(file_token, shell);
-		free(redirect_token->content);
-		free(redirect_token);
-		if (!root)
-		{
-			root = redirect_node;
-			last = redirect_node;
-		}
-		else
-		{
-			last->left = redirect_node;
-			last = redirect_node;
-		}
-	}
-	return (root);
+
 	root = NULL;
 	last = NULL;
 	while (*token_list && ((*token_list)->type == IN

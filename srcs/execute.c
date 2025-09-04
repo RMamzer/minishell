@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/01 17:20:44 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/04 18:09:30 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,8 +130,13 @@ void	execute_cmd_child(char **args, t_shell *shell)
 	char	*env_path;
 	char	*joined_path;
 	int		i;
+	int check;
+
+	check = -1;
 
 	i = 0;
+	while (args[++check])
+		ft_putendl_fd( args[check], STDERR_FILENO);
 	env_path = (get_env_value("PATH", shell->env, NO_ALLOC));
 	if (!env_path)
 		error_exit("minishell: cmd: not found");
