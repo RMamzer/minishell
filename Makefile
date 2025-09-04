@@ -1,8 +1,7 @@
 NAME = minishell
-NAME = minishell
 
 CC = cc
-
+# remove -g
 C_FLAGS = -Wall -Wextra -Werror -g
 
 LIBFT_DIR = ./libft
