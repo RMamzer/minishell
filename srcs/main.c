@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/04 14:13:19 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/04 17:31:50 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,40 +42,42 @@
 // 	}
 // }
 // remove
-const char *type_to_str(t_token_type t)
+const char	*type_to_str(t_token_type t)
 {
-    switch (t)
-    {
-        case WORD:   return "WORD";
-        case IN:     return "IN";
-        case OUT:    return "OUT";
-        case APPEND: return "APPEND";
-        case HEREDOC:return "HEREDOC";
-        case PIPE:   return "PIPE";
-        default:     return "UNKNOWN";
-    }
+	switch (t)
+	{
+	case WORD:
+		return ("WORD");
+	case IN:
+		return ("IN");
+	case OUT:
+		return ("OUT");
+	case APPEND:
+		return ("APPEND");
+	case HEREDOC:
+		return ("HEREDOC");
+	case PIPE:
+		return ("PIPE");
+	default:
+		return ("UNKNOWN");
+	}
 }
 
-void print_ast(t_ast *node, int depth)
+void	print_ast(t_ast *node, int depth)
 {
-    if (!node)
-        return;
-
-    // indentation for readability
-    for (int i = 0; i < depth; i++)
-        printf("  ");
-
-    printf("%s", type_to_str(node->type));
-
-    if (node->value && node->value[0])
-        printf(" (%s)", node->value[0]);   // show filename or command name
-
-    printf("\n");
-
-    if (node->left)
-        print_ast(node->left, depth + 1);
-    if (node->right)
-        print_ast(node->right, depth + 1);
+	if (!node)
+		return ;
+	// indentation for readability
+	for (int i = 0; i < depth; i++)
+		printf("  ");
+	printf("%s", type_to_str(node->type));
+	if (node->value && node->value[0])
+		printf(" (%s)", node->value[0]); // show filename or command name
+	printf("\n");
+	if (node->left)
+		print_ast(node->left, depth + 1);
+	if (node->right)
+		print_ast(node->right, depth + 1);
 }
 
 int	main(int ac, char **av, char **env)
@@ -215,6 +217,7 @@ bool	process_input(char *input_line, t_shell *shell)
 	free(shell->input_line);
 	shell->input_line = line;
 	lexer(shell->input_line, shell);
+	quote_flag(shell);
 	check_heredoc(shell);
 	if (check_syntax(shell) == FAILURE)
 	{
@@ -265,8 +268,6 @@ void	lexer_error(char *input_line, t_shell *shell)
 	exit(shell->exit_code);
 }
 
-
-
 bool	check_syntax(t_shell *shell)
 {
 	t_token	*current;
@@ -298,7 +299,6 @@ bool	check_syntax(t_shell *shell)
 	}
 	return (SUCCESS);
 }
-
 
 // maybe add count for heredocs here ?
 void	check_heredoc(t_shell *shell)
