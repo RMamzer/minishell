@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:29:11 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/03 12:13:17 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/03 18:35:45 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,8 +100,8 @@ void	add_token(t_shell *shell, t_token_type type, char *content)
 	if (token == NULL)
 		lexer_error(shell->input_line, shell);
 	token->type = type;
-    token->expanded = false;
-    token->quoted = false;
+	token->expanded = false;
+	token->quoted = false;
 	token->next = NULL;
 	token->content = ft_strdup(content);
 	if (token->content == NULL)
@@ -133,5 +133,3 @@ bool	is_operator(char c)
 		return (true);
 	return (false);
 }
-
-

@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:26:38 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/02 15:57:03 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/03 16:06:43 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	split_variables(t_shell *data)
 	{
 		if (current->type == WORD && !current->quoted && current->expanded)
 		{
-			split_result = ft_split_IFS(current->content," \t\n");
+			split_result = ft_split_IFS(current->content, " \t\n");
 			if (!split_result)
 				fatality("malloc failed", data, 1);
 			process_split_result(data, current, split_result);
@@ -113,7 +113,7 @@ void	free_split(char **split)
 
 int	check_qty(char **split_result)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	if (!split_result)

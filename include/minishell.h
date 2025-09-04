@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/03 22:22:34 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/04 16:40:32 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include "libft.h"
 # include <errno.h>
+# include <fcntl.h>             // O_RDONLY abd others
 # include <limits.h>            // for exit limits
 # include <readline/history.h>  // add_history
 # include <readline/readline.h> // readline
@@ -22,7 +23,6 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h> //open and close
-#include <fcntl.h> // O_RDONLY abd others
 
 # define SUCCESS 0
 # define FAILURE 1
@@ -38,7 +38,7 @@
 typedef enum e_token_type
 {
 	PIPE,
-    WORD,
+	WORD,
 	IN,
 	OUT,
 	HEREDOC,
@@ -77,7 +77,7 @@ typedef struct s_ast
 	struct s_ast	*right;
 }					t_ast;
 
-// core ?? node v ast peredelaj
+// core
 typedef struct s_shell
 {
 	int				exit_code;
@@ -120,9 +120,12 @@ bool				check_syntax(t_shell *shell);
 
 // expansion
 void				expander(t_shell *shell);
-char	*expand_content(char *content, t_shell *shell, t_token *token);
-char	*process_content(char *content, size_t *i, t_shell *shell, t_token *token);
-char	*handle_dollar(char *content, size_t *i, t_shell *shell, t_token *token);
+char				*expand_content(char *content, t_shell *shell,
+						t_token *token);
+char				*process_content(char *content, size_t *i, t_shell *shell,
+						t_token *token);
+char				*handle_dollar(char *content, size_t *i, t_shell *shell,
+						t_token *token);
 char				*handle_characters(char *content, size_t *i, bool in_dq);
 char				*expand_env_var(char *content, size_t *i, t_env *env);
 char				*get_env_value(char *name, t_env *env, bool alloc);
@@ -130,7 +133,8 @@ char				*strjoin_free(char *new_content, char *temp);
 int					ft_strcmp(const char *s1, const char *s2);
 
 char				*handle_single_quote(char *content, size_t *i);
-char	*handle_double_quote(char *content, size_t *i, t_shell *shell, t_token *token);
+char				*handle_double_quote(char *content, size_t *i,
+						t_shell *shell, t_token *token);
 
 // helper functions
 bool				is_delimiter(int i);
@@ -178,7 +182,7 @@ t_token				*add_expanded_token(t_token *current, t_token_type type,
 						char *content);
 void				free_split(char **split);
 int					check_qty(char **split_result);
-char	**ft_split_IFS(char *str, char *charset);
+char				**ft_split_IFS(char *str, char *charset);
 
 // ambiguous and validation of redirection
 bool				validate_redirection(t_token *redirection);
@@ -239,7 +243,6 @@ void				memory_error(void);
 void				write_bulitin_error(char *str1, char *str2, char *str3,
 						char *str4);
 
-
 // redir
-int   check_redirection(t_ast *ast, t_shell *shell);
+int					check_redirection(t_ast *ast, t_shell *shell);
 #endif

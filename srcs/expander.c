@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:28:42 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/03 12:13:18 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/03 18:34:10 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void	expander(t_shell *shell)
 	current = shell->token_list;
 	while (current)
 	{
-		if (current->type == WORD) //&& ft_strchr(current->content, '$')
+		if (current->type == WORD)
 			current->content = expand_content(current->content, shell, current);
 		current = current->next;
 	}
@@ -69,7 +69,8 @@ char	*expand_content(char *content, t_shell *shell, t_token *token)
  * @param shell Pointer to the shell struct.
  * @return Newly allocated string for the processed part.
  */
-char	*process_content(char *content, size_t *i, t_shell *shell, t_token *token)
+char	*process_content(char *content, size_t *i, t_shell *shell,
+		t_token *token)
 {
 	if (content[*i] == '\'')
 		return (handle_single_quote(content, i));
@@ -97,7 +98,8 @@ char	*handle_single_quote(char *content, size_t *i)
 		(*i)++;
 	return (temp);
 }
-char	*handle_double_quote(char *content, size_t *i, t_shell *shell, t_token *token)
+char	*handle_double_quote(char *content, size_t *i, t_shell *shell,
+		t_token *token)
 {
 	char	*temp;
 	char	*result;
@@ -139,7 +141,7 @@ char	*handle_dollar(char *content, size_t *i, t_shell *shell, t_token *token)
 	if (ft_isalpha(content[*i]) || content[*i] == '_')
 	{
 		expanded = expand_env_var(content, i, shell->env);
-        token->expanded = true;
+		token->expanded = true;
 		return (expanded);
 	}
 	else if (content[*i] == '?')
@@ -147,7 +149,7 @@ char	*handle_dollar(char *content, size_t *i, t_shell *shell, t_token *token)
 		(*i)++;
 		// or functon which updates exitcode idk yet
 		expanded = ft_itoa(shell->exit_code);
-        token->expanded = true; // not sure yet
+		token->expanded = true; // not sure yet
 		return (expanded);
 	}
 	else

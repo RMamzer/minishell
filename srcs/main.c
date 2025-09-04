@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/03 12:13:23 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/04 14:13:19 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,49 +42,41 @@
 // 	}
 // }
 // remove
-// void	print_ast(t_ast *node, int depth)
-// {
-// 	int		i;
-// 	char	**args;
+const char *type_to_str(t_token_type t)
+{
+    switch (t)
+    {
+        case WORD:   return "WORD";
+        case IN:     return "IN";
+        case OUT:    return "OUT";
+        case APPEND: return "APPEND";
+        case HEREDOC:return "HEREDOC";
+        case PIPE:   return "PIPE";
+        default:     return "UNKNOWN";
+    }
+}
 
-// 	if (!node)
-// 		return ;
-// 	// indent for readability
-// 	for (i = 0; i < depth; i++)
-// 		printf("  ");
-// 	// print node type
-// 	if (node->type == PIPE)
-// 		printf("NODE: PIPE\n");
-// 	else if (node->type == IN)
-// 		printf("NODE: IN\n");
-// 	else if (node->type == OUT)
-// 		printf("NODE: OUT\n");
-// 	else if (node->type == APPEND)
-// 		printf("NODE: APPEND\n");
-// 	else if (node->type == HEREDOC)
-// 		printf("NODE: HEREDOC\n");
-// 	else if (node->type == WORD)
-// 	{
-// 		printf("NODE: CMD [");
-// 		if (node->value)
-// 		{
-// 			args = (char **)node->value;
-// 			while (*args)
-// 			{
-// 				printf("%s ", *args);
-// 				args++;
-// 			}
-// 		}
-// 		printf("]\n");
-// 	}
-// 	else
-// 		printf("NODE: UNKNOWN\n");
-// 	// recurse into left/right children
-// 	if (node->left)
-// 		print_ast(node->left, depth + 1);
-// 	if (node->right)
-// 		print_ast(node->right, depth + 1);
-// }
+void print_ast(t_ast *node, int depth)
+{
+    if (!node)
+        return;
+
+    // indentation for readability
+    for (int i = 0; i < depth; i++)
+        printf("  ");
+
+    printf("%s", type_to_str(node->type));
+
+    if (node->value && node->value[0])
+        printf(" (%s)", node->value[0]);   // show filename or command name
+
+    printf("\n");
+
+    if (node->left)
+        print_ast(node->left, depth + 1);
+    if (node->right)
+        print_ast(node->right, depth + 1);
+}
 
 int	main(int ac, char **av, char **env)
 {
