@@ -43,8 +43,12 @@ int execute_redirection_out(t_ast *ast, t_token_type type)
     close(outfile_fd);
     return (0);
 }
-// update error functions: 
-int   check_redirection(t_ast *ast, t_shell *shell)
+// int	execute_heeredoc(t_ast *ast, t_shell *shell)
+// {
+
+// }
+// update error functions:
+int	check_redirection(t_ast *ast, t_shell *shell)
 {
     pid_t   pid;
 
@@ -55,9 +59,10 @@ int   check_redirection(t_ast *ast, t_shell *shell)
     {
         if (ast->type ==IN)
             shell->exit_code = execute_redirection_in(ast->right);
-        if (ast->type == OUT || ast->type == APPEND)
+        else if (ast->type == OUT || ast->type == APPEND)
             shell->exit_code = execute_redirection_out(ast->right, ast->type);
-// add other redirections latwr 
+		// else if(ast->type = HEREDOC)
+		// 	shell->exit_code= execute_heredoc(ast->right);
         if (shell->exit_code != 0)
             exit(shell->exit_code);
         exit(execute_ast(ast->left, shell));
