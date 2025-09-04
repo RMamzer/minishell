@@ -8,8 +8,8 @@ int	write_error_and_return(char *msg, int error)
 	perror(msg);
 	return (error);
 }
-
-int	execute_redirection_in(t_ast *ast)
+// need to clean all opened heredocs at the end, how??
+int execute_redirection_in(t_ast *ast)
 {
 	int	infile_fd;
 
@@ -43,31 +43,26 @@ int	execute_redirection_out(t_ast *ast, t_token_type type)
 	close(outfile_fd);
 	return (0);
 }
-// int	execute_heeredoc(t_ast *ast, t_shell *shell)
-// {
 
-// }
 // update error functions:
 int	check_redirection(t_ast *ast, t_shell *shell)
 {
-	pid_t	pid;
+    pid_t   pid;
 
-	pid = fork();
-	if (pid == -1)
-		return (write_error_and_return("fork", errno));
-	if (pid == 0)
-	{
-		if (ast->type == IN)
-			shell->exit_code = execute_redirection_in(ast->right);
-		else if (ast->type == OUT || ast->type == APPEND)
-			shell->exit_code = execute_redirection_out(ast->right, ast->type);
-		// else if(ast->type = HEREDOC)
-		// 	shell->exit_code= execute_heredoc(ast->right);
-		if (shell->exit_code != 0)
-			exit(shell->exit_code);
-		exit(execute_ast(ast->left, shell));
-	}
-	waitpid(pid, &shell->exit_code, 0);
+    pid = fork();
+    if (pid == -1)
+        return (write_error_and_return("fork", errno));
+    if (pid == 0)
+    {
+        if (ast->type == IN || ast->type == HEREDOC)
+            shell->exit_code = execute_redirection_in(ast->right);
+        else if (ast->type == OUT || ast->type == APPEND)
+            shell->exit_code = execute_redirection_out(ast->right, ast->type);
+        if (shell->exit_code != 0)
+            exit(shell->exit_code);
+        exit(execute_ast(ast->left, shell));
+    }
+    waitpid(pid, &shell->exit_code, 0);
 	if (WIFEXITED(shell->exit_code))
 		return (WEXITSTATUS(shell->exit_code));
 	return (EXIT_FAILURE);
