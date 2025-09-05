@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 18:05:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/04 19:39:06 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/05 11:54:45 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,18 +41,8 @@ t_ast	*parse_pipe(t_token **token_list, t_shell *shell)
 	return (node);
 }
 
-t_ast	*parse_redirection(t_token **token_list, t_shell *shell)
-{
-	if (!*token_list)
-		return (NULL);
-	if ((*token_list)->type == WORD)
-		return (parse_command_with_redirections(token_list, shell));
-	if ((*token_list)->type == IN || (*token_list)->type == OUT
-		|| (*token_list)->type == APPEND || (*token_list)->type == HEREDOC)
-		return (parse_single_redirection(token_list, shell));
-	return (NULL); // for now
-}
 
+// FIRST VERSION
 // t_ast	*parse_command_with_redirections(t_token **token_list, t_shell *shell)
 // {
 // 	t_ast	*node;
@@ -97,6 +87,22 @@ t_ast	*parse_redirection(t_token **token_list, t_shell *shell)
 // 	redirect_node->left = parse_redirection(token_list, shell);
 // 	return (redirect_node);
 // }
+
+
+// SECOND VERSION
+/*
+
+t_ast	*parse_redirection(t_token **token_list, t_shell *shell)
+{
+	if (!*token_list)
+		return (NULL);
+	if ((*token_list)->type == WORD)
+		return (parse_command_with_redirections(token_list, shell));
+	if ((*token_list)->type == IN || (*token_list)->type == OUT
+		|| (*token_list)->type == APPEND || (*token_list)->type == HEREDOC)
+		return (parse_single_redirection(token_list, shell));
+	return (NULL);
+}
 
 t_ast	*parse_command_with_redirections(t_token **token_list, t_shell *shell)
 {
@@ -183,6 +189,63 @@ t_ast	*parse_single_redirection(t_token **token_list, t_shell *shell)
 		root = cmd;
 	return (root);
 }
+*/
+
+
+bool is_redir(t_token_type type)
+{
+    return(type == IN || type == OUT || type == APPEND || type == HEREDOC);
+}
+static t_ast *parse_simple_cmd(t_token **token_list, t_shell *shell)
+{
+    t_ast *root;
+    t_ast *last_redir;
+    t_ast *cmd_node;
+    t_ast *redirect_node;
+    t_token *redirect_token;
+    t_token *file_token;
+    
+    
+    root = NULL;
+    last_redir = NULL;
+    cmd_node = NULL;
+    while (*token_list && (is_redir((*token_list)->type) || (*token_list)->type == WORD))
+    {
+        if((*token_list)->type == WORD)
+        {
+            if(!cmd_node)
+                cmd_node = parse_command(token_list, shell);
+            else
+                break;
+        }
+        else if(is_redir((*token_list)->type))
+        {
+            redirect_token = *token_list;
+            file_token = (*token_list)->next;
+            if(!file_token || file_token->type != WORD)
+                fatality(NULL, shell, 2);
+            redirect_node = add_ast_node(redirect_token->type, shell);
+            redirect_node->right = add_file_node(file_token, shell);
+            *token_list = file_token->next;
+            free(redirect_token->content);
+            free(redirect_token);
+            if(!root)
+                root = redirect_node;
+            else
+                last_redir->left¨= redirect_node;
+            last_redir = redirect_node;
+        }
+        else
+            break;
+    }
+    if(last_redir)
+    {
+        last_redir->left = cmd_node;
+        return (root);
+    }
+    return (cmd_node);
+}
+
 
 int	count_args(t_token *tokens)
 {
@@ -333,3 +396,5 @@ void	fatality(char *msg, t_shell *shell, int exit_code)
 	clear_history();
 	exit(exit_code);
 }
+
+
