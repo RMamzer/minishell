@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 18:05:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/06 12:15:16 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/06 13:15:06 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ t_ast *parse_command_and_redirection(t_token **token_list, t_shell *shell)
         if((*token_list)->type == WORD)
             cmd_node = handle_word_ast(token_list, cmd_node, shell);
         else
-            root = handle_redir_ast(token_list, &tail, shell);
+            handle_redir_ast(token_list,&root, &tail, shell);
     }
     if(tail)
     {
@@ -77,30 +77,34 @@ t_ast *handle_word_ast(t_token **token_list, t_ast *cmd_node, t_shell *shell)
     return (cmd_node);
 }
 
-t_ast *handle_redir_ast(t_token **token_list, t_ast **tail, t_shell *shell)
+t_ast *handle_redir_ast(t_token **token_list,t_ast **root, t_ast **tail, t_shell *shell)
 {
     t_token *redir_token;
     t_token *file_token;
     t_ast *node;
+    t_token *next;
     
     redir_token = *token_list;
     file_token = redir_token->next;
     if(!file_token || file_token->type != WORD)
         fatality("syntax error", shell, 2);
+    next = file_token->next;
     node = add_ast_node(redir_token->type, shell);
     node->right = add_file_node(file_token, shell);
-    *token_list = file_token->next;
+    *token_list = next;
     free(redir_token->content);
     free(redir_token);
-    
-    if(!*tail)
+    if(!*root)
+    {
+        *root = node;
         *tail = node;
+    }
     else
     {
         (*tail)->left = node;
         *tail = node;
     }
-    return (*tail); // mb *node
+    return (node); 
 }
 
 void append_arg(t_ast *cmd_node, const char *str, t_shell *shell)
