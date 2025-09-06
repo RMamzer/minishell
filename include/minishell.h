@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/04 16:40:32 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/06 13:48:21 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,6 +158,7 @@ void				set_minimal_env(t_shell *shell);
 void				create_env(t_shell *shell, char **envp);
 
 // ast
+/*
 bool				parse_tokens(t_shell *shell);
 t_ast				*parse_pipe(t_token **token_list, t_shell *shell);
 t_ast				*parse_redirection(t_token **token_list, t_shell *shell);
@@ -171,6 +172,19 @@ void				load_args(t_ast *command_node, t_token **token_list, int ac,
 t_ast				*parse_command(t_token **token_list, t_shell *shell);
 t_ast				*add_file_node(t_token *token, t_shell *shell);
 t_ast				*add_ast_node(t_token_type type, t_shell *shell);
+*/
+bool	parse_tokens(t_shell *shell);
+t_ast	*parse_pipe(t_token **token_list, t_shell *shell);
+bool is_redir(t_token_type type);
+t_ast *parse_command_and_redirection(t_token **token_list, t_shell *shell);
+t_ast *handle_word_ast(t_token **token_list, t_ast *cmd_node, t_shell *shell);
+t_ast *handle_redir_ast(t_token **token_list,t_ast **root, t_ast **tail, t_shell *shell);
+void append_arg(t_ast *cmd_node, const char *str, t_shell *shell);
+void init_arg(t_ast *cmd_node, const char *str, t_shell *shell);
+char **load_arg(char **old, size_t count, t_shell *shell);
+t_ast	*add_file_node(t_token *token, t_shell *shell);
+t_ast	*add_ast_node(t_token_type type, t_shell *shell);
+void move_and_free(t_token **token_list);
 
 // split vars
 void				split_variables(t_shell *shell);
