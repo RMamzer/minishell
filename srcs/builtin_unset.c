@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_unset.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/25 16:05:01 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/01 17:20:40 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/07 16:56:03 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int	execute_builtin_unset(char **args, t_shell *shell)
 	if (*args && **args == '-')
 	{
 		write_bulitin_error("minishell: unset: ", *args,
-			": options are not supported\n", "unset:  usage: [name ...]\n");
+			": options are not supported\nunset:  usage: [name ...]\n", NULL);
 		return (EXIT_INVALID_OPTION);
 	}
 	i = 0;

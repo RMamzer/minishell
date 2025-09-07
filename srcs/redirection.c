@@ -67,11 +67,3 @@ int	check_redirection(t_ast *ast, t_shell *shell)
 		return (WEXITSTATUS(shell->exit_code));
 	return (EXIT_FAILURE);
 }
-
-/*
-1. fork, check fork, exit if breaks
-2. check what type of redirection
-3. execute the child
-4. check what it returns, if not success, stop everything
-4. parent waits for a child and updates the execution
-*/

@@ -3,14 +3,30 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/01 17:20:44 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/07 21:43:56 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+
+// // for testing, delete later
+// void print_envp(char *const *envp) {
+//     if (envp == NULL) {
+//         printf("(NULL envp)\n");
+//         return;
+//     }
+
+//     // Iterate through the array of pointers until the null terminator is reached.
+//     for (int i = 0; envp[i] != NULL; i++) {
+//         printf("%s\n", envp[i]);
+//     }
+// }
+
+
 
 void	write_bulitin_error(char *str1, char *str2, char *str3, char *str4)
 {
@@ -21,10 +37,32 @@ void	write_bulitin_error(char *str1, char *str2, char *str3, char *str4)
 	if (str3)
 		ft_putstr_fd(str3, STDERR_FILENO);
 	if (str4)
-		ft_putstr_fd(str4, STDERR_FILENO);
+		perror(str4);
+}
+/*
+Do we need to add additional message here?
+What to free here:
+1. Path ft_split
+2. Recreated env array of arrays 
+*/
+void 	write_error_malloc()
+{
+	perror("minishell: malloc");
+	exit(errno);
 }
 
-int	get_env_size(t_env *lst)
+void	error_exec_exit(char *str1, t_shell *shell)
+{
+	ft_putchar_fd("minishell: ", STDERR_FILENO);
+	perror (str1);
+	
+	free (shell);//free everything same as in malloc error
+	exit (errno);
+}
+
+
+
+int	get_env_size(t_env *lst, bool process)
 {
 	t_env	*tmp;
 	int		i;
@@ -33,8 +71,9 @@ int	get_env_size(t_env *lst)
 	tmp = lst;
 	while (tmp)
 	{
-		tmp = tmp->next;
-		i++;
+		if (process == EXPORT || tmp->assigned == true)
+			i++;
+		tmp = tmp->next; 
 	}
 	return (i);
 }
@@ -83,26 +122,12 @@ void	error_exit(char *msg)
 	exit(errno);
 }
 
-void	error_close_and_exit(char *msg, int *pipefd)
+int	error_close_and_return(char *msg, int *pipefd, int error)
 {
 	close(pipefd[WRITE_END]);
 	close(pipefd[READ_END]);
-	error_exit(msg);
+	return (write_error_and_return(msg, error));
 }
-
-// int	ft_strcmp( const char *s1, const char *s2)
-// {
-// 	size_t i;
-
-// 	i = 0;
-// 	while (s1[i] || s2[i])
-// 	{
-// 		if (s1[i] != s2[i])
-// 			return((unsigned char)s1[i] - (unsigned char)s2[i]);
-// 		i++;
-// 	}
-// 	return (0);
-// }
 
 void	recreate_env_array(t_env *env, t_shell *shell)
 {
@@ -111,19 +136,86 @@ void	recreate_env_array(t_env *env, t_shell *shell)
 
 	i = 0;
 	temp = env;
-	shell->env_array = malloc(sizeof(char *) * (get_env_size(env) + 1));
+	shell->env_array = malloc(sizeof(char *) * (get_env_size(env, EXECUTE) + 1));
 	if (!shell->env_array)
-		error_exit("minishell: malloc broke");
+		write_error_malloc();
 	while (temp)
 	{
-		shell->env_array[i] = super_strjoin(temp->key, "=", temp->value);
-		if (!shell->env_array[i])
-			error_exit("minishell: malloc broke");
-		i++;
+		if (temp->assigned == true)
+		{
+			shell->env_array[i] = super_strjoin(temp->key, "=", temp->value);
+			if (!shell->env_array[i])
+				write_error_malloc();
+			i++;
+		}
 		temp = temp->next;
 	}
 	shell->env_array[i] = NULL;
 }
+
+/*
+Logic:
+1. get paths_array
+2. check if it is 
+*/
+
+void	execute_path_cmd(char **args, t_shell *shell)
+{
+	if (access(args[0], X_OK) != 0)
+		error_exec_exit(args[0], shell);
+	execve(args[0],args, shell->env_array);
+	error_exec_exit(args[0], shell);
+}
+
+//Next steps:
+// check the application of path and execute_path combo, add flag?
+/* Potential structure:
+1. find the correct path (/ or f_ok for cmd)
+2. use it into the execve function with error exit on the side there?
+*/
+bool execute_cmd(char **args, t_shell *shell)
+{
+	int i;
+	char *exec_path;
+
+	while (shell->paths_array[i])
+	{
+		exec_path = super_strjoin(shell->paths_array[i], "/", args[0]);
+		if (!exec_path)
+			write_error_malloc(); // check cleaning
+		if (access(exec_path, X_OK) != 0)
+			{		
+				free(exec_path);
+				error_exit("minishell: cannot execute cmd");
+			}
+		execve(exec_path, args, shell->env_array);
+		free(exec_path);
+		error_exec_exit(args[i], shell);
+
+	}
+		free(exec_path);
+		i++;
+}
+
+//add ending
+void	execute_cmd_child(char **args, t_shell *shell)
+{
+	char	*env_path;
+
+	env_path = (get_env_value("PATH", shell->env, NO_ALLOC));
+	if (!env_path) // check what kinds of errors could be here: if command and path?
+		error_exit("minishell cmd: not found");
+	shell->paths_array = ft_split(env_path, ':');
+	if (!shell->paths_array)
+		write_error_malloc(); // malloc env_paths here
+	recreate_env_array(shell->env, shell);
+	if (ft_strchr(args[0], '/'))
+		execute_path_cmd(args, shell);
+	if (!execute_cmd)
+		error_exit(*args);
+	}
+
+
 
 void	execute_cmd_child(char **args, t_shell *shell)
 {
@@ -133,11 +225,11 @@ void	execute_cmd_child(char **args, t_shell *shell)
 
 	i = 0;
 	env_path = (get_env_value("PATH", shell->env, NO_ALLOC));
-	if (!env_path)
-		error_exit("minishell: cmd: not found");
+	if (!env_path) // check what kinds of errors could be here: if command and path?
+		error_exit("minishell cmd: not found");
 	shell->paths_array = ft_split(env_path, ':');
 	if (!shell->paths_array)
-		error_exit("minishell: malloc broke"); // malloc env_paths here
+		write_error_malloc(); // malloc env_paths here
 	recreate_env_array(shell->env, shell);
 	while (shell->paths_array[i])
 	{
@@ -169,7 +261,7 @@ int	execute_external_cmd(char **args, t_shell *shell)
 
 	pid = fork();
 	if (pid == -1)
-		error_exit("minishell: fork failure");
+		return (write_error_and_return("fork", errno));
 	if (pid == 0)
 		execute_cmd_child(args, shell);
 	waitpid(pid, &shell->exit_code, 0);
@@ -184,7 +276,7 @@ int	check_command(t_ast *ast, char *cmd, t_shell *shell)
 	if (ft_strcmp(cmd, "echo") == 0)
 		shell->exit_code = execute_builtin_echo(ast->value + 1);
 	else if (ft_strcmp(cmd, "cd") == 0)
-		execute_builtin_cd(ast->value + 1, shell);
+		shell->exit_code = execute_builtin_cd(ast->value + 1, shell);
 	else if (ft_strcmp(cmd, "pwd") == 0)
 		shell->exit_code = execute_builtin_pwd(ast->value + 1, shell);
 	else if (ft_strcmp(cmd, "export") == 0)
@@ -194,7 +286,7 @@ int	check_command(t_ast *ast, char *cmd, t_shell *shell)
 	else if (ft_strcmp(cmd, "env") == 0)
 		shell->exit_code = execute_builtin_env(ast->value + 1, shell);
 	else if (ft_strcmp(cmd, "exit") == 0)
-		execute_builtin_exit(ast->value + 1, shell);
+		shell->exit_code = execute_builtin_exit(ast->value + 1, shell);
 	else
 		shell->exit_code = execute_external_cmd(ast->value, shell);
 	return (shell->exit_code);
@@ -235,12 +327,10 @@ void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 	if (dup2(pipefd[WRITE_END], STDOUT_FILENO) == -1)
 	{
 		close(pipefd[WRITE_END]);
-		ft_putstr_fd("minishell: fork failure\n", STDERR_FILENO);
-		exit(errno);
+		exit (write_error_and_return("dup2", errno));
 	}
 	close(pipefd[WRITE_END]);
-	shell->exit_code = execute_ast(ast, shell);
-	exit(shell->exit_code);
+	exit(execute_ast(ast, shell));
 }
 
 void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
@@ -249,34 +339,32 @@ void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
 	if (dup2(pipefd[READ_END], STDIN_FILENO) == -1)
 	{
 		close(pipefd[READ_END]);
-		ft_putstr_fd("minishelll: fork failure\n", STDERR_FILENO);
-		exit(errno);
+		exit (write_error_and_return("dup2", errno));
 	}
 	close(pipefd[READ_END]);
-	shell->exit_code = execute_ast(ast, shell);
-	exit(shell->exit_code);
+	exit(execute_ast(ast, shell));
 }
 // need to close read and write ends of pipe
-void	execute_pipe(t_ast *ast, t_shell *shell)
+int	execute_pipe(t_ast *ast, t_shell *shell)
 {
 	int		pipefd[2];
 	pid_t	pids[2];
 
 	if (pipe(pipefd) == -1)
-		error_exit("minishell: pipe failure");
+		write_error_and_return("pipe", errno);
 	pids[0] = fork();
 	if (pids[0] == -1)
-		error_close_and_exit("minishell: fork falure", pipefd);
+		error_close_and_return("fork", pipefd, errno);
 	if (pids[0] == 0)
 		execute_left_child(ast->left, shell, pipefd);
 	pids[1] = fork();
 	if (pids[1] == -1)
-		error_close_and_exit("minishell: fork falure", pipefd);
+		error_close_and_return("fork", pipefd, errno);
 	if (pids[1] == 0)
 		execute_right_child(ast->right, shell, pipefd);
 	close(pipefd[WRITE_END]);
 	close(pipefd[READ_END]);
-	shell->exit_code = wait_children(pids, 2);
+	return (wait_children(pids, 2));
 }
 
 int	execute_ast(t_ast *ast, t_shell *shell)
@@ -284,10 +372,10 @@ int	execute_ast(t_ast *ast, t_shell *shell)
 	if (!ast || !shell)
 		return (0);
 	if (ast->type == PIPE)
-		execute_pipe(ast, shell);
+		shell->exit_code = execute_pipe(ast, shell);
 	else if (ast->type == WORD)
-		check_command(ast, ast->value[0], shell);
+		shell-> exit_code = check_command(ast, ast->value[0], shell);
 	else if (ast->type >= IN && ast->type <= APPEND)
 		shell->exit_code = check_redirection (ast, shell);
-	return (shell->exit_code); // < do i need it if i modify using pointers?
+	return (shell->exit_code); 
 }
