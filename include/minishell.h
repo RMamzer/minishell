@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/09 12:10:47 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/10 16:36:07 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,8 @@ typedef struct s_shell
 # define ALLOC true
 # define NO_ALLOC false
 
+# define EXPORT true
+# define EXECUTE false
 # define EXIT_INVALID_OPTION 2
 
 // main things
@@ -225,7 +227,7 @@ void				fatality(char *msg, t_shell *shell, int exit_code);
 void				write_bulitin_error(char *str1, char *str2, char *str3,
 						char *str4);
 void				error_close_and_exit(char *msg, int *pipefd);
-int					get_env_size(t_env *lst);
+int					get_env_size(t_env *lst,  bool process);
 char				*super_strjoin(char const *s1, char const *s2,
 						char const *s3);
 void				error_exit(char *msg);
@@ -238,7 +240,7 @@ void				execute_left_child(t_ast *node, t_shell *shell,
 						int *pipefd);
 void				execute_right_child(t_ast *node, t_shell *shell,
 						int *pipefd);
-void				execute_pipe(t_ast *node, t_shell *shell);
+int					execute_pipe(t_ast *node, t_shell *shell);
 int					execute_ast(t_ast *node, t_shell *shell);
 int					get_args_len(char **args);
 
@@ -269,4 +271,6 @@ void				write_bulitin_error(char *str1, char *str2, char *str3,
 
 // redir
 int					check_redirection(t_ast *ast, t_shell *shell);
+int 				write_error_and_return(char *msg, int error);
+void 				write_error_malloc();
 #endif

@@ -3,28 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 15:05:10 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/01 18:33:32 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/07 19:39:08 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/*
-Next steps:
-1. update the error message when issue detected in export var
-2. update process line code
-3. check that reguar execution works correctly;
-4. if no cd, i should recreate it.
-*/
-
-void	memory_error(void)
-{
-	perror("memory error");
-	exit(EXIT_FAILURE);
-}
 
 void	process_valueless_export_node(t_shell *shell, char *str)
 {
@@ -99,10 +86,10 @@ int	sort_and_print_export(t_env *env)
 	t_env	*current;
 	int		i;
 
-	i = get_env_size(env);
+	i = get_env_size(env, EXPORT);
 	temp_env = calloc(i, sizeof(t_env *));
 	if (!temp_env)
-		memory_error(); // check what to do
+		write_error_malloc(); // check what to do
 	current = env;
 	i = 0;
 	while (current)
@@ -130,7 +117,7 @@ int	execute_builtin_export(char **args, t_shell *shell)
 	if (args[0][0] == '-')
 	{
 		write_bulitin_error("minishell: export: ", *args,
-			": options are not supported\n", "export:  usage: [name ...]\n");
+			": options are not supported\nexport: usage: [name ...]\n", NULL);
 		return (EXIT_INVALID_OPTION);
 	}
 	i = -1;
