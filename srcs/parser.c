@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 18:05:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/08 18:36:38 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/08 19:15:44 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,8 @@ t_ast	*handle_redir_ast(t_token **token_list, t_ast **root, t_ast **tail,
 	redir_token = *token_list;
 	file_token = redir_token->next;
 	if (!validate_redirection(redir_token))
-		show_error(NULL, shell, 2);
+		show_error(NULL, shell, 2); // dose not work correctly
+	printf("still here\n");
 	next = file_token->next;
 	node = add_ast_node(redir_token->type, shell);
 	node->right = add_file_node(file_token, shell);

@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/08 18:36:26 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/08 19:16:40 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,10 @@
 
 // FOR MAXIM BELOW
 // TODO: plan for heredoc(probably should be handeled before the expansion)
-// TODO: AST situation.
-// TODO: ERROR MANAGEMENT
+// TODO: AST situation. need to test
+// TODO: CHECK SHOW ERROR IN PARSER
+// TODO: HEREDOC
+// TODO: SIGNALS
 
 // test function, remove later
 // void	test_tokens(t_token *list)
@@ -121,7 +123,11 @@ int	main(int ac, char **av, char **env)
 		{
 			// test_tokens(shell->token_list);
 		}
-		if (parse_tokens(shell) == SUCCESS)
+		if (parse_tokens(shell) != SUCCESS)
+		{
+			printf("parse tokens fail\n");
+		}
+		else
 		{
 			execute_ast(shell->ast, shell);
 			free_ast(&shell->ast);
@@ -130,7 +136,6 @@ int	main(int ac, char **av, char **env)
 		}
 	}
 }
-
 
 t_shell	*init_data(void)
 {
@@ -186,4 +191,3 @@ bool	process_input(char *input_line, t_shell *shell)
 	split_variables(shell);
 	return (SUCCESS);
 }
-
