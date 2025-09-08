@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/06 13:48:21 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/08 18:38:30 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,11 @@
 
 # define TO_TRIM " \t\n" // check this
 
+# define ERROR_QUOTE "syntax error: unclosed quote"
+# define ERROR_MEM "cannot allocate memory"
+# define ERROR_PIPE "syntax error near unexpected token `|\'"
+# define ERROR_REDIR "syntax error near unexpected token `redirection'"
+# define ERROR_MAX_HER "maximum here-document count exceeded"
 // token type
 typedef enum e_token_type
 {
@@ -117,6 +122,7 @@ size_t				handle_word(char *input_line, size_t start, t_shell *shell);
 void				add_token(t_shell *shell, t_token_type type, char *content);
 void				check_heredoc(t_shell *shell);
 bool				check_syntax(t_shell *shell);
+void				quote_flag(t_shell *shell);
 
 // expansion
 void				expander(t_shell *shell);
@@ -141,7 +147,7 @@ bool				is_delimiter(int i);
 bool				is_operator(char c);
 
 // errors
-void				show_error(char *msg, int exit_code);
+void				show_error(char *msg, t_shell *shell, int exit_code);
 void				lexer_error(char *input_line, t_shell *shell);
 void				free_list(t_token **list);
 
@@ -162,29 +168,33 @@ void				create_env(t_shell *shell, char **envp);
 bool				parse_tokens(t_shell *shell);
 t_ast				*parse_pipe(t_token **token_list, t_shell *shell);
 t_ast				*parse_redirection(t_token **token_list, t_shell *shell);
-t_ast				*parse_command_with_redirections(t_token **token_list,
+t_ast	*parse_command_with_redirections(t_token **token_list,
 						t_shell *shell);
-t_ast				*parse_single_redirection(t_token **token_list,
+t_ast	*parse_single_redirection(t_token **token_list,
 						t_shell *shell);
 int					count_args(t_token *tokens);
-void				load_args(t_ast *command_node, t_token **token_list, int ac,
+void	load_args(t_ast *command_node, t_token **token_list, int ac,
 						t_shell *shell);
 t_ast				*parse_command(t_token **token_list, t_shell *shell);
 t_ast				*add_file_node(t_token *token, t_shell *shell);
 t_ast				*add_ast_node(t_token_type type, t_shell *shell);
 */
-bool	parse_tokens(t_shell *shell);
-t_ast	*parse_pipe(t_token **token_list, t_shell *shell);
-bool is_redir(t_token_type type);
-t_ast *parse_command_and_redirection(t_token **token_list, t_shell *shell);
-t_ast *handle_word_ast(t_token **token_list, t_ast *cmd_node, t_shell *shell);
-t_ast *handle_redir_ast(t_token **token_list,t_ast **root, t_ast **tail, t_shell *shell);
-void append_arg(t_ast *cmd_node, const char *str, t_shell *shell);
-void init_arg(t_ast *cmd_node, const char *str, t_shell *shell);
-char **load_arg(char **old, size_t count, t_shell *shell);
-t_ast	*add_file_node(t_token *token, t_shell *shell);
-t_ast	*add_ast_node(t_token_type type, t_shell *shell);
-void move_and_free(t_token **token_list);
+bool				parse_tokens(t_shell *shell);
+t_ast				*parse_pipe(t_token **token_list, t_shell *shell);
+bool				is_redir(t_token_type type);
+t_ast				*parse_command_and_redirection(t_token **token_list,
+						t_shell *shell);
+t_ast				*handle_word_ast(t_token **token_list, t_ast *cmd_node,
+						t_shell *shell);
+t_ast				*handle_redir_ast(t_token **token_list, t_ast **root,
+						t_ast **tail, t_shell *shell);
+void				append_arg(t_ast *cmd_node, const char *str,
+						t_shell *shell);
+void				init_arg(t_ast *cmd_node, const char *str, t_shell *shell);
+char				**load_arg(char **old, size_t count, t_shell *shell);
+t_ast				*add_file_node(t_token *token, t_shell *shell);
+t_ast				*add_ast_node(t_token_type type, t_shell *shell);
+void				move_and_free(t_token **token_list);
 
 // split vars
 void				split_variables(t_shell *shell);
@@ -202,7 +212,6 @@ char				**ft_split_IFS(char *str, char *charset);
 bool				validate_redirection(t_token *redirection);
 
 // errors
-void				show_error(char *msg, int exit_code);
 void				lexer_error(char *input_line, t_shell *shell);
 void				free_list(t_token **list);
 void				free_ast(t_ast **node);

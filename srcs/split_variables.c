@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:26:38 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/03 16:06:43 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/08 17:59:26 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ void	split_variables(t_shell *data)
 		{
 			split_result = ft_split_IFS(current->content, " \t\n");
 			if (!split_result)
-				fatality("malloc failed", data, 1);
+				fatality(ERROR_MEM, data, 1);
 			process_split_result(data, current, split_result);
 			free_split(split_result);
 		}
@@ -54,7 +54,7 @@ void	process_split_result(t_shell *data, t_token *current,
 			if (!current)
 			{
 				free_split(split_result);
-				fatality("malloc failed", data, 1);
+				fatality(ERROR_MEM, data, 1);
 			}
 			i++;
 		}
@@ -69,7 +69,7 @@ void	replace_token_content(t_token *current, char *new_content,
 	if (!current->content)
 	{
 		free_split(split_result);
-		fatality("Malloc failed", data, 1);
+		fatality(ERROR_MEM, data, 1);
 	}
 }
 
