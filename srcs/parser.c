@@ -6,17 +6,39 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 18:05:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/08 19:15:44 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/09 12:10:03 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+bool    syntax_confirmed(t_token *token_list, t_shell *shell)
+{
+    t_token *current;
+
+    current = token_list;
+    while(current)
+    {
+        if(is_redir(current->type) && !validate_redirection(current))
+        {
+            show_error(NULL, shell, 2);
+            return (FAILURE);
+        }
+        current = current->next;
+    }
+    return (SUCCESS);
+}
+
 bool	parse_tokens(t_shell *shell)
 {
 	if (!shell || !shell->token_list)
 		return (FAILURE);
+    
+    if (!syntax_confirmed(shell->token_list, shell))
+        return (FAILURE);
+    
 	shell->ast = parse_pipe(&shell->token_list, shell);
+    
 	return (SUCCESS);
 }
 
@@ -88,9 +110,6 @@ t_ast	*handle_redir_ast(t_token **token_list, t_ast **root, t_ast **tail,
 
 	redir_token = *token_list;
 	file_token = redir_token->next;
-	if (!validate_redirection(redir_token))
-		show_error(NULL, shell, 2); // dose not work correctly
-	printf("still here\n");
 	next = file_token->next;
 	node = add_ast_node(redir_token->type, shell);
 	node->right = add_file_node(file_token, shell);
