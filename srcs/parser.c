@@ -6,39 +6,36 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 18:05:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/09 13:40:32 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/09 15:23:58 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-bool    syntax_confirmed(t_token *token_list, t_shell *shell)
+bool	syntax_confirmed(t_token *token_list, t_shell *shell)
 {
-    t_token *current;
+	t_token	*current;
 
-    current = token_list;
-    while(current)
-    {
-        if(is_redir(current->type) && !validate_redirection(current))
-        {
-            show_error(NULL, shell, 2);
-            return (FAILURE);
-        }
-        current = current->next;
-    }
-    return (SUCCESS);
+	current = token_list;
+	while (current)
+	{
+		if (is_redir(current->type) && !validate_redirection(current))
+		{
+			show_error(NULL, shell, 2);
+			return (FAILURE);
+		}
+		current = current->next;
+	}
+	return (SUCCESS);
 }
 
 bool	parse_tokens(t_shell *shell)
 {
 	if (!shell || !shell->token_list)
 		return (FAILURE);
-    
-    if (syntax_confirmed(shell->token_list, shell) == FAILURE)
-        return (FAILURE);
-    
+	if (syntax_confirmed(shell->token_list, shell) == FAILURE)
+		return (FAILURE);
 	shell->ast = parse_pipe(&shell->token_list, shell);
-    
 	return (SUCCESS);
 }
 
