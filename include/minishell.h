@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/08 18:38:30 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/09 12:10:47 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,6 +210,7 @@ char				**ft_split_IFS(char *str, char *charset);
 
 // ambiguous and validation of redirection
 bool				validate_redirection(t_token *redirection);
+bool    syntax_confirmed(t_token *token_list, t_shell *shell);
 
 // errors
 void				lexer_error(char *input_line, t_shell *shell);
