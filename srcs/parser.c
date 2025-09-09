@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 18:05:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/09 12:10:03 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/09 13:40:32 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ bool	parse_tokens(t_shell *shell)
 	if (!shell || !shell->token_list)
 		return (FAILURE);
     
-    if (!syntax_confirmed(shell->token_list, shell))
+    if (syntax_confirmed(shell->token_list, shell) == FAILURE)
         return (FAILURE);
     
 	shell->ast = parse_pipe(&shell->token_list, shell);
