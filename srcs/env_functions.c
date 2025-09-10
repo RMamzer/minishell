@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env_functions.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/01 17:20:42 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/10 16:11:02 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ void	update_shllvl_value(t_shell *shell)
 	if (!value_shlvl)
 		error_exit("minishell: itoa failed");
 	// <---------------------- what fucntion to exit with?
-	update_env_value(&shell->env, "SHLLVL", value_shlvl);
+	update_env_value(&shell->env, "SHLVL", value_shlvl);
 }
 
 // add the node to the env and connect last->next to new_node
