@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/09 12:36:34 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/10 17:06:05 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,7 +139,7 @@ t_shell	*init_data(void)
 		ft_putendl_fd(ERROR_MEM, 2);
 		exit(FAILURE);
 	}
-	shell->exit_code = -1; // for now
+	shell->exit_code = 0; // for now
 	shell->input_line = NULL;
 	shell->token_list = NULL;
 	shell->env = NULL;
