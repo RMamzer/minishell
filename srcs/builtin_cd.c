@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/10 16:42:24 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/10 16:44:33 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,6 @@ int	execute_builtin_cd(char **args, t_shell *shell)
 	if (args[0][0] == '-')
 	if (args[0][0] == '-')
 	{
-		write_bulitin_error("minishell: cd: ", args[0], ": invalid option\n",
 		write_bulitin_error("minishell: cd: ", args[0], ": invalid option\n",
 			NULL);
 		return (EXIT_INVALID_OPTION);
