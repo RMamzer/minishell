@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/10 17:18:18 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/10 17:23:31 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@ int	change_working_directory(char *path, t_shell *shell)
 	}
 	if (chdir(path) != 0)
 	{
-		write_bulitin_error("minishell: cd:", NULL, NULL, path);
-		return (errno);
+		write_bulitin_error("minishell: cd: ", NULL, NULL, path);
+		return (EXIT_FAILURE); // heck code here
 	}
 	new_pwd = getcwd(NULL, 0);
 	if (!new_pwd)

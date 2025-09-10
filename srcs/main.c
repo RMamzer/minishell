@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/10 17:06:05 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/10 17:44:51 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,8 +106,8 @@ int	main(int ac, char **av, char **env)
 	t_shell	*shell;
 	char	*input;
 
-	(void)ac; // addded for testing
-	(void)av; // addded for testing
+	(void)ac;
+	(void)av;
 	shell = init_data();
 	create_env(shell, env);
 	// test_env(shell->env); // test
@@ -123,6 +123,7 @@ int	main(int ac, char **av, char **env)
             continue;
 		if (parse_tokens(shell) != SUCCESS)
             continue;
+		// print_ast(shell->ast, 0);
 		execute_ast(shell->ast, shell);
         //print_ast(shell->ast, 0);
 		free_shell_data(shell);

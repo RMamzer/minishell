@@ -15,7 +15,7 @@ int execute_redirection_in(t_ast *ast)
 
 	infile_fd = open(*ast->value, O_RDONLY);
 	if (infile_fd < 0)
-		return (write_error_and_return(*ast->value, errno));
+		return (write_error_and_return(*ast->value, EXIT_FAILURE));
 	if (dup2(infile_fd, STDIN_FILENO) == -1)
 	{
 		close(infile_fd);
