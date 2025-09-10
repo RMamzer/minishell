@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/10 16:36:07 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/10 16:37:36 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,7 @@ typedef struct s_shell
 # define EXPORT true
 # define EXECUTE false
 # define EXIT_INVALID_OPTION 2
+# define EXIT_CMD_NOT_FOUND 127
 
 // main things
 int					main(int ac, char **av, char **env);

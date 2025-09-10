@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/10 16:36:28 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/10 16:37:23 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,9 @@ int	get_env_size(t_env *lst, bool process)
 	tmp = lst;
 	while (tmp)
 	{
+		if (process == EXPORT || tmp->assigned == true)
+			i++;
+		tmp = tmp->next;
 		tmp = tmp->next;
 		i++;
 	}
@@ -87,17 +90,17 @@ char	*super_strjoin(char const *s1, char const *s2, char const *s3)
 	return (joinedstr);
 }
 
-// use a main error exit when parent breaks:
-// draw the exit path for functions
-void	error_exit(char *msg)
-{
-	perror(msg);
-	// free env,
-	// if (shell->env)
-	// free env
-	// free ast?
-	exit(errno);
-}
+// // use a main error exit when parent breaks:
+// // draw the exit path for functions
+// void	error_exit(char *msg)
+// {
+// 	perror(msg);
+// 	// free env,
+// 	// if (shell->env)
+// 	// free env
+// 	// free ast?
+// 	exit(errno);
+// }
 
 int	error_close_and_return(char *msg, int *pipefd, int error)
 {
@@ -295,5 +298,6 @@ int	execute_ast(t_ast *ast, t_shell *shell)
 		shell-> exit_code = check_command(ast, ast->value[0], shell);
 	else if (ast->type >= IN && ast->type <= APPEND)
 		shell->exit_code = check_redirection (ast, shell);
+	return (shell->exit_code);
 	return (shell->exit_code); // < do i need it if i modify using pointers?
 }
