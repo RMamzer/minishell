@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_echo.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 15:37:48 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/10 16:01:28 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/10 18:55:48 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,13 @@ int	execute_builtin_echo(char **args)
 
 	i = 0;
 	n_flag = false;
-	if (!*args)
-	while (ft_strcmp("-n", args[i]) == 0)
+	if (*args)
 	{
-		n_flag = true;
-		i++;
+		while (ft_strcmp("-n", args[i]) == 0)
+		{
+			n_flag = true;
+			i++;
+		}
 	}
 	while (args[i])
 	{

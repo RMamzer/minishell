@@ -3,17 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_cd.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/10 17:23:31 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/10 18:51:26 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
 #include "minishell.h"
-
-
 
 int	change_working_directory(char *path, t_shell *shell)
 {
@@ -33,16 +30,14 @@ int	change_working_directory(char *path, t_shell *shell)
 	if (!new_pwd)
 		return (write_error_and_return("cd: getcwd", errno));
 	if (update_env_value(&shell->env, "OLDPWD", get_env_value("PWD", shell->env,
-			ALLOC)) == false)
-			{
-				free (new_pwd);
-				write_error_malloc();
-			}
+				ALLOC)) == false)
+	{
+		free(new_pwd);
+		write_error_malloc();
+	}
 	update_env_value(&shell->env, "PWD", new_pwd);
 	return (EXIT_SUCCESS);
 }
-
-
 
 int	execute_builtin_cd(char **args, t_shell *shell)
 {

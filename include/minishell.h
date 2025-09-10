@@ -3,15 +3,12 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/10 16:42:09 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/10 18:52:39 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-
-
 
 #ifndef MINISHELL_H
 # define MINISHELL_H
@@ -173,21 +170,6 @@ void				set_minimal_env(t_shell *shell);
 void				create_env(t_shell *shell, char **envp);
 
 // ast
-/*
-bool				parse_tokens(t_shell *shell);
-t_ast				*parse_pipe(t_token **token_list, t_shell *shell);
-t_ast				*parse_redirection(t_token **token_list, t_shell *shell);
-t_ast	*parse_command_with_redirections(t_token **token_list,
-						t_shell *shell);
-t_ast	*parse_single_redirection(t_token **token_list,
-						t_shell *shell);
-int					count_args(t_token *tokens);
-void	load_args(t_ast *command_node, t_token **token_list, int ac,
-						t_shell *shell);
-t_ast				*parse_command(t_token **token_list, t_shell *shell);
-t_ast				*add_file_node(t_token *token, t_shell *shell);
-t_ast				*add_ast_node(t_token_type type, t_shell *shell);
-*/
 bool				parse_tokens(t_shell *shell);
 t_ast				*parse_pipe(t_token **token_list, t_shell *shell);
 bool				is_redir(t_token_type type);
@@ -219,7 +201,7 @@ char				**ft_split_IFS(char *str, char *charset);
 
 // ambiguous and validation of redirection
 bool				validate_redirection(t_token *redirection);
-bool    syntax_confirmed(t_token *token_list, t_shell *shell);
+bool				syntax_confirmed(t_token *token_list, t_shell *shell);
 
 // errors
 void				lexer_error(char *input_line, t_shell *shell);
@@ -234,8 +216,8 @@ void				fatality(char *msg, t_shell *shell, int exit_code);
 void				write_bulitin_error(char *str1, char *str2, char *str3,
 						char *str4);
 void				error_close_and_exit(char *msg, int *pipefd);
-int					get_env_size(t_env *lst,  bool process);
-int					get_env_size(t_env *lst,  bool process);
+int					get_env_size(t_env *lst, bool process);
+int					get_env_size(t_env *lst, bool process);
 char				*super_strjoin(char const *s1, char const *s2,
 						char const *s3);
 void				error_exit(char *msg);
@@ -280,8 +262,8 @@ void				write_bulitin_error(char *str1, char *str2, char *str3,
 
 // redir
 int					check_redirection(t_ast *ast, t_shell *shell);
-int 				write_error_and_return(char *msg, int error);
-void 				write_error_malloc();
-int 				write_error_and_return(char *msg, int error);
-void 				write_error_malloc();
+int					write_error_and_return(char *msg, int error);
+void				write_error_malloc(void);
+int					write_error_and_return(char *msg, int error);
+void				write_error_malloc(void);
 #endif

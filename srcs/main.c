@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/10 17:44:51 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/10 18:52:26 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 
 // FOR MAXIM BELOW
 // TODO: plan for heredoc(probably should be handeled before the expansion)
-// TODO: AST situation. need to test
-// TODO: CHECK SHOW ERROR IN PARSER
 // TODO: HEREDOC
 // TODO: SIGNALS
 
@@ -120,12 +118,12 @@ int	main(int ac, char **av, char **env)
 			add_history(input);
 		shell->input_line = input;
 		if (process_input(shell->input_line, shell) != SUCCESS)
-            continue;
+			continue ;
 		if (parse_tokens(shell) != SUCCESS)
-            continue;
+			continue ;
 		// print_ast(shell->ast, 0);
 		execute_ast(shell->ast, shell);
-        //print_ast(shell->ast, 0);
+		// print_ast(shell->ast, 0);
 		free_shell_data(shell);
 	}
 }

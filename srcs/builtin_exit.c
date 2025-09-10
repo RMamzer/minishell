@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_exit.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 17:38:22 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/07 16:59:04 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/10 18:51:34 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,6 @@ int	execute_builtin_exit(char **args, t_shell *shell)
 	}
 	if (*args)
 		shell->exit_code = check_exit_code(args[0]);
-	// free_minishell_here??? Figure out with maxim 
+	// free_minishell_here??? Figure out with maxim
 	exit(shell->exit_code);
 }
