@@ -5,10 +5,13 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/08/06 14:59:35 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/10 16:37:36 by rmamzer          ###   ########.fr       */
+/*   Created: Invalid date        by                   #+#    #+#             */
+/*   Updated: 2025/09/10 16:42:09 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+
+
 
 #ifndef MINISHELL_H
 # define MINISHELL_H
@@ -107,7 +110,10 @@ typedef struct s_shell
 
 # define EXPORT true
 # define EXECUTE false
+# define EXPORT true
+# define EXECUTE false
 # define EXIT_INVALID_OPTION 2
+# define EXIT_CMD_NOT_FOUND 127
 # define EXIT_CMD_NOT_FOUND 127
 
 // main things
@@ -229,6 +235,7 @@ void				write_bulitin_error(char *str1, char *str2, char *str3,
 						char *str4);
 void				error_close_and_exit(char *msg, int *pipefd);
 int					get_env_size(t_env *lst,  bool process);
+int					get_env_size(t_env *lst,  bool process);
 char				*super_strjoin(char const *s1, char const *s2,
 						char const *s3);
 void				error_exit(char *msg);
@@ -241,6 +248,7 @@ void				execute_left_child(t_ast *node, t_shell *shell,
 						int *pipefd);
 void				execute_right_child(t_ast *node, t_shell *shell,
 						int *pipefd);
+int					execute_pipe(t_ast *node, t_shell *shell);
 int					execute_pipe(t_ast *node, t_shell *shell);
 int					execute_ast(t_ast *node, t_shell *shell);
 int					get_args_len(char **args);
@@ -272,6 +280,8 @@ void				write_bulitin_error(char *str1, char *str2, char *str3,
 
 // redir
 int					check_redirection(t_ast *ast, t_shell *shell);
+int 				write_error_and_return(char *msg, int error);
+void 				write_error_malloc();
 int 				write_error_and_return(char *msg, int error);
 void 				write_error_malloc();
 #endif
