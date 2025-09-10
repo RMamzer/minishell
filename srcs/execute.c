@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 15:58:25 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/10 14:33:06 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/10 15:53:54 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,20 @@
 //         printf("%s\n", envp[i]);
 //     }
 // }
+
+// REMOVE AND FIX ENV EXITS
+void	error_exit(char *msg)
+{
+	perror(msg);
+	exit (errno);
+}
+
+void	free_execution(t_shell *shell)
+{
+
+	free(shell);
+}
+
 
 
 
@@ -51,13 +65,12 @@ void 	write_error_malloc()
 	exit(errno);
 }
 
-void	error_exec_exit(char *str1, char *str2, int exit_code, t_shell *shell)
+void	error_exec_exit(char *str1, t_shell *shell)
 {
-	ft_putchar_fd("minishell: ", STDERR_FILENO);
+	ft_putstr_fd("minishell: ", STDERR_FILENO);
 	if (*str1)
 		ft_putstr_fd(str1, STDERR_FILENO);
-
-	free (shell);//free everything same as in malloc error
+	free_execution(shell);
 	exit (errno);
 }
 
@@ -111,17 +124,7 @@ char	*super_strjoin(char const *s1, char const *s2, char const *s3)
 	return (joinedstr);
 }
 
-// // use a main error exit when parent breaks:
-// // draw the exit path for functions
-// void	error_exit(char *msg)
-// {
-// 	perror(msg);
-// 	// free env,
-// 	// if (shell->env)
-// 	// free env
-// 	// free ast?
-// 	exit(errno);
-// }
+
 
 int	error_close_and_return(char *msg, int *pipefd, int error)
 {
@@ -216,7 +219,7 @@ Logic:
 // 		error_exit(*args);
 // 	}
 
-char	*find_path_cmd(char**args, t_shell *shell)
+char	*find_path_cmd(char**args, bool *malocced, t_shell *shell)
 {
 	char	*cmd_path;
 	int		i;
@@ -224,6 +227,7 @@ char	*find_path_cmd(char**args, t_shell *shell)
 	if (ft_strchr(args[0], '/'))
 		return (args[0]);
 	i = 0;
+	*malocced = true;
 	while (shell->paths_array[i])
 	{
 		cmd_path = super_strjoin(shell->paths_array[i], "/", args[0]);
@@ -236,11 +240,8 @@ char	*find_path_cmd(char**args, t_shell *shell)
 	}
 	write_bulitin_error("minishell: ", *args, ": command not found\n", NULL);
 	free(shell); // free everything mallocced on this level
-	exit (EXIT_CMD_NOT_FOUND);
+	exit(EXIT_CMD_NOT_FOUND);
 }
-
-
-
 
 
 //add ending
@@ -248,18 +249,28 @@ void	execute_cmd_child(char **args, t_shell *shell)
 {
 	char	*env_path;
 	char	*cmd_path;
+	bool	malloced;
 
+	malloced = false;
 	env_path = (get_env_value("PATH", shell->env, NO_ALLOC));
 	if (!env_path) // check what kinds of errors could be here: if command and path?
-		error_exit("minishell cmd: not found");
+	{
+		write_bulitin_error("minishell: ", *args, ": command not found\n", NULL);
+		free_execution(shell);
+		exit(EXIT_CMD_NOT_FOUND);
+	}
+
 	shell->paths_array = ft_split(env_path, ':');
 	if (!shell->paths_array)
 		write_error_malloc(); // malloc env_paths here
 	recreate_env_array(shell->env, shell);
-	cmd_path = find_path_cmd(args, shell);
+	cmd_path = find_path_cmd(args, &malloced, shell);
 	if (access(cmd_path, X_OK)== 0)
-
-	}
+		execve(cmd_path, args, shell->env_array);
+	if (malloced == true)
+		free (cmd_path);
+	error_exec_exit(args[0], shell);
+}
 
 
 // THE OLDEST ONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -350,13 +361,13 @@ int	wait_children(pid_t *pids, int children_rem)
 	{
 		term_pid = waitpid(*pids, &status, 0);
 		if (term_pid == -1)
-			error_exit("minishell: waitpd failed");
+			return(write_error_and_return("waitpd", errno));
 	}
 	while (children_rem > 0)
 	{
 		term_pid = waitpid(-1, &status, 0);
 		if (term_pid == -1)
-			error_exit("minishell: waitpd failed");
+			return(write_error_and_return("waitpd", errno));
 		if (term_pid == pids[0] || term_pid == pids[1])
 		{
 			children_rem--;
