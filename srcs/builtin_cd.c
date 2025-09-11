@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/10 17:23:31 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/11 20:09:53 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,40 +15,77 @@
 
 
 
+// int	change_working_directory(char *path, t_shell *shell)
+// {
+// 	char	*new_pwd;
+// 	char	*old_pwd:
+
+// 	if (!path)
+// 		return (write_error_and_return("minishell: cd: HOME not set\n", EXIT_FAILURE));
+// 	if (chdir(path) != 0)
+// 	{
+// 		write_bulitin_error("minishell: cd: ", NULL, NULL, path);
+// 		return (EXIT_FAILURE);
+// 	}
+// 	new_pwd = getcwd(NULL, 0);
+// 	if (!new_pwd)
+// 		return (write_error_and_return("cd: getcwd", errno));
+// 	if (get_env_value("PWD", shell->env, NO_ALLOC) && get_env_value("PWD", shell->env, NO_ALLOC))
+// 	{
+// 		update_env_value(&shell->env, "OLDPWD", get_env_value("PWD", shell->env,
+// 		ALLOC)) == false)
+// 			{
+// 				free (new_pwd);
+// 				write_error_malloc();
+// 			}
+// 	}
+// 	if (update_env_value(&shell->env, "PWD", new_pwd) == false)
+// 		free(new_pwd);
+// 	return (EXIT_SUCCESS);
+// }
+
+
 int	change_working_directory(char *path, t_shell *shell)
 {
 	char	*new_pwd;
+	char	*old_pwd;
 
-	if (!path)
-	{
-		ft_putstr_fd("minishell: cd: HOME not set\n", STDERR_FILENO);
-		return (EXIT_FAILURE);
-	}
 	if (chdir(path) != 0)
 	{
 		write_bulitin_error("minishell: cd: ", NULL, NULL, path);
-		return (EXIT_FAILURE); // heck code here
+		return (EXIT_FAILURE);
 	}
-	new_pwd = getcwd(NULL, 0);
-	if (!new_pwd)
-		return (write_error_and_return("cd: getcwd", errno));
-	if (update_env_value(&shell->env, "OLDPWD", get_env_value("PWD", shell->env,
-			ALLOC)) == false)
-			{
-				free (new_pwd);
-				write_error_malloc();
-			}
-	update_env_value(&shell->env, "PWD", new_pwd);
+	if (get_env_value("PWD", shell->env, NO_ALLOC))
+	{
+		old_pwd = get_env_value("PWD", shell->env, ALLOC);
+		if (!old_pwd)
+			write_error_malloc();
+		if (update_env_value (&shell->env, "OLDPWD", old_pwd) == false)
+			free (old_pwd);
+		new_pwd = getcwd(NULL, 0);
+		if (!new_pwd)
+			return (write_error_and_return("cd: getcwd", errno));
+		if (update_env_value(&shell->env, "PWD", new_pwd) == false)
+			free(new_pwd);
+	}
 	return (EXIT_SUCCESS);
 }
 
 
-
 int	execute_builtin_cd(char **args, t_shell *shell)
 {
+	char	*path;
+
 	if (!args[0])
-		return (change_working_directory(get_env_value("HOME", shell->env,
-					NO_ALLOC), shell));
+	{
+		path = get_env_value("HOME", shell->env, NO_ALLOC);
+		if (!path)
+		{
+			ft_putstr_fd("minishell: cd: HOME not set\n",STDERR_FILENO);
+			return (EXIT_FAILURE);
+		}
+	return (change_working_directory(path, shell));
+	}
 	if (args[0][0] == '-')
 	{
 		write_bulitin_error("minishell: cd: ", args[0], ": invalid option\n",

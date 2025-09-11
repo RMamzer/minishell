@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/10 16:54:52 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/11 20:48:15 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,15 +34,6 @@ void	error_exit(char *msg)
 	exit (errno);
 }
 
-void	free_execution(t_shell *shell)
-{
-
-	free(shell);
-}
-
-
-
-
 void	write_bulitin_error(char *str1, char *str2, char *str3, char *str4)
 {
 	if (str1)
@@ -54,6 +45,17 @@ void	write_bulitin_error(char *str1, char *str2, char *str3, char *str4)
 	if (str4)
 		perror(str4);
 }
+
+void	free_execution(t_shell *shell)
+{
+	if (!shell)
+		return ;
+	if (shell->env_array)
+		free_array(shell->env_array);
+	if (shell->paths_array)
+		free_array(shell->paths_array);
+}
+
 /*
 Do we need to add additional message here?
 What to free here:
@@ -152,7 +154,10 @@ void	recreate_env_array(t_env *env, t_shell *shell)
 		{
 			shell->env_array[i] = super_strjoin(temp->key, "=", temp->value);
 			if (!shell->env_array[i])
+			{
+				free_execution(shell);
 				write_error_malloc();
+			}
 			i++;
 		}
 		temp = temp->next;
@@ -300,19 +305,22 @@ char	*find_path_cmd(char**args, bool *malocced, t_shell *shell)
 	{
 		cmd_path = super_strjoin(shell->paths_array[i], "/", args[0]);
 		if (!cmd_path)
+		{
+			free_execution(shell);
 			write_error_malloc();
+		}
 		if (access(cmd_path, F_OK) == 0)
 			return (cmd_path);
 		free(cmd_path);
 		i++;
 	}
 	write_bulitin_error("minishell: ", *args, ": command not found\n", NULL);
-	free(shell); // free everything mallocced on this level
+	free_execution (shell);
 	exit(EXIT_CMD_NOT_FOUND);
 }
 
 
-//add ending
+//CHECK ENV_ARRAY AND PATHS_ARRAY frees
 void	execute_cmd_child(char **args, t_shell *shell)
 {
 	char	*env_path;
@@ -321,10 +329,9 @@ void	execute_cmd_child(char **args, t_shell *shell)
 
 	malloced = false;
 	env_path = (get_env_value("PATH", shell->env, NO_ALLOC));
-	if (!env_path) // check what kinds of errors could be here: if command and path?
+	if (!env_path)
 	{
 		write_bulitin_error("minishell: ", *args, ": command not found\n", NULL);
-		free_execution(shell);
 		exit(EXIT_CMD_NOT_FOUND);
 	}
 	shell->paths_array = ft_split(env_path, ':');
@@ -517,6 +524,7 @@ int	execute_pipe(t_ast *ast, t_shell *shell)
 	int		pipefd[2];
 	pid_t	pids[2];
 
+	shell->complete_exit = false;
 	if (pipe(pipefd) == -1)
 		write_error_and_return("pipe", errno);
 	pids[0] = fork();

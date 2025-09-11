@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_pwd.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/20 15:46:34 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/01 17:20:38 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/11 19:19:00 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,16 @@ int	execute_builtin_pwd(char **args, t_shell *shell)
 			STDERR_FILENO);
 		return (EXIT_FAILURE);
 	}
-	path = get_env_value("PWD", shell->env, NO_ALLOC);
+	if (!shell)
+		return (1);
+	// path = get_env_value("PWD", shell->env, NO_ALLOC);
+	// if (!path)
+	// 	return (EXIT_FAILURE);
+	// printf("%s\n", path);
+	path = getcwd(NULL, 0);
 	if (!path)
-		return (EXIT_FAILURE);
+		return (write_error_and_return("cd: getcwd", errno));
 	printf("%s\n", path);
+	free(path);
 	return (0);
 }

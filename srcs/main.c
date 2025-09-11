@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/10 17:44:51 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/11 15:54:45 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,6 +145,7 @@ t_shell	*init_data(void)
 	shell->token_list = NULL;
 	shell->env = NULL;
 	shell->ast = NULL;
+	shell->complete_exit = true;
 	return (shell);
 }
 

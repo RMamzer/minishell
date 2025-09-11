@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/10 16:11:02 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/11 20:12:51 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,5 +233,6 @@ void	create_env(t_shell *shell, char **envp)
 	shell_name = ft_strdup("minishell");
 	if (!shell_name)
 		error_exit("minishell: malloc failed:"); //<-what fucntion to exit with?
-	update_env_value(&shell->env, "SHELL", shell_name);
+	if (update_env_value(&shell->env, "SHELL", shell_name)==false)
+		free(shell_name);
 }

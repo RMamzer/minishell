@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/10 16:42:09 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/11 15:53:52 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,7 @@ typedef struct s_shell
 	t_ast			*ast;
 	char			**env_array;
 	char			**paths_array;
+	bool			complete_exit;
 }					t_shell;
 
 // lib and macro for execution

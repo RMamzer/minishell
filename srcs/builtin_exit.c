@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 17:38:22 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/07 16:59:04 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/11 16:13:54 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ int	execute_builtin_exit(char **args, t_shell *shell)
 	}
 	if (*args)
 		shell->exit_code = check_exit_code(args[0]);
-	// free_minishell_here??? Figure out with maxim 
-	exit(shell->exit_code);
+	if (shell->complete_exit == true)
+		fatality(NULL, shell, shell->exit_code);
+	return (shell->exit_code);
 }
