@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/10 18:52:26 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/11 19:09:20 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,6 +174,7 @@ bool	process_input(char *input_line, t_shell *shell)
 	lexer(shell->input_line, shell);
 	quote_flag(shell);
 	check_heredoc(shell);
+	process_heredoc(shell);
 	if (check_syntax(shell) == FAILURE)
 	{
 		return (FAILURE);

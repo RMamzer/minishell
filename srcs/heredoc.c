@@ -1,0 +1,131 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   heredoc.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
+/*   Updated: 2025/09/11 19:13:04 by mklevero         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "minishell.h"
+
+// TODO: sskobki chtob ostavalis' vnutri herdoca
+// TODO: syntax check for << <<
+// TODO: EOF "da" dolzhen bit da
+
+bool	process_heredoc(t_shell *shell)
+{
+	int		fd;
+	size_t	i;
+	char	*file;
+	t_token	*current;
+
+	i = 0;
+	file = NULL;
+	current = shell->token_list;
+	while (current)
+	{
+		if (current->type == HEREDOC && (current->next->type == HEREDOC_DELIM_QT
+				|| current->next->type == HEREDOC_DELIM_UQ)) // think here
+		{
+			update_file_name(&file, &i, shell);
+			fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+			if (fd == -1)
+			{
+				free(file);
+				return (FAILURE);
+			}
+			if (read_heredoc(&fd, current->next, shell) == FAILURE)
+			{
+				close(fd);
+				free(file);
+				return (FAILURE);
+			}
+			close(fd);
+			update_heredoc_token(current, file);
+			i++;
+		}
+		current = current->next;
+	}
+	return (SUCCESS);
+}
+
+bool	read_heredoc(int *fd, t_token *delim, t_shell *shell)
+{
+	char	*line;
+
+	while (69)
+	{
+		line = readline("> ");
+		if (!line)
+		{
+			ft_putendl_fd(ERROR_EOF, 2);
+			break ;
+		}
+		if (ft_strcmp(line, delim->content) == 0)
+		{
+			free(line);
+			break ;
+		}
+		if (delim->quoted == false)
+			expand_heredoc(&line, shell);
+		write(*fd, line, ft_strlen(line));
+		write(*fd, "\n", 1);
+		free(line);
+	}
+	return (SUCCESS);
+}
+
+void	update_file_name(char **file, size_t *i, t_shell *shell)
+{
+	char	*file_num;
+
+	while (69)
+	{
+		file_num = ft_itoa(*i);
+		if (!file_num)
+			fatality(ERROR_MEM, shell, 1);
+		*file = ft_strjoin("/tmp/kunteynir", file_num);
+		free(file_num);
+		if (!file)
+			fatality(ERROR_MEM, shell, 1);
+		if (access(*file, F_OK) == 0)
+		{
+			free(*file);
+			(*i)++;
+		}
+		else
+			break ;
+	}
+}
+
+void	expand_heredoc(char **line, t_shell *shell)
+{
+	t_token	temp_token;
+	char	*expanded;
+
+	if (!line || !*line)
+		return ;
+	temp_token.content = *line;
+	temp_token.type = WORD;
+	temp_token.expanded = false;
+	temp_token.quoted = false;
+	// what about next??
+	expanded = expand_content(temp_token.content, shell, &temp_token);
+	*line = expanded;
+}
+
+void	update_heredoc_token(t_token *current, char *file)
+{
+	free(current->content);
+	current->type = IN;
+	current->content = ft_strdup("<");
+	if (!current->content)
+		// malloc failed, need to check what to free
+		free(current->next->content);
+	current->next->type = WORD;
+	current->next->content = file;
+}
