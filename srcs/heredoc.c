@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/11 19:13:04 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/12 12:53:41 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,17 +104,14 @@ void	update_file_name(char **file, size_t *i, t_shell *shell)
 
 void	expand_heredoc(char **line, t_shell *shell)
 {
-	t_token	temp_token;
+	
 	char	*expanded;
 
 	if (!line || !*line)
 		return ;
-	temp_token.content = *line;
-	temp_token.type = WORD;
-	temp_token.expanded = false;
-	temp_token.quoted = false;
-	// what about next??
-	expanded = expand_content(temp_token.content, shell, &temp_token);
+
+	expanded = heredoc_expander(*line, shell);
+    free(*line);
 	*line = expanded;
 }
 
@@ -124,8 +121,52 @@ void	update_heredoc_token(t_token *current, char *file)
 	current->type = IN;
 	current->content = ft_strdup("<");
 	if (!current->content)
-		// malloc failed, need to check what to free
-		free(current->next->content);
+		fatality(ERROR_MEM, shell, 1);
+    free(current->next->content);
 	current->next->type = WORD;
 	current->next->content = file;
+}
+char *heredoc_expander(char *line, t_shell *shell)
+{
+    size_t i;
+    size_t start;
+    char *new_content;
+    char *temp;
+    
+    i = 0;
+    new_content = ft_strdup("");
+	if (new_content == NULL)
+        fatality(ERROR_MEM, shell, 1);
+    while(line[i])
+    {
+        if(line[i] == '$')
+        {
+            i++;
+            if(ft_isalpha(line[i]) || line[i] == '_')
+                temp = expand_env_var(line, &i, shell->env);
+            else if(line[i] == '?')
+            {
+                i++;
+                temp = ft_itoa(shell->exit_code);
+            }
+            else
+                temp = ft_strdup("$");
+        }
+        else
+        {
+            start = i;
+            while(line[i] && line[i] != '$')
+                i++;
+            temp = ft_substr(line, start, i - start);
+        }
+        if(!temp)
+        {
+            free(new_content);
+            fatality(ERROR_MEM, shell, 1);
+        }
+        new_content = strjoin_free(new_content, temp);
+        if(!new_content)
+            fatality(ERROR_MEM, shell, 1);
+    }
+    return (new_content);
 }
