@@ -34,7 +34,7 @@ int	execute_redirection_out(t_ast *ast, t_token_type type)
 	else
 		outfile_fd = open(*ast->value, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	if (outfile_fd < 0)
-		return (write_error_and_return(*ast->value, errno));
+		return (write_error_and_return(*ast->value, EXIT_FAILURE));
 	if (dup2(outfile_fd, STDOUT_FILENO) == -1)
 	{
 		close(outfile_fd);

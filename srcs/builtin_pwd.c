@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/20 15:46:34 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/11 19:19:00 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/12 17:01:05 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int	execute_builtin_pwd(char **args, t_shell *shell)
 	{
 		ft_putstr_fd("minishell: pwd: no options or arguments are supported\n",
 			STDERR_FILENO);
-		return (EXIT_FAILURE);
+		return (EXIT_INVALID_OPTION);
 	}
 	if (!shell)
 		return (1);
