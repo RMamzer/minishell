@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:29:11 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/10 18:52:24 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/12 19:08:44 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,4 +132,33 @@ bool	is_operator(char c)
 	if (c == '|' || c == '<' || c == '>')
 		return (true);
 	return (false);
+}
+
+void    remove_empty_tokens(t_shell *shell)
+{
+    t_token *curr;
+    t_token *prev;
+    t_token *tmp;
+
+    curr = shell->token_list;
+    prev = NULL;
+    while (curr)
+    {
+        if (!curr->quoted && curr->type == WORD && curr->content[0] == '\0')
+        {
+            tmp = curr;
+            if (prev == NULL) // removing head
+                shell->token_list = curr->next;
+            else
+                prev->next = curr->next;
+            curr = curr->next;
+            free(tmp->content);
+            free(tmp);
+        }
+        else
+        {
+            prev = curr;
+            curr = curr->next;
+        }
+    }
 }
