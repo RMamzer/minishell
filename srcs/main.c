@@ -6,14 +6,14 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/12 15:26:10 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/12 18:29:08 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 // FOR MAXIM BELOW
-// TODO: plan for heredoc(probably should be handeled before the expansion)
+// cleanup for temp file
 // TODO: HEREDOC
 // TODO: SIGNALS
 
@@ -121,7 +121,7 @@ int	main(int ac, char **av, char **env)
 			continue ;
 		if (parse_tokens(shell) != SUCCESS)
 			continue ;
-		// print_ast(shell->ast, 0);
+		print_ast(shell->ast, 0);
 		execute_ast(shell->ast, shell);
 		// print_ast(shell->ast, 0);
 		free_shell_data(shell);
@@ -173,16 +173,14 @@ bool	process_input(char *input_line, t_shell *shell)
 	shell->input_line = line;
 	lexer(shell->input_line, shell);
 	quote_flag(shell);
-	test_tokens(shell->token_list);
 	if (check_syntax(shell) == FAILURE)
 	{
 		return (FAILURE);
 	}
 	check_heredoc(shell);
-	test_tokens(shell->token_list);
 	process_heredoc(shell);
-	test_tokens(shell->token_list);
 	expander(shell); // test
 	split_variables(shell);
+	test_tokens(shell->token_list);
 	return (SUCCESS);
 }
