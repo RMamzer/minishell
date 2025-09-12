@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/11 17:55:09 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/12 12:56:15 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,6 +138,7 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell);
 void	update_file_name(char **file, size_t *i, t_shell *shell);
 void	expand_heredoc(char **line, t_shell *shell);
 void	update_heredoc_token(t_token *current, char *file);
+char *heredoc_expander(char *line, t_shell *shell);
 
 
 // expansion
