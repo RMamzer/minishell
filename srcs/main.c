@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/11 19:09:20 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/12 15:26:10 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,14 @@
 // TODO: SIGNALS
 
 // test function, remove later
-// void	test_tokens(t_token *list)
-// {
-// 	while (list)
-// 	{
-// 		printf("[TYPE: %d] \"%s\"\n", list->type, list->content);
-// 		list = list->next;
-// 	}
-// }
+void	test_tokens(t_token *list)
+{
+	while (list)
+	{
+		printf("[TYPE: %d] \"%s\"\n", list->type, list->content);
+		list = list->next;
+	}
+}
 
 // void	test_env(t_env *envlist)
 // {
@@ -173,12 +173,15 @@ bool	process_input(char *input_line, t_shell *shell)
 	shell->input_line = line;
 	lexer(shell->input_line, shell);
 	quote_flag(shell);
-	check_heredoc(shell);
-	process_heredoc(shell);
+	test_tokens(shell->token_list);
 	if (check_syntax(shell) == FAILURE)
 	{
 		return (FAILURE);
 	}
+	check_heredoc(shell);
+	test_tokens(shell->token_list);
+	process_heredoc(shell);
+	test_tokens(shell->token_list);
 	expander(shell); // test
 	split_variables(shell);
 	return (SUCCESS);

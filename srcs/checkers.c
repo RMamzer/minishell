@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/10 18:51:48 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/12 15:54:55 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,9 @@ void	check_heredoc(t_shell *shell)
 {
 	t_token	*current;
 	int		count;
+	int		i;
 
+	i = 0;
 	count = 0;
 	current = shell->token_list;
 	while (current)
@@ -77,8 +79,7 @@ void	check_heredoc(t_shell *shell)
 		if (current->type == HEREDOC && current->next)
 		{
 			count++;
-			if (current->next->content[0] == '\''
-				|| current->next->content[0] == '"')
+			if (current->next->quoted == true)
 				current->next->type = HEREDOC_DELIM_QT;
 			else
 				current->next->type = HEREDOC_DELIM_UQ;

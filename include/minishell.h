@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/12 12:56:15 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/12 17:21:10 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,6 @@ t_shell				*init_data(void);
 bool				process_input(char *input_line, t_shell *shell);
 char				check_quote(char *line, int index);
 
-
 // lexer
 void				lexer(char *input_line, t_shell *shell);
 size_t				handle_operator(char *input_line, size_t i, t_shell *shell);
@@ -133,13 +132,13 @@ bool				check_syntax(t_shell *shell);
 void				quote_flag(t_shell *shell);
 
 // heredoc
-bool	process_heredoc(t_shell *shell);
-bool	read_heredoc(int *fd, t_token *delim, t_shell *shell);
-void	update_file_name(char **file, size_t *i, t_shell *shell);
-void	expand_heredoc(char **line, t_shell *shell);
-void	update_heredoc_token(t_token *current, char *file);
-char *heredoc_expander(char *line, t_shell *shell);
-
+bool				process_heredoc(t_shell *shell);
+bool				read_heredoc(int *fd, t_token *delim, t_shell *shell);
+void				update_file_name(char **file, size_t *i, t_shell *shell);
+void				expand_heredoc(char **line, t_shell *shell);
+void				update_heredoc_token(t_token *current, char *file);
+char				*heredoc_expander(char *line, t_shell *shell);
+void				process_delim(t_token *delim, t_shell *shell);
 
 // expansion
 void				expander(t_shell *shell);
