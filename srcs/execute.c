@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/12 19:24:31 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/12 21:19:42 by mamzerr1         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,7 @@ Do we need to add additional message here?
 What to free here:
 1. Path ft_split
 2. Recreated env array of arrays
+// free execution
 */
 void 	write_error_malloc()
 {
@@ -91,13 +92,13 @@ void 	write_error_malloc()
 	exit(errno);
 }
 
-void	error_exec_exit(char *str1, t_shell *shell)
+void	error_exec_exit(char *str1, t_shell *shell, int exit_code)
 {
 	ft_putstr_fd("minishell: ", STDERR_FILENO);
 	if (*str1)
-		ft_putstr_fd(str1, STDERR_FILENO);
+		perror(str1);
 	free_execution(shell);
-	exit (errno);
+	exit (exit_code);
 }
 
 
@@ -195,17 +196,19 @@ char	*find_path_cmd(char**args, bool *malocced, t_shell *shell)
 	int		i;
 
 	if (ft_strchr(args[0], '/'))
-		return (args[0]);
+	{
+		if (access(args[0], F_OK) == 0)
+			return (args[0]);
+		error_exec_exit(args[0], shell, EXIT_CMD_NOT_FOUND);
+	}	
 	i = 0;
 	*malocced = true;
 	while (shell->paths_array[i])
 	{
 		cmd_path = super_strjoin(shell->paths_array[i], "/", args[0]);
 		if (!cmd_path)
-		{
-			free_execution(shell);
 			write_error_malloc();
-		}
+
 		if (access(cmd_path, F_OK) == 0)
 			return (cmd_path);
 		free(cmd_path);
@@ -240,7 +243,7 @@ void	execute_cmd_child(char **args, t_shell *shell)
 		execve(cmd_path, args, shell->env_array);
 	if (malloced == true)
 		free (cmd_path);
-	error_exec_exit(args[0], shell);
+	error_exec_exit(args[0], shell, EXIT_CMD_NOT_EXEC);//127
 }
 
 

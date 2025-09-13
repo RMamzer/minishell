@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/11 15:53:52 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/12 21:14:28 by mamzerr1         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,7 @@ typedef struct s_shell
 # define EXECUTE false
 # define EXIT_INVALID_OPTION 2
 # define EXIT_CMD_NOT_FOUND 127
-# define EXIT_CMD_NOT_FOUND 127
+# define EXIT_CMD_NOT_EXEC 126
 
 // main things
 int					main(int ac, char **av, char **env);

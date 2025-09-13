@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_cd.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/11 20:09:53 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/13 10:30:59 by mamzerr1         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ int	change_working_directory(char *path, t_shell *shell)
 
 	if (chdir(path) != 0)
 	{
+		printf("chdir fail");
 		write_bulitin_error("minishell: cd: ", NULL, NULL, path);
 		return (EXIT_FAILURE);
 	}
