@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/15 12:16:22 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/15 17:06:52 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ typedef struct s_shell
 	t_token			*token_list;
 	t_env			*env;
 	t_ast			*ast;
-    char            **heredoc_files;
+	char			**heredoc_files;
 	char			**env_array;
 	char			**paths_array;
 }					t_shell;
@@ -115,9 +115,8 @@ typedef struct s_shell
 # define EXIT_CMD_NOT_FOUND 127
 # define EXIT_CMD_NOT_FOUND 127
 
-//test functions 
-void    remove_empty_tokens(t_shell *shell);
-
+// test functions
+void				remove_empty_tokens(t_shell *shell);
 
 // main things
 int					main(int ac, char **av, char **env);
@@ -138,14 +137,18 @@ void				quote_flag(t_shell *shell);
 
 // heredoc
 bool				process_heredoc(t_shell *shell);
-bool				read_heredoc(int *fd, t_token *delim, t_shell *shell);
-void				update_file_name(char **file, size_t *i, t_shell *shell);
-void				expand_heredoc(char **line, t_shell *shell);
-void				update_heredoc_token(t_token *current, char *file);
-char				*heredoc_expander(char *line, t_shell *shell);
+bool				process_heredoc_token(t_shell *shell, t_token *current,
+						size_t i);
 void				process_delim(t_token *delim, t_shell *shell);
-void    save_heredoc_file(t_shell *shell, char *file);
-void    free_heredoc_files(t_shell *shell);
+void				update_file_name(char **file, size_t *i, t_shell *shell);
+bool				read_heredoc(int *fd, t_token *delim, t_shell *shell);
+void				update_heredoc_token(t_token *current, char *file,
+						t_shell *shell);
+void				expand_heredoc(char **line, t_shell *shell);
+char				*heredoc_expander(char *line, t_shell *shell);
+char				*get_new_content(char *line, size_t *i, t_shell *shell);
+void				save_heredoc_file(t_shell *shell, char *file);
+void				free_heredoc_files(t_shell *shell);
 
 // expansion
 void				expander(t_shell *shell);

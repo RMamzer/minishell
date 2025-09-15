@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/12 19:04:55 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/15 15:35:11 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,7 +121,7 @@ int	main(int ac, char **av, char **env)
 			continue ;
 		if (parse_tokens(shell) != SUCCESS)
 			continue ;
-		print_ast(shell->ast, 0);
+		// print_ast(shell->ast, 0);
 		execute_ast(shell->ast, shell);
 		// print_ast(shell->ast, 0);
 		free_shell_data(shell);
@@ -143,6 +143,7 @@ t_shell	*init_data(void)
 	shell->token_list = NULL;
 	shell->env = NULL;
 	shell->ast = NULL;
+	shell->heredoc_files = NULL;
 	return (shell);
 }
 
@@ -181,8 +182,6 @@ bool	process_input(char *input_line, t_shell *shell)
 	process_heredoc(shell);
 	expander(shell); // test
 	split_variables(shell);
-	test_tokens(shell->token_list);
 	remove_empty_tokens(shell); // test functions
-	test_tokens(shell->token_list);
 	return (SUCCESS);
 }

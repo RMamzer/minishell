@@ -6,20 +6,67 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/15 13:28:58 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/15 17:09:32 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+bool	process_heredoc(t_shell *shell)
+{
+	size_t	i;
+	t_token	*current;
+
+	i = 0;
+	current = shell->token_list;
+	while (current)
+	{
+		if (current->type == HEREDOC && current->next)
+		{
+			if (process_heredoc_token(shell, current, i) == FAILURE)
+				return (FAILURE);
+			i++;
+		}
+		current = current->next;
+	}
+	return (SUCCESS);
+}
+
+bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
+{
+	int		fd;
+	char	*file;
+
+	file = NULL;
+	process_delim(current->next, shell);
+	update_file_name(&file, &i, shell);
+	fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (fd == -1)
+	{
+		free(file);
+		return (FAILURE);
+	}
+	if (read_heredoc(&fd, current->next, shell) == FAILURE)
+	{
+		close(fd);
+		free(file);
+		return (FAILURE);
+	}
+	close(fd);
+	update_heredoc_token(current, file, shell);
+	save_heredoc_file(shell, file);
+	free(file);
+	return (SUCCESS);
+}
 
 void	process_delim(t_token *delim, t_shell *shell)
 {
 	char	*new_content;
 	size_t	i;
 	size_t	j;
-    
-    if (!delim->content)
-        fatality(ERROR_MEM, shell, 1);
+
+	if (!delim->content)
+		fatality(ERROR_MEM, shell, 1);
 	new_content = ft_calloc(ft_strlen(delim->content) + 1, sizeof(char));
 	if (!new_content)
 		fatality(ERROR_MEM, shell, 1);
@@ -38,43 +85,23 @@ void	process_delim(t_token *delim, t_shell *shell)
 	delim->content = new_content;
 }
 
-bool	process_heredoc(t_shell *shell)
+void	update_file_name(char **file, size_t *i, t_shell *shell)
 {
-	int		fd;
-	size_t	i;
-	char	*file;
-	t_token	*current;
+	char	*file_num;
 
-	i = 0;
-	file = NULL;
-	current = shell->token_list;
-	while (current)
+	while (1)
 	{
-		if (current->type == HEREDOC && current->next)
-		{
-			process_delim(current->next, shell);
-			update_file_name(&file, &i, shell);
-			fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-			if (fd == -1)
-			{
-				free(file);
-				return (FAILURE);
-			}
-			if (read_heredoc(&fd, current->next, shell) == FAILURE)
-			{
-				close(fd);
-				free(file);
-				return (FAILURE);
-			}
-			close(fd);
-			update_heredoc_token(current, file);
-            save_heredoc_file(shell, file);
-			free(file);
-			i++;
-		}
-		current = current->next;
+		file_num = ft_itoa(*i++);
+		if (!file_num)
+			fatality(ERROR_MEM, shell, 1);
+		*file = ft_strjoin("/tmp/kunteynir", file_num);
+		free(file_num);
+		if (!*file)
+			fatality(ERROR_MEM, shell, 1);
+		if (access(*file, F_OK) != 0)
+			break ;
+		free(*file);
 	}
-	return (SUCCESS);
 }
 
 bool	read_heredoc(int *fd, t_token *delim, t_shell *shell)
@@ -103,26 +130,20 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell)
 	return (SUCCESS);
 }
 
-void	update_file_name(char **file, size_t *i, t_shell *shell)
+void	update_heredoc_token(t_token *current, char *file, t_shell *shell)
 {
-	char	*file_num;
-
-	while (1)
+	free(current->content);
+	current->type = IN;
+	current->content = ft_strdup("<");
+	if (!current->content)
+		fatality(ERROR_MEM, shell, 1); // think here
+	if (current->next)
 	{
-		file_num = ft_itoa(*i);
-		if (!file_num)
-			fatality(ERROR_MEM, shell, 1);
-		*file = ft_strjoin("/tmp/kunteynir", file_num);
-		free(file_num);
-		if (!*file)
-			fatality(ERROR_MEM, shell, 1);
-		if (access(*file, F_OK) == 0)
-		{
-			free(*file);
-			(*i)++;
-		}
-		else
-			break ;
+		free(current->next->content);
+		current->next->type = WORD;
+		current->next->content = ft_strdup(file);
+		if (!current->next->content)
+			fatality(ERROR_MEM, shell, 1); // think here
 	}
 }
 
@@ -137,29 +158,11 @@ void	expand_heredoc(char **line, t_shell *shell)
 	*line = expanded;
 }
 
-void	update_heredoc_token(t_token *current, char *file)
-{
-	free(current->content);
-	current->type = IN;
-	current->content = ft_strdup("<");
-	if (!current->content)
-		fatality(ERROR_MEM, NULL, 1); // think here
-    if(current->next)
-    {
-        free(current->next->content);
-        current->next->type = WORD;
-	    current->next->content = ft_strdup(file);
-        if(!current->next->content)
-            fatality(ERROR_MEM, NULL, 1); // think here
-    }
-	
-}
 char	*heredoc_expander(char *line, t_shell *shell)
 {
-	size_t i;
-	size_t start;
-	char *new_content;
-	char *temp;
+	size_t	i;
+	char	*new_content;
+	char	*temp;
 
 	i = 0;
 	new_content = ft_strdup("");
@@ -167,26 +170,7 @@ char	*heredoc_expander(char *line, t_shell *shell)
 		fatality(ERROR_MEM, shell, 1);
 	while (line[i])
 	{
-		if (line[i] == '$')
-		{
-			i++;
-			if (ft_isalpha(line[i]) || line[i] == '_')
-				temp = expand_env_var(line, &i, shell->env);
-			else if (line[i] == '?')
-			{
-				i++;
-				temp = ft_itoa(shell->exit_code);
-			}
-			else
-				temp = ft_strdup("$");
-		}
-		else
-		{
-			start = i;
-			while (line[i] && line[i] != '$')
-				i++;
-			temp = ft_substr(line, start, i - start);
-		}
+		temp = get_new_content(line, &i, shell);
 		if (!temp)
 		{
 			free(new_content);
@@ -199,44 +183,73 @@ char	*heredoc_expander(char *line, t_shell *shell)
 	return (new_content);
 }
 
-void    save_heredoc_file(t_shell *shell, char *file)
+char	*get_new_content(char *line, size_t *i, t_shell *shell)
 {
-    char    **new;
-    size_t     count;
-    size_t     i;
-    
-    count = 0;
-    i = 0;
-    if(shell->heredoc_files)
-        while(shell->heredoc_files[count])
-            count++;
-    new = ft_calloc(count + 2, sizeof(char *));
-    if(!new)
-        fatality(ERROR_MEM, shell, 1);
-    while(i < count)
-    {
-        new[i] = shell->heredoc_files[i];
-        i++;
-    }
-    new[count] = ft_strdup(file);
-    if(!new[count])
-        fatality(ERROR_MEM, shell, 1);
-    free(shell->heredoc_files);
-    shell->heredoc_files = new;
+	size_t	start;
+	char	*temp;
+
+	if (line[*i] == '$')
+	{
+		(*i)++;
+		if (ft_isalpha(line[*i]) || line[*i] == '_')
+			temp = expand_env_var(line, i, shell->env);
+		else if (line[*i] == '?')
+		{
+			(*i)++;
+			temp = ft_itoa(shell->exit_code);
+		}
+		else
+			temp = ft_strdup("$");
+	}
+	else
+	{
+		start = *i;
+		while (line[*i] && line[*i] != '$')
+			(*i)++;
+		temp = ft_substr(line, start, *i - start);
+	}
+	return (temp);
 }
-void    free_heredoc_files(t_shell *shell)
+
+void	save_heredoc_file(t_shell *shell, char *file)
 {
-    size_t i;
-    
-    if(!shell->heredoc_files)
-        return; 
-    i = 0;
-    while(shell->heredoc_files[i])
-    {
-        unlink(shell->heredoc_files[i]);
-        free(shell->heredoc_files[i]);
-        i++;
-    }
-    free(shell->heredoc_files);
-    shell->heredoc_files = NULL;
+	char	**new;
+	size_t	count;
+	size_t	i;
+
+	count = 0;
+	i = 0;
+	if (shell->heredoc_files)
+		while (shell->heredoc_files[count])
+			count++;
+	new = ft_calloc(count + 2, sizeof(char *));
+	if (!new)
+		fatality(ERROR_MEM, shell, 1);
+	while (i < count)
+	{
+		new[i] = shell->heredoc_files[i];
+		i++;
+	}
+	new[count] = ft_strdup(file);
+	if (!new[count])
+		fatality(ERROR_MEM, shell, 1);
+	free(shell->heredoc_files);
+	shell->heredoc_files = new;
+}
+
+void	free_heredoc_files(t_shell *shell)
+{
+	size_t	i;
+
+	if (!shell->heredoc_files)
+		return ;
+	i = 0;
+	while (shell->heredoc_files[i])
+	{
+		unlink(shell->heredoc_files[i]);
+		free(shell->heredoc_files[i]);
+		i++;
+	}
+	free(shell->heredoc_files);
+	shell->heredoc_files = NULL;
 }
