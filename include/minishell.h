@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/12 18:57:09 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/15 12:16:22 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,7 @@ typedef struct s_shell
 	t_token			*token_list;
 	t_env			*env;
 	t_ast			*ast;
+    char            **heredoc_files;
 	char			**env_array;
 	char			**paths_array;
 }					t_shell;
@@ -143,6 +144,8 @@ void				expand_heredoc(char **line, t_shell *shell);
 void				update_heredoc_token(t_token *current, char *file);
 char				*heredoc_expander(char *line, t_shell *shell);
 void				process_delim(t_token *delim, t_shell *shell);
+void    save_heredoc_file(t_shell *shell, char *file);
+void    free_heredoc_files(t_shell *shell);
 
 // expansion
 void				expander(t_shell *shell);
