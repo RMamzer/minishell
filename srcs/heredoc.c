@@ -6,22 +6,22 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/12 17:21:19 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/15 12:23:46 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// TODO: sskobki chtob ostavalis' vnutri herdoca
-// TODO: syntax check for << <<
-// TODO: EOF "da" dolzhen bit da
+
 
 void	process_delim(t_token *delim, t_shell *shell)
 {
 	char	*new_content;
 	size_t	i;
 	size_t	j;
-
+    
+    if (!delim->content)
+        fatality(ERROR_MEM, shell, 1);
 	new_content = ft_calloc(ft_strlen(delim->content) + 1, sizeof(char));
 	if (!new_content)
 		fatality(ERROR_MEM, shell, 1);
@@ -52,7 +52,7 @@ bool	process_heredoc(t_shell *shell)
 	current = shell->token_list;
 	while (current)
 	{
-		if (current->type == HEREDOC && current->next) // think here
+		if (current->type == HEREDOC && current->next)
 		{
 			process_delim(current->next, shell);
 			update_file_name(&file, &i, shell);
@@ -70,6 +70,7 @@ bool	process_heredoc(t_shell *shell)
 			}
 			close(fd);
 			update_heredoc_token(current, file);
+            save_heredoc_file(shell, file);
 			i++;
 		}
 		current = current->next;
@@ -114,7 +115,7 @@ void	update_file_name(char **file, size_t *i, t_shell *shell)
 			fatality(ERROR_MEM, shell, 1);
 		*file = ft_strjoin("/tmp/kunteynir", file_num);
 		free(file_num);
-		if (!file)
+		if (!*file)
 			fatality(ERROR_MEM, shell, 1);
 		if (access(*file, F_OK) == 0)
 		{
@@ -144,9 +145,14 @@ void	update_heredoc_token(t_token *current, char *file)
 	current->content = ft_strdup("<");
 	if (!current->content)
 		// free smth
-		free(current->next->content);
-	current->next->type = WORD;
-	current->next->content = file;
+		
+    if(current->next)
+    {
+        free(current->next->content);
+        current->next->type = WORD;
+	    current->next->content = file;
+    }
+	
 }
 char	*heredoc_expander(char *line, t_shell *shell)
 {
@@ -191,4 +197,44 @@ char	*heredoc_expander(char *line, t_shell *shell)
 			fatality(ERROR_MEM, shell, 1);
 	}
 	return (new_content);
+}
+
+void    save_heredoc_file(t_shell *shell, char *file)
+{
+    char    **new;
+    size_t     count;
+    size_t     i;
+    
+    count = 0;
+    i = 0;
+    if(shell->heredoc_files)
+        while(shell->heredoc_files[count])
+            count++;
+    new = ft_calloc(count + 2, sizeof(char *));
+    if(!new)
+        fatality(ERROR_MEM, shell, 1);
+    while(i < count)
+    {
+        new[i] = shell->heredoc_files[i];
+        i++;
+    }
+    new[count] = file;
+    free(shell->heredoc_files);
+    shell->heredoc_files = new;
+}
+void    free_heredoc_files(t_shell *shell)
+{
+    size_t i;
+    
+    if(!shell->heredoc_files)
+        return; 
+    i = 0;
+    while(shell->heredoc_files[i])
+    {
+        unlink(shell->heredoc_files[i]);
+        free(shell->heredoc_files[i]);
+        i++;
+    }
+    free(shell->heredoc_files);
+    shell->heredoc_files = NULL;
 }
