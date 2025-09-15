@@ -6,13 +6,11 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/15 12:23:46 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/15 13:28:58 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-
 
 void	process_delim(t_token *delim, t_shell *shell)
 {
@@ -71,6 +69,7 @@ bool	process_heredoc(t_shell *shell)
 			close(fd);
 			update_heredoc_token(current, file);
             save_heredoc_file(shell, file);
+			free(file);
 			i++;
 		}
 		current = current->next;
@@ -82,7 +81,7 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell)
 {
 	char	*line;
 
-	while (69)
+	while (1)
 	{
 		line = readline("> ");
 		if (!line)
@@ -108,7 +107,7 @@ void	update_file_name(char **file, size_t *i, t_shell *shell)
 {
 	char	*file_num;
 
-	while (69)
+	while (1)
 	{
 		file_num = ft_itoa(*i);
 		if (!file_num)
@@ -144,13 +143,14 @@ void	update_heredoc_token(t_token *current, char *file)
 	current->type = IN;
 	current->content = ft_strdup("<");
 	if (!current->content)
-		// free smth
-		
+		fatality(ERROR_MEM, NULL, 1); // think here
     if(current->next)
     {
         free(current->next->content);
         current->next->type = WORD;
-	    current->next->content = file;
+	    current->next->content = ft_strdup(file);
+        if(!current->next->content)
+            fatality(ERROR_MEM, NULL, 1); // think here
     }
 	
 }
@@ -218,7 +218,9 @@ void    save_heredoc_file(t_shell *shell, char *file)
         new[i] = shell->heredoc_files[i];
         i++;
     }
-    new[count] = file;
+    new[count] = ft_strdup(file);
+    if(!new[count])
+        fatality(ERROR_MEM, shell, 1);
     free(shell->heredoc_files);
     shell->heredoc_files = new;
 }
