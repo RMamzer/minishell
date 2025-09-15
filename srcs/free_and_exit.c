@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:59 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/11 15:59:06 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/15 12:18:22 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ void	free_shell_data(t_shell *shell)
 	shell->input_line = NULL;
 	free_list(&shell->token_list);
 	free_ast(&shell->ast);
-
+    free_heredoc_files(shell);
 }
 
 void	free_shell(t_shell *shell)
