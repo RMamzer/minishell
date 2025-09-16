@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:29:11 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/15 18:54:41 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/16 13:14:27 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,11 @@ void	lexer(char *input_line, t_shell *shell)
 	i = 0;
 	while (input_line[i])
 	{
-		while (is_delimiter(input_line[i]))
+		while (input_line[i] && is_delimiter(input_line[i]))
 			i++;
-		if (is_operator(input_line[i]) && check_quote(input_line, i) == 0)
+		if (input_line[i] && is_operator(input_line[i]) && check_quote(input_line, i) == 0)
 			i += handle_operator(input_line, i, shell);
-		else
+		else if (input_line[i])
 			i += handle_word(input_line, i, shell);
 	}
 }
@@ -49,7 +49,7 @@ size_t	handle_word(char *input_line, size_t start, t_shell *shell)
 	len = i - word_start;
 	temp = malloc(len + 1);
 	if (temp == NULL)
-		lexer_error(input_line, shell);
+		lexer_error(input_line, shell, temp);
 	ft_strlcpy(temp, &input_line[word_start], len + 1);
 	add_token(shell, WORD, temp);
 	free(temp);
@@ -98,7 +98,7 @@ void	add_token(t_shell *shell, t_token_type type, char *content)
 
 	token = malloc(sizeof(t_token));
 	if (token == NULL)
-		lexer_error(shell->input_line, shell);
+        lexer_error(shell->input_line, shell, content);
 	token->type = type;
 	token->expanded = false;
 	token->quoted = false;
@@ -107,7 +107,7 @@ void	add_token(t_shell *shell, t_token_type type, char *content)
 	if (token->content == NULL)
 	{
 		free(token);
-		lexer_error(shell->input_line, shell);
+		lexer_error(shell->input_line, shell, content);
 	}
 	if (shell->token_list == NULL)
 		shell->token_list = token;
