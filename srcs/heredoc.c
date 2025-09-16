@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/15 17:09:32 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/16 17:28:55 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
 		free(file);
 		return (FAILURE);
 	}
-	if (read_heredoc(&fd, current->next, shell) == FAILURE)
+	if (read_heredoc(&fd, current->next, shell) == FAILURE) 
 	{
 		close(fd);
 		free(file);
@@ -65,8 +65,8 @@ void	process_delim(t_token *delim, t_shell *shell)
 	size_t	i;
 	size_t	j;
 
-	if (!delim->content)
-		fatality(ERROR_MEM, shell, 1);
+	//if (!delim->content)
+		//fatality(ERROR_MEM, shell, 1); // noty surre if i need it 
 	new_content = ft_calloc(ft_strlen(delim->content) + 1, sizeof(char));
 	if (!new_content)
 		fatality(ERROR_MEM, shell, 1);
@@ -113,7 +113,7 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell)
 		line = readline("> ");
 		if (!line)
 		{
-			ft_putendl_fd(ERROR_EOF, 2);
+			ft_putendl_fd(ERROR_EOF, 2); // probably show_error
 			break ;
 		}
 		if (ft_strcmp(line, delim->content) == 0)
@@ -123,28 +123,13 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell)
 		}
 		if (delim->quoted == false)
 			expand_heredoc(&line, shell);
-		write(*fd, line, ft_strlen(line));
-		write(*fd, "\n", 1);
+		if (write(*fd, line, ft_strlen(line)) == -1)
+			return (free(line),FAILURE);
+		if (write(*fd, "\n", 1) == -1)
+			return (free(line), FAILURE);
 		free(line);
 	}
 	return (SUCCESS);
-}
-
-void	update_heredoc_token(t_token *current, char *file, t_shell *shell)
-{
-	free(current->content);
-	current->type = IN;
-	current->content = ft_strdup("<");
-	if (!current->content)
-		fatality(ERROR_MEM, shell, 1); // think here
-	if (current->next)
-	{
-		free(current->next->content);
-		current->next->type = WORD;
-		current->next->content = ft_strdup(file);
-		if (!current->next->content)
-			fatality(ERROR_MEM, shell, 1); // think here
-	}
 }
 
 void	expand_heredoc(char **line, t_shell *shell)
@@ -167,18 +152,25 @@ char	*heredoc_expander(char *line, t_shell *shell)
 	i = 0;
 	new_content = ft_strdup("");
 	if (new_content == NULL)
-		fatality(ERROR_MEM, shell, 1);
+    {
+        free(line); // Free the input line before exiting
+        fatality(ERROR_MEM, shell, 1);
+    }
 	while (line[i])
 	{
 		temp = get_new_content(line, &i, shell);
 		if (!temp)
 		{
 			free(new_content);
+			free(line);  // Free the input line before exiting
 			fatality(ERROR_MEM, shell, 1);
 		}
 		new_content = strjoin_free(new_content, temp);
 		if (!new_content)
+		{
+			free(line);  // Free the input line before exiting
 			fatality(ERROR_MEM, shell, 1);
+		}
 	}
 	return (new_content);
 }
@@ -210,6 +202,28 @@ char	*get_new_content(char *line, size_t *i, t_shell *shell)
 	}
 	return (temp);
 }
+void	update_heredoc_token(t_token *current, char *file, t_shell *shell)
+{
+	free(current->content);
+	current->type = IN;
+	current->content = ft_strdup("<");
+	if (!current->content)
+	{
+		free(file);  // Free the file before exiting
+		fatality(ERROR_MEM, shell, 1);
+	}
+	if (current->next)
+	{
+		free(current->next->content);
+		current->next->type = WORD;
+		current->next->content = ft_strdup(file);
+		if (!current->next->content)
+		{
+			free(file);  // Free the file before exiting
+			fatality(ERROR_MEM, shell, 1);
+		}
+	}
+}
 
 void	save_heredoc_file(t_shell *shell, char *file)
 {
@@ -224,7 +238,10 @@ void	save_heredoc_file(t_shell *shell, char *file)
 			count++;
 	new = ft_calloc(count + 2, sizeof(char *));
 	if (!new)
+	{
+		free(file);  // Free the file parameter before exiting
 		fatality(ERROR_MEM, shell, 1);
+	}
 	while (i < count)
 	{
 		new[i] = shell->heredoc_files[i];
@@ -232,7 +249,11 @@ void	save_heredoc_file(t_shell *shell, char *file)
 	}
 	new[count] = ft_strdup(file);
 	if (!new[count])
+	{
+		free(new);   // Free the allocated array
+		free(file);  // Free the file parameter before exiting
 		fatality(ERROR_MEM, shell, 1);
+	}
 	free(shell->heredoc_files);
 	shell->heredoc_files = new;
 }
