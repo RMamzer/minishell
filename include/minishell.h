@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/15 18:55:16 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/16 13:07:06 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,7 +224,7 @@ bool				validate_redirection(t_token *redirection);
 bool				syntax_confirmed(t_token *token_list, t_shell *shell);
 
 // errors
-void				lexer_error(char *input_line, t_shell *shell);
+void	lexer_error(char *input_line, t_shell *shell, char *temp_cont);
 void				free_list(t_token **list);
 void				free_ast(t_ast **node);
 void				free_shell_data(t_shell *shell);
