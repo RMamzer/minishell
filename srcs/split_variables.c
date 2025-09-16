@@ -6,33 +6,33 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:26:38 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/10 18:52:34 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/16 18:07:23 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	split_variables(t_shell *data)
+void	split_variables(t_shell *shell)
 {
 	t_token	*current;
 	char	**split_result;
 
-	current = data->token_list;
+	current = shell->token_list;
 	while (current)
 	{
 		if (current->type == WORD && !current->quoted && current->expanded)
 		{
 			split_result = ft_split_IFS(current->content, " \t\n");
 			if (!split_result)
-				fatality(ERROR_MEM, data, 1);
-			process_split_result(data, current, split_result);
+				fatality(ERROR_MEM, shell, 1);
+			process_split_result(shell, current, split_result);
 			free_split(split_result);
 		}
 		current = current->next;
 	}
 }
 
-void	process_split_result(t_shell *data, t_token *current,
+void	process_split_result(t_shell *shell, t_token *current,
 		char **split_result)
 {
 	int	str_qty;
@@ -41,12 +41,12 @@ void	process_split_result(t_shell *data, t_token *current,
 	i = 0;
 	str_qty = check_qty(split_result);
 	if (str_qty == 0)
-		replace_token_content(current, "", data, split_result);
+		replace_token_content(current, "", shell, split_result);
 	else if (str_qty == 1)
-		replace_token_content(current, split_result[0], data, split_result);
+		replace_token_content(current, split_result[0], shell, split_result);
 	else
 	{
-		replace_token_content(current, split_result[i], data, split_result);
+		replace_token_content(current, split_result[i], shell, split_result);
 		i++;
 		while (i < str_qty)
 		{
@@ -54,7 +54,7 @@ void	process_split_result(t_shell *data, t_token *current,
 			if (!current)
 			{
 				free_split(split_result);
-				fatality(ERROR_MEM, data, 1);
+				fatality(ERROR_MEM, shell, 1);
 			}
 			i++;
 		}
@@ -62,14 +62,14 @@ void	process_split_result(t_shell *data, t_token *current,
 }
 
 void	replace_token_content(t_token *current, char *new_content,
-		t_shell *data, char **split_result)
+		t_shell *shell, char **split_result)
 {
 	free(current->content);
 	current->content = ft_strdup(new_content);
 	if (!current->content)
 	{
 		free_split(split_result);
-		fatality(ERROR_MEM, data, 1);
+		fatality(ERROR_MEM, shell, 1);
 	}
 }
 
