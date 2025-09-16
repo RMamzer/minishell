@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:59 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/15 12:18:22 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/16 17:52:51 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,11 +98,14 @@ void	show_error(char *msg, t_shell *shell, int exit_code)
 	// global exit status = exit_code
 }
 
-void	lexer_error(char *input_line, t_shell *shell)
+void	lexer_error(char *input_line, t_shell *shell, char *temp_cont)
 {
+    if(temp_cont)
+        free(temp_cont);
 	free(input_line);
-	clear_history();
 	free_list(&shell->token_list);
+    free_heredoc_files(shell);
+    clear_history();
 	ft_putendl_fd(ERROR_MEM, 2);
 	shell->exit_code = 1;
 	exit(shell->exit_code);
