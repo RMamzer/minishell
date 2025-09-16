@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:28:42 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/10 18:52:06 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/16 17:44:23 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,18 +45,15 @@ char	*expand_content(char *content, t_shell *shell, t_token *token)
 	i = 0;
 	new_content = ft_strdup("");
 	if (new_content == NULL)
-		lexer_error(content, shell);
+		lexer_error(content, shell, NULL);
 	while (content[i])
 	{
 		temp = process_content(content, &i, shell, token);
 		if (temp == NULL)
-		{
-			free(new_content);
-			lexer_error(content, shell);
-		}
+			lexer_error(content, shell, new_content);
 		new_content = strjoin_free(new_content, temp);
 		if (new_content == NULL)
-			lexer_error(content, shell);
+			lexer_error(content, shell, NULL);
 	}
 	free(content);
 	return (new_content);
