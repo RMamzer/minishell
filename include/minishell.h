@@ -6,7 +6,7 @@
 /*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/12 21:14:28 by mamzerr1         ###   ########.fr       */
+/*   Updated: 2025/09/17 13:37:59 by mamzerr1         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,7 +163,7 @@ void				free_list(t_token **list);
 
 // env
 void				error_exit(char *msg);
-void				error_env_exit(char *key, char *value, t_shell *shell);
+void				error_malloc_env_exit(char *key, char *value, t_shell *shell);
 bool				update_env_value(t_env **env, char *key, char *new_value);
 char				*find_env_value(char *str, t_env *env);
 void				update_shllvl_value(t_shell *shell);

@@ -3,29 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   env_functions.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/11 20:12:51 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/17 13:41:14 by mamzerr1         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/*
-needs to be done:
-- check exit paths
-- make code more readable?
-- do i need to build whole env back before the execution?
-*/
 
-void	error_env_exit(char *key, char *value, t_shell *shell)
+
+void	error_malloc_env_exit(char *key, char *value, t_shell *shell)
 {
+	perror("minishell: malloc");
 	if (key)
 		free(key);
 	if (value)
 		free(value);
-	(void)shell;
+	free_shell(shell);
 }
 
 void	free_env_node(t_env *env)
@@ -66,9 +62,7 @@ void	remove_env_variable(t_env **env, char *key)
 	}
 }
 
-// update the value of a key to a new value: do we need to send there strdup?
-// can add new_value check and error exit with malloc error here,
-// so we can send ft_strdup
+
 bool	update_env_value(t_env **env, char *key, char *new_value)
 {
 	t_env	*temp;
@@ -98,13 +92,12 @@ void	update_shllvl_value(t_shell *shell)
 	int		level;
 
 	value_shlvl = get_env_value("SHLVL", shell->env, NO_ALLOC);
-	// if !value --> malloc
 	level = ft_atoi(value_shlvl) + 1;
 	value_shlvl = ft_itoa(level);
 	if (!value_shlvl)
-		error_exit("minishell: itoa failed");
-	// <---------------------- what fucntion to exit with?
-	update_env_value(&shell->env, "SHLVL", value_shlvl);
+		error_malloc_env_exit(NULL, NULL, shell); 
+	if (update_env_value(&shell->env, "SHLVL", value_shlvl) == false)
+		free (value_shlvl);
 }
 
 // add the node to the env and connect last->next to new_node
@@ -129,10 +122,8 @@ t_env	*create_env_node(char *key, char *value)
 {
 	t_env	*new_node;
 
-	// check later,
-	// would it mean that malloc broke or no input?
-	if (!key)
-		return (NULL);
+	if (!key) // check cause i throw malloc here, cant find case how to get no key otherwise
+		return (NULL); 
 	new_node = calloc(1, sizeof(t_env));
 	if (!new_node)
 		return (NULL);
@@ -144,30 +135,6 @@ t_env	*create_env_node(char *key, char *value)
 	}
 	return (new_node);
 }
-
-// void	process_env_line(t_shell *shell, const char *envp)
-// {
-// 	char	*key;
-// 	char	*value;
-// 	char	*equal;
-// 	t_env	*new_node;
-
-// 	key = NULL;
-// 	value = NULL;
-// 	equal = ft_strchr(envp, '=');
-// 	if (!equal)
-// 		return ;
-// 	key = ft_substr(envp, 0, equal - envp);
-// 	if (!key)
-// 		error_env_exit(key, value, shell);
-// 	value = ft_strdup(equal + 1);
-// 	if (!value)
-// 		error_env_exit(key, value, shell);
-// 	new_node = create_env_node(key, value);
-// 	if (!new_node)
-// 		error_env_exit(key, value, shell);
-// 	add_env_node(&shell->env, new_node);
-// }
 
 void	process_env_line(t_shell *shell, const char *envp)
 {
@@ -183,16 +150,16 @@ void	process_env_line(t_shell *shell, const char *envp)
 		return ;
 	key = ft_substr(envp, 0, equal - envp);
 	if (!key)
-		error_env_exit(key, value, shell);
+		error_malloc_env_exit(key, value, shell); 
 	value = ft_strdup(equal + 1);
 	if (!value)
-		error_env_exit(key, value, shell);
+		error_malloc_env_exit(key, value, shell); 
 	new_node = create_env_node(key, value);
 	if (!new_node)
-		error_env_exit(key, value, shell);
+		error_malloc_env_exit(key, value, shell);
 	add_env_node(&shell->env, new_node);
 }
-
+// check it later
 void	set_minimal_env(t_shell *shell)
 {
 	char	*pwd_line;
@@ -201,24 +168,22 @@ void	set_minimal_env(t_shell *shell)
 
 	pwd = getcwd(NULL, 0);
 	if (!pwd)
-		error_env_exit(NULL, NULL, shell);
+		error_malloc_env_exit(NULL, NULL, shell);
 	pwd_line = ft_strjoin("PWD=", pwd);
 	free(pwd);
 	if (!pwd_line)
-		error_env_exit(NULL, NULL, shell);
-	process_env_line(shell, pwd_line);
+		error_malloc_env_exit(NULL, NULL, shell);
+	process_env_line(shell, pwd_line); // check if it leaks (set env env -i)
 	process_env_line(shell, "SHLVL=0");
 	process_env_line(shell, "_=/usr/bin/env");
 	old_pwd_node = create_env_node(ft_strdup("OLDPWD"), NULL);
 	if (!old_pwd_node)
-		error_env_exit(NULL, NULL, shell);
+		error_malloc_env_exit(NULL, NULL, shell);
 	add_env_node(&shell->env, old_pwd_node);
 }
 
 void	create_env(t_shell *shell, char **envp)
 {
-	char *shell_name;
-
 	if (!envp || !envp[0])
 		set_minimal_env(shell);
 	else
@@ -229,10 +194,8 @@ void	create_env(t_shell *shell, char **envp)
 			envp++;
 		}
 	}
-	update_shllvl_value(shell);
-	shell_name = ft_strdup("minishell");
-	if (!shell_name)
-		error_exit("minishell: malloc failed:"); //<-what fucntion to exit with?
-	if (update_env_value(&shell->env, "SHELL", shell_name)==false)
-		free(shell_name);
+	update_shllvl_value(shell); // check overflow lol?
 }
+/*
+1. 
+*/
