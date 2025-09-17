@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/16 17:30:50 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/17 17:23:27 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,8 +144,8 @@ t_shell	*init_data(void)
 	shell->env = NULL;
 	shell->ast = NULL;
 	shell->heredoc_files = NULL;
-    shell->env_array = NULL;
-    shell->paths_array = NULL;
+	shell->env_array = NULL;
+	shell->paths_array = NULL;
 	return (shell);
 }
 
@@ -170,7 +170,7 @@ bool	process_input(char *input_line, t_shell *shell)
 	if (check_quote(line, ft_strlen(line)) != 0)
 	{
 		free(line);
-		return (show_error(ERROR_QUOTE, shell, 258), FAILURE);
+		return (show_error(ERROR_QUOTE, NULL, shell, 2), FAILURE);
 	}
 	free(shell->input_line);
 	shell->input_line = line;
@@ -179,13 +179,12 @@ bool	process_input(char *input_line, t_shell *shell)
 	if (check_syntax(shell) == FAILURE)
 		return (FAILURE);
 	check_heredoc(shell);
-	if (process_heredoc(shell) == FAILURE);
-        fatality("write failed", shell, 1);
-	expander(shell); 
+	if (process_heredoc(shell) == FAILURE)
+		fatality("write failed", shell, 1);
+	expander(shell);
 	split_variables(shell);
-	test_tokens(shell->token_list);
+	// test_tokens(shell->token_list);
 	delete_empty_tokens(shell);
-	test_tokens(shell->token_list);
+	// test_tokens(shell->token_list);
 	return (SUCCESS);
 }
-

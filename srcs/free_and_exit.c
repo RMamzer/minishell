@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:59 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/16 17:52:51 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/17 15:30:17 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ void	free_shell_data(t_shell *shell)
 	shell->input_line = NULL;
 	free_list(&shell->token_list);
 	free_ast(&shell->ast);
-    free_heredoc_files(shell);
+	free_heredoc_files(shell);
 }
 
 void	free_shell(t_shell *shell)
@@ -87,12 +87,21 @@ void	fatality(char *msg, t_shell *shell, int exit_code)
 	clear_history();
 	exit(exit_code);
 }
-void	show_error(char *msg, t_shell *shell, int exit_code)
+void	show_error(char *msg, t_token *wrong_token, t_shell *shell, int exit_code)
 {
 	if (!shell)
 		return ;
 	if (msg)
 		ft_putendl_fd(msg, 2);
+	else
+	{
+		ft_putstr_fd("syntax error near unexpected token `", 2);
+		if (wrong_token == NULL)
+			ft_putstr_fd("newline", 2);
+		else if (wrong_token->content)
+			ft_putstr_fd(wrong_token->content, 2);
+		ft_putendl_fd("'", 2);
+	}
 	free_shell_data(shell);
 	shell->exit_code = exit_code;
 	// global exit status = exit_code
@@ -100,12 +109,12 @@ void	show_error(char *msg, t_shell *shell, int exit_code)
 
 void	lexer_error(char *input_line, t_shell *shell, char *temp_cont)
 {
-    if(temp_cont)
-        free(temp_cont);
+	if (temp_cont)
+		free(temp_cont);
 	free(input_line);
 	free_list(&shell->token_list);
-    free_heredoc_files(shell);
-    clear_history();
+	free_heredoc_files(shell);
+	clear_history();
 	ft_putendl_fd(ERROR_MEM, 2);
 	shell->exit_code = 1;
 	exit(shell->exit_code);

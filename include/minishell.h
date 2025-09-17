@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/16 13:07:06 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/17 15:39:05 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,8 @@
 
 # define ERROR_QUOTE "syntax error: unclosed quote"
 # define ERROR_MEM "cannot allocate memory"
-# define ERROR_PIPE "syntax error near unexpected token `|\'"
-# define ERROR_REDIR "syntax error near unexpected token `redirection'"
+//# define ERROR_PIPE "syntax error near unexpected token `|\'"
+//# define ERROR_REDIR "syntax error near unexpected token `newline'"
 # define ERROR_MAX_HER "maximum here-document count exceeded"
 # define ERROR_EOF "worning: heredoc delimeted by EOF"
 // token type
@@ -173,8 +173,10 @@ bool				is_delimiter(int i);
 bool				is_operator(char c);
 
 // errors
-void				show_error(char *msg, t_shell *shell, int exit_code);
-void				lexer_error(char *input_line, t_shell *shell);
+void				show_error(char *msg, t_token *wrong_token, t_shell *shell,
+						int exit_code);
+void				lexer_error(char *input_line, t_shell *shell,
+						char *temp_cont);
 void				free_list(t_token **list);
 
 // env
@@ -224,7 +226,7 @@ bool				validate_redirection(t_token *redirection);
 bool				syntax_confirmed(t_token *token_list, t_shell *shell);
 
 // errors
-void	lexer_error(char *input_line, t_shell *shell, char *temp_cont);
+
 void				free_list(t_token **list);
 void				free_ast(t_ast **node);
 void				free_shell_data(t_shell *shell);

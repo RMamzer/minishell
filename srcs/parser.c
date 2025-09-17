@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 18:05:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/10 18:52:28 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/17 15:38:32 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ bool	syntax_confirmed(t_token *token_list, t_shell *shell)
 	{
 		if (is_redir(current->type) && !validate_redirection(current))
 		{
-			show_error(NULL, shell, 2);
+			show_error(NULL, NULL, shell, 2);
 			return (FAILURE);
 		}
 		current = current->next;

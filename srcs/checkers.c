@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/12 15:54:55 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/17 17:24:13 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,18 +46,22 @@ bool	check_syntax(t_shell *shell)
 	{
 		if (current->type == PIPE)
 		{
-			if (current == shell->token_list || current->next == NULL)
-				return (show_error(ERROR_PIPE, shell, 258), FAILURE);
+			if (current == shell->token_list)
+				return (show_error(NULL, current, shell, 2), FAILURE);
+			if (current->next == NULL)
+				return (show_error(NULL, NULL, shell, 2), FAILURE);
 			if (current->next->type == PIPE)
-				return (show_error(ERROR_PIPE, shell, 258), FAILURE);
+				return (show_error(NULL, current->next, shell, 2), FAILURE);
 		}
 		if (current->type == IN || current->type == OUT
 			|| current->type == APPEND || current->type == HEREDOC)
 		{
-			if (current->next == NULL || (current->next->type != WORD
-					&& current->next->type != HEREDOC_DELIM_QT
-					&& current->next->type != HEREDOC_DELIM_UQ))
-				return (show_error(ERROR_REDIR, shell, 258), FAILURE);
+			if (current->next == NULL)
+				return (show_error(NULL, NULL, shell, 2), FAILURE);
+			if (current->next->type != WORD
+				&& current->next->type != HEREDOC_DELIM_QT
+				&& current->next->type != HEREDOC_DELIM_UQ)
+				return (show_error(NULL, current->next, shell, 2), FAILURE);
 		}
 		current = current->next;
 	}
@@ -87,7 +91,7 @@ void	check_heredoc(t_shell *shell)
 		current = current->next;
 	}
 	if (count > 16)
-		show_error(ERROR_MAX_HER, shell, 2);
+		show_error(ERROR_MAX_HER, NULL, shell, 2);
 }
 
 void	quote_flag(t_shell *shell)
