@@ -6,7 +6,7 @@
 /*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/17 13:41:14 by mamzerr1         ###   ########.fr       */
+/*   Updated: 2025/09/17 14:23:14 by mamzerr1         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ void	error_malloc_env_exit(char *key, char *value, t_shell *shell)
 	if (value)
 		free(value);
 	free_shell(shell);
+	exit (EXIT_FAILURE);
 }
 
 void	free_env_node(t_env *env)
@@ -197,5 +198,6 @@ void	create_env(t_shell *shell, char **envp)
 	update_shllvl_value(shell); // check overflow lol?
 }
 /*
-1. 
+1. What should be the malloc error message and exit code?
+2. What should be the structure of free functions? (env is separate from bash_init_free)
 */
