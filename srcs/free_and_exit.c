@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:59 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/17 15:30:17 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/17 19:20:36 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,11 +83,11 @@ void	fatality(char *msg, t_shell *shell, int exit_code)
 		ft_putendl_fd(msg, 2);
 	if (shell)
 		free_shell(shell);
-	// free env here so not to add it in free_shell_data
 	clear_history();
 	exit(exit_code);
 }
-void	show_error(char *msg, t_token *wrong_token, t_shell *shell, int exit_code)
+void	show_error(char *msg, t_token *wrong_token, t_shell *shell,
+		int exit_code)
 {
 	if (!shell)
 		return ;
