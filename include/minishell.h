@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/17 19:21:59 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/18 15:47:47 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,7 @@ typedef struct s_shell
 # define EXIT_CMD_NOT_FOUND 127
 # define EXIT_CMD_NOT_FOUND 127
 
-// test functions
+
 void				delete_empty_tokens(t_shell *shell);
 
 // main things
