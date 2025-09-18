@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/18 19:21:31 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/18 19:48:57 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 // cleanup for temp file
 // TODO: HEREDOC
 // TODO: SIGNALS
+// TODO: check push
 
 // test function, remove later
 void	test_tokens(t_token *list)
@@ -117,7 +118,7 @@ int	main(int ac, char **av, char **env)
 		if (input[0] != '\0')
 			add_history(input);
 		shell->input_line = input;
-		printf ("%sp\n", shell->input_line);
+		printf("%sp\n", shell->input_line);
 		if (process_input(shell->input_line, shell) != SUCCESS)
 		{
 			// free_shell_data(shell);
@@ -153,7 +154,6 @@ t_shell	*init_data(void)
 	shell->env_array = NULL;
 	shell->paths_array = NULL;
 	shell->complete_exit = true;
-	
 	return (shell);
 }
 
