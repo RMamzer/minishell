@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 16:20:42 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/04/29 13:02:03 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/18 19:16:07 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,13 +32,13 @@ char	*ft_strtrim(char const *s1, char const *set)
 	size_t	start;
 	size_t	end;
 
-	if (!s1)
+	if (!s1 || !(*s1))
 		return (ft_strdup(""));
 	start = 0;
 	end = ft_strlen(s1)-1;
 	while (trimcheck(s1[start], set))
 		start++;
-	while (trimcheck(s1[end], set))
+	while (trimcheck(s1[end], set) && end > 0)
 		end--;
 	trimmed = ft_substr(s1 + start, 0, end - start + 1);
 	if (!trimmed)

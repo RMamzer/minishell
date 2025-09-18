@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/18 16:17:42 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/18 19:05:17 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,9 +243,7 @@ void	execute_cmd_child(char **args, t_shell *shell)
 
 
 
-// check envp or args?
-// will need exstra signal check?
-// what should i return if not WIFEXITED?
+// free whole struct and everything
 int	execute_external_cmd(char **args, t_shell *shell)
 {
 	pid_t	pid;
@@ -321,10 +319,8 @@ void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 	{
 		close(pipefd[WRITE_END]);
 		exit(write_error_and_return("dup2", errno));
-		exit(write_error_and_return("dup2", errno));
 	}
 	close(pipefd[WRITE_END]);
-	exit(execute_ast(ast, shell));
 	exit(execute_ast(ast, shell));
 }
 
@@ -335,10 +331,8 @@ void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
 	{
 		close(pipefd[READ_END]);
 		exit(write_error_and_return("dup2", errno));
-		exit(write_error_and_return("dup2", errno));
 	}
 	close(pipefd[READ_END]);
-	exit(execute_ast(ast, shell));
 	exit(execute_ast(ast, shell));
 }
 // need to close read and write ends of pipe

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/18 13:13:38 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/18 19:39:13 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
 		free(file);
 		return (FAILURE);
 	}
-	if (read_heredoc(&fd, current->next, shell) == FAILURE) 
+	if (read_heredoc(&fd, current->next, shell) == FAILURE)
 	{
 		close(fd);
 		free(file);
@@ -66,7 +66,7 @@ void	process_delim(t_token *delim, t_shell *shell)
 	size_t	j;
 
 	//if (!delim->content)
-		//fatality(ERROR_MEM, shell, 1); // noty surre if i need it 
+		//fatality(ERROR_MEM, shell, 1); // noty surre if i need it
 	new_content = ft_calloc(ft_strlen(delim->content) + 1, sizeof(char));
 	if (!new_content)
 		fatality(ERROR_MEM, shell, 1);
@@ -254,16 +254,16 @@ void	save_heredoc_file(t_shell *shell, char *file)
 		free(file);  // Free the file parameter before exiting
 		fatality(ERROR_MEM, shell, 1);
 	}
-    // test below 
-    if (shell->heredoc_files) // <-- add this block
-    {
-        size_t j = 0;
-        while (shell->heredoc_files[j])
-            free(shell->heredoc_files[j++]);
-        free(shell->heredoc_files);
-    }
-    // test up
-	//free(shell->heredoc_files); orig input
+    // test below
+    // if (shell->heredoc_files) // <-- add this block
+    // {
+    //     size_t j = 0;
+    //     while (shell->heredoc_files[j])
+    //         free(shell->heredoc_files[j++]);
+    //     free(shell->heredoc_files);
+    // }
+    // // test up
+	free(shell->heredoc_files);
 	shell->heredoc_files = new;
 }
 

@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:59 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/18 16:17:53 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/18 19:28:03 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ void	free_shell_data(t_shell *shell)
 	shell->input_line = NULL;
 	free_list(&shell->token_list);
 	free_ast(&shell->ast);
+	free_heredoc_files(shell);
 	shell->complete_exit = true;
 	// probably free_env
 }
@@ -80,6 +81,7 @@ void	free_shell(t_shell *shell)
 	free_shell_data(shell);
 	if (shell->env)
 		free_env(shell->env);
+	if (shell->env_array)
 	free(shell);
 }
 

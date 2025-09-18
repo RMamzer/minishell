@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/18 16:09:51 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/18 18:53:25 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,7 @@ typedef struct s_shell
 # define EXECUTE false
 # define EXIT_INVALID_OPTION 2
 # define EXIT_CMD_NOT_FOUND 127
-# define EXIT_CMD_NOT_FOUND 127
+# define EXIT_CMD_NOT_EXEC 127
 
 
 void				delete_empty_tokens(t_shell *shell);
