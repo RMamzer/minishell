@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/17 19:22:50 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/18 12:52:54 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,16 +118,19 @@ int	main(int ac, char **av, char **env)
 			add_history(input);
 		shell->input_line = input;
 		if (process_input(shell->input_line, shell) != SUCCESS)
-			continue ;
+        {
+            free_shell_data(shell);
+            continue;
+        }	
 		if (parse_tokens(shell) != SUCCESS)
-			continue ;
-		// print_ast(shell->ast, 0);
+        {
+            free_shell_data(shell);
+            continue;
+        }
 		execute_ast(shell->ast, shell);
-		// print_ast(shell->ast, 0);
 		free_shell_data(shell);
 	}
 	free_shell(shell);
-	// test upper
 }
 
 t_shell	*init_data(void)

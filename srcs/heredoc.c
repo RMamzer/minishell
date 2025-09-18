@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/16 17:28:55 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/18 13:13:38 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,7 +254,16 @@ void	save_heredoc_file(t_shell *shell, char *file)
 		free(file);  // Free the file parameter before exiting
 		fatality(ERROR_MEM, shell, 1);
 	}
-	free(shell->heredoc_files);
+    // test below 
+    if (shell->heredoc_files) // <-- add this block
+    {
+        size_t j = 0;
+        while (shell->heredoc_files[j])
+            free(shell->heredoc_files[j++]);
+        free(shell->heredoc_files);
+    }
+    // test up
+	//free(shell->heredoc_files); orig input
 	shell->heredoc_files = new;
 }
 
