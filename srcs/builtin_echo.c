@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_echo.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 15:37:48 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/10 18:55:48 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/18 16:13:48 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,13 @@ int	execute_builtin_echo(char **args)
 			n_flag = true;
 			i++;
 		}
-	}
-	while (args[i])
-	{
-		ft_putstr_fd(args[i], STDOUT_FILENO);
-		i++;
-		if (args[i])
-			ft_putchar_fd(' ', STDOUT_FILENO);
+		while (args[i])
+		{
+			ft_putstr_fd(args[i], STDOUT_FILENO);
+			i++;
+			if (args[i])
+				ft_putchar_fd(' ', STDOUT_FILENO);
+		}
 	}
 	if (n_flag == false)
 		ft_putchar_fd('\n', STDOUT_FILENO);

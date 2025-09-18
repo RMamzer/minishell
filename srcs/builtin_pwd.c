@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_pwd.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/20 15:46:34 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/10 18:51:43 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/18 16:15:54 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,15 +15,24 @@
 int	execute_builtin_pwd(char **args, t_shell *shell)
 {
 	char *path;
-	if (*args)
+	if (*args && **args == '-')
 	{
-		ft_putstr_fd("minishell: pwd: no options or arguments are supported\n",
-			STDERR_FILENO);
-		return (EXIT_FAILURE);
+		write_bulitin_error("minishell: unset: ", *args,
+			": options are not supported\n" ,NULL);
+		return (EXIT_INVALID_OPTION);
 	}
+	if (!shell)
+		return (1);
 	path = get_env_value("PWD", shell->env, NO_ALLOC);
+	if (path)
+	{
+		printf("%s\n", path);
+		return (0);
+	}
+	path = getcwd(NULL, 0);
 	if (!path)
-		return (EXIT_FAILURE);
+		return (write_error_and_return("cd: getcwd", errno));
 	printf("%s\n", path);
+	free(path);
 	return (0);
 }

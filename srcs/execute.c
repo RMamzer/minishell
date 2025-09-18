@@ -3,14 +3,38 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/10 18:58:20 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/18 16:17:42 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+
+// // TESTING
+// void    print_char_array(char **arr)
+// {
+//     // A counter for the index of the array
+//     int i = 0;
+
+//     // Check if the array itself is NULL before attempting to access it
+//     if (!arr)
+//         return;
+
+//     // Loop until a NULL pointer is encountered.
+//     // In C, string arrays are often terminated by a NULL pointer.
+//     while (arr[i] != NULL)
+//     {
+//         // Use printf for formatted output. The `%s` specifier is for strings.
+//         // A newline `\n` is added for clean output.
+//         printf("%d:%s\n", i, arr[i]);
+//         i++;
+//     }
+// }
+
+
 
 // // for testing, delete later
 // void print_envp(char *const *envp) {
@@ -33,11 +57,6 @@ void	error_exit(char *msg)
 	exit(errno);
 }
 
-void	free_execution(t_shell *shell)
-{
-	free(shell);
-}
-
 void	write_bulitin_error(char *str1, char *str2, char *str3, char *str4)
 {
 	if (str1)
@@ -49,11 +68,23 @@ void	write_bulitin_error(char *str1, char *str2, char *str3, char *str4)
 	if (str4)
 		perror(str4);
 }
+
+void	free_execution(t_shell *shell)
+{
+	if (!shell)
+		return ;
+	if (shell->env_array)
+		free_array(shell->env_array);
+	if (shell->paths_array)
+		free_array(shell->paths_array);
+}
+
 /*
 Do we need to add additional message here?
 What to free here:
 1. Path ft_split
 2. Recreated env array of arrays
+// free execution
 */
 void	write_error_malloc(void)
 {
@@ -61,13 +92,13 @@ void	write_error_malloc(void)
 	exit(errno);
 }
 
-void	error_exec_exit(char *str1, t_shell *shell)
+void	error_exec_exit(char *str1, t_shell *shell, int exit_code)
 {
 	ft_putstr_fd("minishell: ", STDERR_FILENO);
 	if (*str1)
-		ft_putstr_fd(str1, STDERR_FILENO);
+		perror(str1);
 	free_execution(shell);
-	exit(errno);
+	exit (exit_code);
 }
 
 int	get_env_size(t_env *lst, bool process)
@@ -142,7 +173,10 @@ void	recreate_env_array(t_env *env, t_shell *shell)
 		{
 			shell->env_array[i] = super_strjoin(temp->key, "=", temp->value);
 			if (!shell->env_array[i])
+			{
+				free_execution(shell);
 				write_error_malloc();
+			}
 			i++;
 		}
 		temp = temp->next;
@@ -150,132 +184,6 @@ void	recreate_env_array(t_env *env, t_shell *shell)
 	shell->env_array[i] = NULL;
 }
 
-/*
-Logic:
-1. get paths_array
-2. check if it is
-*/
-
-// void	execute_path_cmd(char **args, t_shell *shell)
-// {
-// 	if (access(args[0], X_OK) != 0)
-// 		error_exec_exit(args[0], shell);
-// 	execve(args[0],args, shell->env_array);
-// 	error_exec_exit(args[0], shell);
-// }
-
-// //Next steps:
-// // check the application of path and execute_path combo, add flag?
-// /* Potential structure:
-// 1. find the correct path (/ or f_ok for cmd)
-// 2. use it into the execve function with error exit on the side there?
-// */
-// bool execute_cmd(char **args, t_shell *shell)
-// {
-// 	int i;
-// 	char *exec_path;
-
-// 	while (shell->paths_array[i])
-// 	{
-// 		exec_path = super_strjoin(shell->paths_array[i], "/", args[0]);
-// 		if (!exec_path)
-// 			write_error_malloc(); // check cleaning
-// 		if (access(exec_path, X_OK) != 0)
-// 			{
-// 				free(exec_path);
-// 				error_exit("minishell: cannot execute cmd");
-// 			}
-// 		execve(exec_path, args, shell->env_array);
-// 		free(exec_path);
-// 		error_exec_exit(args[i], shell);
-
-// 	}
-// 		free(exec_path);
-// 		i++;
-// }
-
-// add ending
-// void	execute_cmd_child(char **args, t_shell *shell)
-// {
-// 	char	*env_path;
-
-// 	env_path = (get_env_value("PATH", shell->env, NO_ALLOC));
-// 	if (!env_path)
-// check what kinds of errors could be here: if command and path?
-// 		error_exit("minishell cmd: not found");
-// 	shell->paths_array = ft_split(env_path, ':');
-// 	if (!shell->paths_array)
-// 		write_error_malloc(); // malloc env_paths here
-// 	recreate_env_array(shell->env, shell);
-// 	if (ft_strchr(args[0], '/'))
-// 		execute_path_cmd(args, shell);
-// 	if (!execute_cmd)
-// 		error_exit(*args);
-// 	}
-
-// add ending
-/*
-Logic:
-1. get paths_array
-2. check if it is
-*/
-
-// void	execute_path_cmd(char **args, t_shell *shell)
-// {
-// 	if (access(args[0], X_OK) != 0)
-// 		error_exec_exit(args[0], shell);
-// 	execve(args[0],args, shell->env_array);
-// 	error_exec_exit(args[0], shell);
-// }
-
-// //Next steps:
-// // check the application of path and execute_path combo, add flag?
-// /* Potential structure:
-// 1. find the correct path (/ or f_ok for cmd)
-// 2. use it into the execve function with error exit on the side there?
-// */
-// bool execute_cmd(char **args, t_shell *shell)
-// {
-// 	int i;
-// 	char *exec_path;
-
-// 	while (shell->paths_array[i])
-// 	{
-// 		exec_path = super_strjoin(shell->paths_array[i], "/", args[0]);
-// 		if (!exec_path)
-// 			write_error_malloc(); // check cleaning
-// 		if (access(exec_path, X_OK) != 0)
-// 			{
-// 				free(exec_path);
-// 				error_exit("minishell: cannot execute cmd");
-// 			}
-// 		execve(exec_path, args, shell->env_array);
-// 		free(exec_path);
-// 		error_exec_exit(args[i], shell);
-
-// 	}
-// 		free(exec_path);
-// 		i++;
-// }
-
-// add ending
-// void	execute_cmd_child(char **args, t_shell *shell)
-// {
-// 	char	*env_path;
-
-// 	env_path = (get_env_value("PATH", shell->env, NO_ALLOC));
-// 	if (!env_path)
-// check what kinds of errors could be here: if command and path?
-// 		error_exit("minishell cmd: not found");
-// 	shell->paths_array = ft_split(env_path, ':');
-// 	if (!shell->paths_array)
-// 		write_error_malloc(); // malloc env_paths here
-// 	recreate_env_array(shell->env, shell);
-// 	if (ft_strchr(args[0], '/'))
-// 		execute_path_cmd(args, shell);
-// 	if (!execute_cmd)
-// 		error_exit(*args);
-// 	}
 
 char	*find_path_cmd(char **args, bool *malocced, t_shell *shell)
 {
@@ -283,7 +191,11 @@ char	*find_path_cmd(char **args, bool *malocced, t_shell *shell)
 	int		i;
 
 	if (ft_strchr(args[0], '/'))
-		return (args[0]);
+	{
+		if (access(args[0], F_OK) == 0)
+			return (args[0]);
+		error_exec_exit(args[0], shell, EXIT_CMD_NOT_FOUND);
+	}
 	i = 0;
 	*malocced = true;
 	while (shell->paths_array[i])
@@ -291,17 +203,19 @@ char	*find_path_cmd(char **args, bool *malocced, t_shell *shell)
 		cmd_path = super_strjoin(shell->paths_array[i], "/", args[0]);
 		if (!cmd_path)
 			write_error_malloc();
+
 		if (access(cmd_path, F_OK) == 0)
 			return (cmd_path);
 		free(cmd_path);
 		i++;
 	}
 	write_bulitin_error("minishell: ", *args, ": command not found\n", NULL);
-	free(shell); // free everything mallocced on this level
+	free_execution (shell);
 	exit(EXIT_CMD_NOT_FOUND);
 }
 
-// add ending
+
+//CHECK ENV_ARRAY AND PATHS_ARRAY frees
 void	execute_cmd_child(char **args, t_shell *shell)
 {
 	char	*env_path;
@@ -311,11 +225,8 @@ void	execute_cmd_child(char **args, t_shell *shell)
 	malloced = false;
 	env_path = (get_env_value("PATH", shell->env, NO_ALLOC));
 	if (!env_path)
-	// check what kinds of errors could be here: if command and path?
 	{
-		write_bulitin_error("minishell: ", *args,
-			": no such fille or directory\n", NULL);
-		free_execution(shell);
+		write_bulitin_error("minishell: ", *args, ": command not found\n", NULL);
 		exit(EXIT_CMD_NOT_FOUND);
 	}
 	shell->paths_array = ft_split(env_path, ':');
@@ -326,83 +237,11 @@ void	execute_cmd_child(char **args, t_shell *shell)
 	if (access(cmd_path, X_OK) == 0)
 		execve(cmd_path, args, shell->env_array);
 	if (malloced == true)
-		free(cmd_path);
-	error_exec_exit(args[0], shell);
+		free (cmd_path);
+	error_exec_exit(args[0], shell, EXIT_CMD_NOT_EXEC);//127
 }
 
-// THE OLDEST ONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// void	execute_cmd_child(char **args, t_shell *shell)
-// {
-// 	char	*env_path;
-// 	char	*joined_path;
-// 	int		i;
 
-// 	i = 0;
-// 	env_path = (get_env_value("PATH", shell->env, NO_ALLOC));
-// 	if (!env_path)
-// check what kinds of errors could be here: if command and path?
-// 		error_exit("minishell cmd: not found");
-// 	shell->paths_array = ft_split(env_path, ':');
-// 	if (!shell->paths_array)
-// 		write_error_malloc(); // malloc env_paths here
-// 	recreate_env_array(shell->env, shell);
-// 	while (shell->paths_array[i])
-// 	{
-// 		joined_path = super_strjoin(shell->paths_array[i], "/", args[0]);
-// 		if (!joined_path)
-// 			error_exit("minishell: malloc broke"); // malloc env_paths here
-// 		if (access(joined_path, F_OK) == 0)
-// 		{
-// 			if (access(joined_path, X_OK) == 0)
-// 			{
-// 				execve(joined_path, args, shell->env_array);
-// 				free(joined_path);
-// 				error_exit("minishell: execution error");
-// 			}
-// 			free(joined_path);
-// 			error_exit("minishell: cannot execute cmd");
-// 		}
-// 		free(joined_path);
-// 		i++;
-// 	}
-// }
-
-// THE OLDEST ONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// void	execute_cmd_child(char **args, t_shell *shell)
-// {
-// 	char	*env_path;
-// 	char	*joined_path;
-// 	int		i;
-
-// 	i = 0;
-// 	env_path = (get_env_value("PATH", shell->env, NO_ALLOC));
-// 	if (!env_path)
-// check what kinds of errors could be here: if command and path?
-// 		error_exit("minishell cmd: not found");
-// 	shell->paths_array = ft_split(env_path, ':');
-// 	if (!shell->paths_array)
-// 		write_error_malloc(); // malloc env_paths here
-// 	recreate_env_array(shell->env, shell);
-// 	while (shell->paths_array[i])
-// 	{
-// 		joined_path = super_strjoin(shell->paths_array[i], "/", args[0]);
-// 		if (!joined_path)
-// 			error_exit("minishell: malloc broke"); // malloc env_paths here
-// 		if (access(joined_path, F_OK) == 0)
-// 		{
-// 			if (access(joined_path, X_OK) == 0)
-// 			{
-// 				execve(joined_path, args, shell->env_array);
-// 				free(joined_path);
-// 				error_exit("minishell: execution error");
-// 			}
-// 			free(joined_path);
-// 			error_exit("minishell: cannot execute cmd");
-// 		}
-// 		free(joined_path);
-// 		i++;
-// 	}
-// }
 
 // check envp or args?
 // will need exstra signal check?
@@ -425,7 +264,9 @@ int	execute_external_cmd(char **args, t_shell *shell)
 // do i need to check empty cmd here?
 int	check_command(t_ast *ast, char *cmd, t_shell *shell)
 {
-	if (ft_strcmp(cmd, "echo") == 0)
+	if (!*cmd)
+		shell->exit_code = 0;
+	else if (ft_strcmp(cmd, "echo") == 0)
 		shell->exit_code = execute_builtin_echo(ast->value + 1);
 	else if (ft_strcmp(cmd, "cd") == 0)
 		shell->exit_code = execute_builtin_cd(ast->value + 1, shell);
@@ -507,6 +348,7 @@ int	execute_pipe(t_ast *ast, t_shell *shell)
 	int		pipefd[2];
 	pid_t	pids[2];
 
+	shell->complete_exit = false;
 	if (pipe(pipefd) == -1)
 		write_error_and_return("pipe", errno);
 	pids[0] = fork();

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 15:05:10 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/10 18:51:37 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/18 16:15:42 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,13 @@ void	process_valueless_export_node(t_shell *shell, char *str)
 
 	key = ft_strdup(str);
 	if (!key)
-		error_env_exit(key, NULL, shell);
+		write_error_malloc();
 	new_node = create_env_node(key, NULL);
 	if (!new_node)
-		error_env_exit(key, NULL, shell);
+	{
+		free (key);
+		write_error_malloc();
+	}
 	add_env_node(&shell->env, new_node);
 }
 

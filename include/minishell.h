@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/18 15:47:47 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/18 16:09:51 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,7 @@ typedef struct s_shell
 	char			**heredoc_files;
 	char			**env_array;
 	char			**paths_array;
+	bool			complete_exit;
 }					t_shell;
 
 // lib and macro for execution
@@ -181,7 +182,7 @@ void				free_list(t_token **list);
 
 // env
 void				error_exit(char *msg);
-void				error_env_exit(char *key, char *value, t_shell *shell);
+void				error_malloc_env_exit(char *key, char *value, t_shell *shell);
 bool				update_env_value(t_env **env, char *key, char *new_value);
 char				*find_env_value(char *str, t_env *env);
 void				update_shllvl_value(t_shell *shell);

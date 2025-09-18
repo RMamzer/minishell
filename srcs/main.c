@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/18 15:48:58 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/18 16:18:38 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,46 +58,46 @@ const char	*type_to_str(t_token_type t)
 	}
 }
 
-static void	print_value(char **value)
-{
-	int	i;
+// static void	print_value(char **value)
+// {
+// 	int	i;
 
-	i = 0;
-	if (!value)
-		return ;
-	printf(" (");
-	while (value[i])
-	{
-		if (i > 0)
-			printf(" ");
-		printf("%s", value[i]);
-		i++;
-	}
-	printf(")");
-}
+// 	i = 0;
+// 	if (!value)
+// 		return ;
+// 	printf(" (");
+// 	while (value[i])
+// 	{
+// 		if (i > 0)
+// 			printf(" ");
+// 		printf("%s", value[i]);
+// 		i++;
+// 	}
+// 	printf(")");
+// }
 
-void	print_ast(t_ast *node, int depth)
-{
-	int	i;
+// void	print_ast(t_ast *node, int depth)
+// {
+// 	int	i;
 
-	if (!node)
-	{
-		printf("ast is clean\n");
-		return ;
-	}
-	/* indentation */
-	i = 0;
-	while (i++ < depth)
-		printf("  ");
-	printf("%s", type_to_str(node->type));
-	if (node->value && node->value[0])
-		print_value(node->value);
-	printf("\n");
-	if (node->left)
-		print_ast(node->left, depth + 1);
-	if (node->right)
-		print_ast(node->right, depth + 1);
-}
+// 	if (!node)
+// 	{
+// 		printf("ast is clean\n");
+// 		return ;
+// 	}
+// 	/* indentation */
+// 	i = 0;
+// 	while (i++ < depth)
+// 		printf("  ");
+// 	printf("%s", type_to_str(node->type));
+// 	if (node->value && node->value[0])
+// 		print_value(node->value);
+// 	printf("\n");
+// 	if (node->left)
+// 		print_ast(node->left, depth + 1);
+// 	if (node->right)
+// 		print_ast(node->right, depth + 1);
+// }
 
 int	main(int ac, char **av, char **env)
 {
@@ -151,6 +151,7 @@ t_shell	*init_data(void)
 	shell->heredoc_files = NULL;
 	shell->env_array = NULL;
 	shell->paths_array = NULL;
+	shell->complete_exit = true;
 	return (shell);
 }
 

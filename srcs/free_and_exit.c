@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   free_and_exit.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:59 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/18 15:06:50 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/18 16:17:53 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,22 @@ void	free_ast(t_ast **ast)
 	free(temp);
 	*ast = NULL;
 }
+void	free_env(t_env *env)
+{
+	t_env *temp;
+	t_env *current;
+
+	if (!env)
+		return;
+	temp = env;
+	while (temp)
+	{
+		current = temp;
+		temp = temp->next;
+		free_env_node(current);
+	}
+}
+
 // free shell shell
 void	free_shell_data(t_shell *shell)
 {
@@ -53,7 +69,8 @@ void	free_shell_data(t_shell *shell)
 	shell->input_line = NULL;
 	free_list(&shell->token_list);
 	free_ast(&shell->ast);
-	free_heredoc_files(shell);
+	shell->complete_exit = true;
+	// probably free_env
 }
 
 void	free_shell(t_shell *shell)
@@ -61,6 +78,8 @@ void	free_shell(t_shell *shell)
 	if (!shell)
 		return ;
 	free_shell_data(shell);
+	if (shell->env)
+		free_env(shell->env);
 	free(shell);
 }
 

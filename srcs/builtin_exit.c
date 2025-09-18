@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_exit.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 17:38:22 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/18 15:48:49 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/18 16:14:08 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,4 +77,7 @@ int	execute_builtin_exit(char **args, t_shell *shell)
 		shell->exit_code = check_exit_code(args[0]);
 	// free_minishell_here??? Figure out with maxim
 	exit(shell->exit_code);
+	if (shell->complete_exit == true)
+		fatality(NULL, shell, shell->exit_code);
+	return (shell->exit_code);
 }
