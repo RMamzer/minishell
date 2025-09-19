@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/18 19:48:57 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/19 11:42:16 by mamzerr1         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,6 @@ int	main(int ac, char **av, char **env)
 		if (input[0] != '\0')
 			add_history(input);
 		shell->input_line = input;
-		printf("%sp\n", shell->input_line);
 		if (process_input(shell->input_line, shell) != SUCCESS)
 		{
 			// free_shell_data(shell);
