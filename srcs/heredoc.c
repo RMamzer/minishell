@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/19 16:22:21 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/19 17:47:26 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ void	process_heredoc(t_shell *shell)
 		if (current->type == HEREDOC && current->next)
 		{
 			if (process_heredoc_token(shell, current, i) == FAILURE)
-				fatality("hered failed", shell, 1);
+				fatality("heredoc failed", shell, 1);
 			i++;
 		}
 		current = current->next;
@@ -65,8 +65,6 @@ void	process_delim(t_token *delim, t_shell *shell)
 	size_t	i;
 	size_t	j;
 
-	// if (!delim->content)
-	// fatality(ERROR_MEM, shell, 1); // noty surre if i need it
 	new_content = ft_calloc(ft_strlen(delim->content) + 1, sizeof(char));
 	if (!new_content)
 		fatality(ERROR_MEM, shell, 1);
