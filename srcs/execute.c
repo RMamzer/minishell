@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/18 19:05:17 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/19 11:32:40 by mamzerr1         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,11 +51,7 @@
 // }
 
 // REMOVE AND FIX ENV EXITS
-void	error_exit(char *msg)
-{
-	perror(msg);
-	exit(errno);
-}
+
 
 void	write_bulitin_error(char *str1, char *str2, char *str3, char *str4)
 {
@@ -227,11 +223,11 @@ void	execute_cmd_child(char **args, t_shell *shell)
 	if (!env_path)
 	{
 		write_bulitin_error("minishell: ", *args, ": command not found\n", NULL);
-		exit(EXIT_CMD_NOT_FOUND);
+		exit(EXIT_CMD_NOT_FOUND); // fatality 
 	}
 	shell->paths_array = ft_split(env_path, ':');
 	if (!shell->paths_array)
-		write_error_malloc(); // malloc env_paths here
+		write_error_malloc(); // use maxes fatality approach
 	recreate_env_array(shell->env, shell);
 	cmd_path = find_path_cmd(args, &malloced, shell);
 	if (access(cmd_path, X_OK) == 0)
@@ -259,7 +255,8 @@ int	execute_external_cmd(char **args, t_shell *shell)
 	return (EXIT_FAILURE);
 }
 
-// do i need to check empty cmd here?
+// check the difference in exits between built-ins and external cmds
+// pipe needs to free on its level to account for builtins
 int	check_command(t_ast *ast, char *cmd, t_shell *shell)
 {
 	if (!*cmd)

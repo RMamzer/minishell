@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   free_and_exit.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:59 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/18 19:28:03 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/19 11:11:24 by mamzerr1         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,16 @@ void	free_shell_data(t_shell *shell)
 	free_ast(&shell->ast);
 	free_heredoc_files(shell);
 	shell->complete_exit = true;
+	if (shell->env_array)
+	{
+		free_array(shell->env_array);
+		shell->env_array = NULL;
+	}
+	if (shell->env_array)
+	{
+		free_array(shell->paths_array);
+		shell->paths_array = NULL;
+	}
 	// probably free_env
 }
 

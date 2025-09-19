@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/18 18:53:25 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/19 10:58:15 by mamzerr1         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,7 +181,6 @@ void				lexer_error(char *input_line, t_shell *shell,
 void				free_list(t_token **list);
 
 // env
-void				error_exit(char *msg);
 void				error_malloc_env_exit(char *key, char *value, t_shell *shell);
 bool				update_env_value(t_env **env, char *key, char *new_value);
 char				*find_env_value(char *str, t_env *env);
