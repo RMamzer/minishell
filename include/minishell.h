@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/18 18:53:25 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/19 16:35:26 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,15 +116,15 @@ typedef struct s_shell
 # define EXIT_CMD_NOT_FOUND 127
 # define EXIT_CMD_NOT_EXEC 127
 
-
 void				delete_empty_tokens(t_shell *shell);
 
 // main things
 int					main(int ac, char **av, char **env);
 t_shell				*init_data(void);
+bool				receive_input(t_shell *shell);
 
 // pre processing of input
-bool				process_input(char *input_line, t_shell *shell);
+bool				process_input(t_shell *shell);
 char				check_quote(char *line, int index);
 
 // lexer
@@ -137,7 +137,7 @@ bool				check_syntax(t_shell *shell);
 void				quote_flag(t_shell *shell);
 
 // heredoc
-bool				process_heredoc(t_shell *shell);
+void				process_heredoc(t_shell *shell);
 bool				process_heredoc_token(t_shell *shell, t_token *current,
 						size_t i);
 void				process_delim(t_token *delim, t_shell *shell);
@@ -182,7 +182,8 @@ void				free_list(t_token **list);
 
 // env
 void				error_exit(char *msg);
-void				error_malloc_env_exit(char *key, char *value, t_shell *shell);
+void				error_malloc_env_exit(char *key, char *value,
+						t_shell *shell);
 bool				update_env_value(t_env **env, char *key, char *new_value);
 char				*find_env_value(char *str, t_env *env);
 void				update_shllvl_value(t_shell *shell);

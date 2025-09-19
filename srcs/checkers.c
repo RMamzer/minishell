@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/18 13:13:40 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/19 15:55:13 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,14 +68,11 @@ bool	check_syntax(t_shell *shell)
 	return (SUCCESS);
 }
 
-// maybe add count for heredocs here ?
 void	check_heredoc(t_shell *shell)
 {
 	t_token	*current;
 	int		count;
-	int		i;
 
-	i = 0;
 	count = 0;
 	current = shell->token_list;
 	while (current)
