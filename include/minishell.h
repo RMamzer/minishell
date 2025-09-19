@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/19 16:35:26 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/19 17:42:00 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,6 +134,8 @@ size_t				handle_word(char *input_line, size_t start, t_shell *shell);
 void				add_token(t_shell *shell, t_token_type type, char *content);
 void				check_heredoc(t_shell *shell);
 bool				check_syntax(t_shell *shell);
+bool				check_pipe_syntax(t_token *current, t_shell *shell);
+bool				check_redir_syntax(t_token *current, t_shell *shell);
 void				quote_flag(t_shell *shell);
 
 // heredoc
