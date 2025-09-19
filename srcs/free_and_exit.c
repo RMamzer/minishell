@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   free_and_exit.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:59 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/19 11:11:24 by mamzerr1         ###   ########.fr       */
+/*   Updated: 2025/09/19 19:47:48 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,18 +71,12 @@ void	free_shell_data(t_shell *shell)
 	free_ast(&shell->ast);
 	free_heredoc_files(shell);
 	shell->complete_exit = true;
-	if (shell->env_array)
-	{
-		free_array(shell->env_array);
-		shell->env_array = NULL;
-	}
-	if (shell->env_array)
-	{
-		free_array(shell->paths_array);
-		shell->paths_array = NULL;
-	}
-	// probably free_env
+	free_array(shell->env_array);
+	shell->env_array = NULL;
+	free_array(shell->paths_array);
+	shell->paths_array = NULL;
 }
+
 
 void	free_shell(t_shell *shell)
 {
@@ -91,7 +85,6 @@ void	free_shell(t_shell *shell)
 	free_shell_data(shell);
 	if (shell->env)
 		free_env(shell->env);
-	if (shell->env_array)
 	free(shell);
 }
 
@@ -106,6 +99,7 @@ void	free_array(char **arr)
 	while (arr[i])
 		free(arr[i++]);
 	free(arr);
+
 }
 
 void	fatality(char *msg, t_shell *shell, int exit_code)

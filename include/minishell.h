@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/19 10:58:15 by mamzerr1         ###   ########.fr       */
+/*   Updated: 2025/09/19 20:35:01 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,6 +235,7 @@ void				free_array(char **arr);
 void				fatality(char *msg, t_shell *shell, int exit_code);
 
 // execute.c
+void				brutality(char *msg, t_shell *shell, int exit_code);
 void				write_bulitin_error(char *str1, char *str2, char *str3,
 						char *str4);
 void				error_close_and_exit(char *msg, int *pipefd);
@@ -272,7 +273,7 @@ void				process_valueless_export_node(t_shell *shell, char *str);
 bool				is_identifier_valid(char *str);
 void				print_env_export(t_env **temp_env);
 void				bubble_sort_env(t_env **env, int len);
-int					sort_and_print_export(t_env *env);
+int					sort_and_print_export(t_env *env, t_shell *shell);
 int					execute_builtin_export(char **args, t_shell *shell);
 
 //  other exec
@@ -285,7 +286,5 @@ void				write_bulitin_error(char *str1, char *str2, char *str3,
 // redir
 int					check_redirection(t_ast *ast, t_shell *shell);
 int					write_error_and_return(char *msg, int error);
-void				write_error_malloc(void);
-int					write_error_and_return(char *msg, int error);
-void				write_error_malloc(void);
+
 #endif

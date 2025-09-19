@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/19 11:32:40 by mamzerr1         ###   ########.fr       */
+/*   Updated: 2025/09/19 20:45:31 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,15 @@
 
 // REMOVE AND FIX ENV EXITS
 
+void	brutality(char *msg, t_shell *shell, int exit_code)
+{
+	if (msg)
+		perror(msg);
+	if (shell)
+		free_shell(shell);
+	clear_history();
+	exit (exit_code);
+}
 
 void	write_bulitin_error(char *str1, char *str2, char *str3, char *str4)
 {
@@ -82,11 +91,11 @@ What to free here:
 2. Recreated env array of arrays
 // free execution
 */
-void	write_error_malloc(void)
-{
-	perror("minishell: malloc");
-	exit(errno);
-}
+// void	write_error_malloc(void)
+// {
+// 	perror("minishell: malloc");
+// 	exit(errno);
+// }
 
 void	error_exec_exit(char *str1, t_shell *shell, int exit_code)
 {
@@ -162,17 +171,14 @@ void	recreate_env_array(t_env *env, t_shell *shell)
 	shell->env_array = malloc(sizeof(char *) * (get_env_size(env, EXECUTE)
 				+ 1));
 	if (!shell->env_array)
-		write_error_malloc();
+		fatality(ERROR_MEM, shell, 1);
 	while (temp)
 	{
 		if (temp->assigned == true)
 		{
 			shell->env_array[i] = super_strjoin(temp->key, "=", temp->value);
 			if (!shell->env_array[i])
-			{
-				free_execution(shell);
-				write_error_malloc();
-			}
+				fatality(ERROR_MEM, shell, 1);
 			i++;
 		}
 		temp = temp->next;
@@ -190,7 +196,8 @@ char	*find_path_cmd(char **args, bool *malocced, t_shell *shell)
 	{
 		if (access(args[0], F_OK) == 0)
 			return (args[0]);
-		error_exec_exit(args[0], shell, EXIT_CMD_NOT_FOUND);
+		write_bulitin_error("minishell: ", NULL, NULL, args[0]);
+		brutality(NULL, shell, EXIT_CMD_NOT_FOUND);
 	}
 	i = 0;
 	*malocced = true;
@@ -198,16 +205,15 @@ char	*find_path_cmd(char **args, bool *malocced, t_shell *shell)
 	{
 		cmd_path = super_strjoin(shell->paths_array[i], "/", args[0]);
 		if (!cmd_path)
-			write_error_malloc();
-
+			fatality(ERROR_MEM, shell, 1);
 		if (access(cmd_path, F_OK) == 0)
 			return (cmd_path);
 		free(cmd_path);
 		i++;
 	}
 	write_bulitin_error("minishell: ", *args, ": command not found\n", NULL);
-	free_execution (shell);
-	exit(EXIT_CMD_NOT_FOUND);
+	brutality(NULL, shell, EXIT_CMD_NOT_FOUND);
+	return (NULL);
 }
 
 
@@ -223,18 +229,19 @@ void	execute_cmd_child(char **args, t_shell *shell)
 	if (!env_path)
 	{
 		write_bulitin_error("minishell: ", *args, ": command not found\n", NULL);
-		exit(EXIT_CMD_NOT_FOUND); // fatality 
+		brutality(NULL, shell, EXIT_CMD_NOT_FOUND);
 	}
 	shell->paths_array = ft_split(env_path, ':');
 	if (!shell->paths_array)
-		write_error_malloc(); // use maxes fatality approach
+		fatality(ERROR_MEM, shell, 1);
 	recreate_env_array(shell->env, shell);
 	cmd_path = find_path_cmd(args, &malloced, shell);
 	if (access(cmd_path, X_OK) == 0)
 		execve(cmd_path, args, shell->env_array);
 	if (malloced == true)
 		free (cmd_path);
-	error_exec_exit(args[0], shell, EXIT_CMD_NOT_EXEC);//127
+	write_bulitin_error("minishell:", NULL, NULL, args[0]);
+	brutality(NULL, shell, EXIT_CMD_NOT_EXEC);
 }
 
 
@@ -246,7 +253,7 @@ int	execute_external_cmd(char **args, t_shell *shell)
 
 	pid = fork();
 	if (pid == -1)
-		return (write_error_and_return("fork", errno));
+		return (write_error_and_return("fork", EXIT_FAILURE));
 	if (pid == 0)
 		execute_cmd_child(args, shell);
 	waitpid(pid, &shell->exit_code, 0);
@@ -292,13 +299,13 @@ int	wait_children(pid_t *pids, int children_rem)
 	{
 		term_pid = waitpid(*pids, &status, 0);
 		if (term_pid == -1)
-			return (write_error_and_return("waitpd", errno));
+			return (write_error_and_return("waitpd", EXIT_FAILURE));
 	}
 	while (children_rem > 0)
 	{
 		term_pid = waitpid(-1, &status, 0);
 		if (term_pid == -1)
-			return (write_error_and_return("waitpd", errno));
+			return (write_error_and_return("waitpd", EXIT_FAILURE));
 		if (term_pid == pids[0] || term_pid == pids[1])
 		{
 			children_rem--;
@@ -315,10 +322,10 @@ void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 	if (dup2(pipefd[WRITE_END], STDOUT_FILENO) == -1)
 	{
 		close(pipefd[WRITE_END]);
-		exit(write_error_and_return("dup2", errno));
+		brutality("minishell: dup2",shell, EXIT_FAILURE);
 	}
 	close(pipefd[WRITE_END]);
-	exit(execute_ast(ast, shell));
+	fatality(NULL, shell, execute_ast(ast, shell));
 }
 
 void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
@@ -327,10 +334,10 @@ void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
 	if (dup2(pipefd[READ_END], STDIN_FILENO) == -1)
 	{
 		close(pipefd[READ_END]);
-		exit(write_error_and_return("dup2", errno));
+		brutality("minishel: dup2",shell, EXIT_FAILURE);
 	}
 	close(pipefd[READ_END]);
-	exit(execute_ast(ast, shell));
+	fatality(NULL, shell, execute_ast(ast, shell));
 }
 // need to close read and write ends of pipe
 
@@ -341,15 +348,15 @@ int	execute_pipe(t_ast *ast, t_shell *shell)
 
 	shell->complete_exit = false;
 	if (pipe(pipefd) == -1)
-		write_error_and_return("pipe", errno);
+		write_error_and_return("pipe", EXIT_FAILURE);
 	pids[0] = fork();
 	if (pids[0] == -1)
-		error_close_and_return("fork", pipefd, errno);
+		error_close_and_return("fork", pipefd, EXIT_FAILURE);
 	if (pids[0] == 0)
 		execute_left_child(ast->left, shell, pipefd);
 	pids[1] = fork();
 	if (pids[1] == -1)
-		error_close_and_return("fork", pipefd, errno);
+		error_close_and_return("fork", pipefd, EXIT_FAILURE);
 	if (pids[1] == 0)
 		execute_right_child(ast->right, shell, pipefd);
 	close(pipefd[WRITE_END]);
@@ -361,10 +368,10 @@ int	execute_ast(t_ast *ast, t_shell *shell)
 {
 	if (!ast || !shell)
 		return (0);
+	if (ast->type == WORD)
+		shell->exit_code = check_command(ast, ast->value[0], shell);
 	if (ast->type == PIPE)
 		shell->exit_code = execute_pipe(ast, shell);
-	else if (ast->type == WORD)
-		shell->exit_code = check_command(ast, ast->value[0], shell);
 	else if (ast->type >= IN && ast->type <= APPEND)
 		shell->exit_code = check_redirection(ast, shell);
 	return (shell->exit_code); // < do i need it if i modify using pointers?

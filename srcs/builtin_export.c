@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 15:05:10 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/18 16:15:42 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/19 20:38:03 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,12 @@ void	process_valueless_export_node(t_shell *shell, char *str)
 
 	key = ft_strdup(str);
 	if (!key)
-		write_error_malloc();
+		fatality(ERROR_MEM, shell, 1);
 	new_node = create_env_node(key, NULL);
 	if (!new_node)
 	{
 		free (key);
-		write_error_malloc();
+		fatality(ERROR_MEM, shell, 1);
 	}
 	add_env_node(&shell->env, new_node);
 }
@@ -82,7 +82,7 @@ void	bubble_sort_env(t_env **env, int len)
 	}
 }
 
-int	sort_and_print_export(t_env *env)
+int	sort_and_print_export(t_env *env, t_shell *shell)
 {
 	t_env	**temp_env;
 	t_env	*current;
@@ -91,7 +91,7 @@ int	sort_and_print_export(t_env *env)
 	i = get_env_size(env, EXPORT);
 	temp_env = calloc(i, sizeof(t_env *));
 	if (!temp_env)
-		write_error_malloc(); // check what to do
+		fatality(ERROR_MEM, shell, 1);
 	current = env;
 	i = 0;
 	while (current)
@@ -115,7 +115,7 @@ int	execute_builtin_export(char **args, t_shell *shell)
 	int	i;
 
 	if (args[0] == NULL)
-		return (sort_and_print_export(shell->env));
+		return (sort_and_print_export(shell->env, shell));
 	if (args[0][0] == '-')
 	{
 		write_bulitin_error("minishell: export: ", *args,
