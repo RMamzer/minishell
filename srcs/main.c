@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/19 16:38:06 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/22 18:13:21 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,6 +202,7 @@ bool	process_input(t_shell *shell)
 	expander(shell);
 	split_variables(shell);
 	delete_empty_tokens(shell);
+	test_tokens(shell->token_list);
 	return (SUCCESS);
 }
 
