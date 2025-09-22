@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:29:11 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/19 16:00:26 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/22 11:34:54 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,16 +124,12 @@ void	add_token(t_shell *shell, t_token_type type, char *content)
 
 bool	is_delimiter(int i)
 {
-	if (i == ' ' || i == '\n' || i == '\t')
-		return (true);
-	return (false);
+	return (i == ' ' || i == '\n' || i == '\t');
 }
 
 bool	is_operator(char c)
 {
-	if (c == '|' || c == '<' || c == '>')
-		return (true);
-	return (false);
+	return (c == '|' || c == '<' || c == '>');
 }
 
 void	delete_empty_tokens(t_shell *shell)
