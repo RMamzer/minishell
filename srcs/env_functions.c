@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env_functions.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/19 10:58:18 by mamzerr1         ###   ########.fr       */
+/*   Updated: 2025/09/23 18:24:35 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,21 @@ void	free_env_node(t_env *env)
 			free(env->value);
 		free(env);
 	}
+}
+
+
+bool	check_env_key(char *name, t_env *env)
+{
+	t_env	*current;
+
+	current = env;
+	while (current)
+	{
+		if (ft_strcmp(current->key, name) == 0)
+			return (true);
+		current = current->next;
+	}
+	return (false);
 }
 
 void	remove_env_variable(t_env **env, char *key)
@@ -137,14 +152,13 @@ t_env	*create_env_node(char *key, char *value)
 	return (new_node);
 }
 
-void	process_env_line(t_shell *shell, const char *envp)
+void	process_env_line(t_shell *shell, const char *envp, bool process)
 {
 	char	*key;
 	char	*value;
 	char	*equal;
 	t_env	*new_node;
 
-	key = NULL;
 	value = NULL;
 	equal = ft_strchr(envp, '=');
 	if (!equal)
@@ -155,11 +169,18 @@ void	process_env_line(t_shell *shell, const char *envp)
 	value = ft_strdup(equal + 1);
 	if (!value)
 		error_malloc_env_exit(key, value, shell);
+	if (process == EXPORT && check_env_key(key, shell->env) == true)
+	{
+		update_env_value(&shell->env, key, value);
+		free(key);
+		return ;
+	}
 	new_node = create_env_node(key, value);
 	if (!new_node)
 		error_malloc_env_exit(key, value, shell);
 	add_env_node(&shell->env, new_node);
 }
+
 // check it later
 void	set_minimal_env(t_shell *shell)
 {
@@ -174,9 +195,9 @@ void	set_minimal_env(t_shell *shell)
 	free(pwd);
 	if (!pwd_line)
 		error_malloc_env_exit(NULL, NULL, shell);
-	process_env_line(shell, pwd_line); // check if it leaks (set env env -i)
-	process_env_line(shell, "SHLVL=0");
-	process_env_line(shell, "_=/usr/bin/env");
+	process_env_line(shell, pwd_line, ENV); // check if it leaks (set env env -i)
+	process_env_line(shell, "SHLVL=0", ENV);
+	process_env_line(shell, "_=/usr/bin/env",ENV);
 	old_pwd_node = create_env_node(ft_strdup("OLDPWD"), NULL);
 	if (!old_pwd_node)
 		error_malloc_env_exit(NULL, NULL, shell);
@@ -191,7 +212,7 @@ void	create_env(t_shell *shell, char **envp)
 	{
 		while (*envp)
 		{
-			process_env_line(shell, *envp);
+			process_env_line(shell, *envp, ENV);
 			envp++;
 		}
 	}

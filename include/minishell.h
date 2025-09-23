@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/19 20:35:01 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/23 18:11:47 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,8 +110,7 @@ typedef struct s_shell
 
 # define EXPORT true
 # define EXECUTE false
-# define EXPORT true
-# define EXECUTE false
+# define ENV false
 # define EXIT_INVALID_OPTION 2
 # define EXIT_CMD_NOT_FOUND 127
 # define EXIT_CMD_NOT_EXEC 127
@@ -183,11 +182,11 @@ void				free_list(t_token **list);
 // env
 void				error_malloc_env_exit(char *key, char *value, t_shell *shell);
 bool				update_env_value(t_env **env, char *key, char *new_value);
-char				*find_env_value(char *str, t_env *env);
+//char				*find_env_value(char *str, t_env *env);
 void				update_shllvl_value(t_shell *shell);
 void				add_env_node(t_env **env, t_env *new_node);
 t_env				*create_env_node(char *key, char *value);
-void				process_env_line(t_shell *shell, const char *envp);
+void				process_env_line(t_shell *shell, const char *envp, bool process);
 void				set_minimal_env(t_shell *shell);
 void				create_env(t_shell *shell, char **envp);
 

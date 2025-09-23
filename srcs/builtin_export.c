@@ -6,17 +6,22 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 15:05:10 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/19 20:38:03 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/23 18:16:38 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+
+
 
 void	process_valueless_export_node(t_shell *shell, char *str)
 {
 	char	*key;
 	t_env	*new_node;
 
+	if (get_env_value(str, shell->env, NO_ALLOC))
+		return;
 	key = ft_strdup(str);
 	if (!key)
 		fatality(ERROR_MEM, shell, 1);
@@ -132,7 +137,7 @@ int	execute_builtin_export(char **args, t_shell *shell)
 			shell->exit_code = EXIT_FAILURE;
 		}
 		else if (ft_strchr(args[i], '='))
-			process_env_line(shell, args[i]); // check
+			process_env_line(shell, args[i],EXPORT); // check
 		else
 			process_valueless_export_node(shell, args[i]);
 	}
