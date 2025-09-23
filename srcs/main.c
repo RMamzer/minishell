@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/19 18:51:36 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/23 19:24:07 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,6 +100,7 @@ const char	*type_to_str(t_token_type t)
 // 		print_ast(node->right, depth + 1);
 // }
 
+
 int	main(int ac, char **av, char **env)
 {
 	t_shell	*shell;
@@ -133,6 +134,7 @@ int	main(int ac, char **av, char **env)
 	}
 	free_shell(shell);
 }
+
 
 t_shell	*init_data(void)
 {
