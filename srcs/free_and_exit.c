@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:59 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/19 16:32:40 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/23 17:07:04 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,11 +46,11 @@ void	free_ast(t_ast **ast)
 }
 void	free_env(t_env *env)
 {
-	t_env *temp;
-	t_env *current;
+	t_env	*temp;
+	t_env	*current;
 
 	if (!env)
-		return;
+		return ;
 	temp = env;
 	while (temp)
 	{
@@ -82,7 +82,7 @@ void	free_shell(t_shell *shell)
 	if (shell->env)
 		free_env(shell->env);
 	if (shell->env_array)
-	free(shell);
+		free(shell);
 }
 
 // free array of strings

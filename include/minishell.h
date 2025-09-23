@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/22 13:03:56 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/23 17:00:21 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,6 @@
 
 # define ERROR_QUOTE "syntax error: unclosed quote"
 # define ERROR_MEM "cannot allocate memory"
-//# define ERROR_PIPE "syntax error near unexpected token `|\'"
-//# define ERROR_REDIR "syntax error near unexpected token `newline'"
 # define ERROR_MAX_HER "maximum here-document count exceeded"
 # define ERROR_EOF "worning: heredoc delimeted by EOF"
 // token type
@@ -144,16 +142,18 @@ bool				process_heredoc_token(t_shell *shell, t_token *current,
 						size_t i);
 void				process_delim(t_token *delim, t_shell *shell);
 void				update_file_name(char **file, size_t *i, t_shell *shell);
-bool	read_heredoc(int *fd, t_token *delim, t_shell *shell, char *file);
+bool				read_heredoc(int *fd, t_token *delim, t_shell *shell,
+						char *file);
 void				update_heredoc_token(t_token *current, char *file,
 						t_shell *shell);
-void	expand_heredoc(char **line, t_shell *shell, char *file);
-char	*heredoc_expander(char *line, t_shell *shell, char *file);
+void				expand_heredoc(char **line, t_shell *shell, char *file);
+char				*heredoc_expander(char *line, t_shell *shell, char *file);
 char				*get_new_content(char *line, size_t *i, t_shell *shell);
 void				save_heredoc_file(t_shell *shell, char *file);
 void				free_heredoc_files(t_shell *shell);
-bool expand_line(char *line, char **new_content, t_shell *shell);
-char **allocate_heredoc_array(t_shell *shell, char *file, size_t *count);
+bool				expand_line(char *line, char **new_content, t_shell *shell);
+char				**allocate_heredoc_array(t_shell *shell, char *file,
+						size_t *count);
 
 // expansion
 void				expander(t_shell *shell);
