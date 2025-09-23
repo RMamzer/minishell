@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:59 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/23 19:42:16 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/23 19:48:47 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,6 @@ void	free_shell_data(t_shell *shell)
 	shell->paths_array = NULL;
 }
 
-
 void	free_shell(t_shell *shell)
 {
 	if (!shell)
@@ -85,7 +84,7 @@ void	free_shell(t_shell *shell)
 	free_shell_data(shell);
 	if (shell->env)
 		free_env(shell->env);
-		free(shell);
+	free(shell);
 }
 
 // free array of strings
@@ -99,7 +98,6 @@ void	free_array(char **arr)
 	while (arr[i])
 		free(arr[i++]);
 	free(arr);
-
 }
 
 void	fatality(char *msg, t_shell *shell, int exit_code)
