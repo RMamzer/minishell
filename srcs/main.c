@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/23 19:24:07 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/23 19:45:17 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,35 +100,57 @@ const char	*type_to_str(t_token_type t)
 // 		print_ast(node->right, depth + 1);
 // }
 
+// int	main(int ac, char **av, char **env)
+// {
+// 	t_shell	*shell;
+// 	char	*input;
+
+// 	(void)ac;
+// 	(void)av;
+// 	shell = init_data();
+// 	create_env(shell, env);
+// 	// test_env(shell->env); // test
+// 	while (1) // addded for testing
+// 	{
+// 		input = readline("dirty_shell> ");
+// 		if (!input)
+// 			break ;
+// 		if (input[0] != '\0')
+// 			add_history(input);
+// 		shell->input_line = input;
+// 		printf("%sp\n", shell->input_line);
+// 		if (process_input(shell->input_line, shell) != SUCCESS)
+// 		{
+// 			// free_shell_data(shell);
+// 			continue ;
+// 		}
+// 		if (parse_tokens(shell) != SUCCESS)
+// 		{
+// 			free_shell_data(shell);
+// 			continue ;
+// 		}
+// 		execute_ast(shell->ast, shell);
+// 		free_shell_data(shell);
+// 	}
+// 	free_shell(shell);
+// }
 
 int	main(int ac, char **av, char **env)
 {
 	t_shell	*shell;
-	char	*input;
 
 	(void)ac;
 	(void)av;
 	shell = init_data();
 	create_env(shell, env);
-	// test_env(shell->env); // test
-	while (1) // addded for testing
+	while (1)
 	{
-		input = readline("dirty_shell> ");
-		if (!input)
-			break ;
-		if (input[0] != '\0')
-			add_history(input);
-		shell->input_line = input;
-		if (process_input(shell->input_line, shell) != SUCCESS)
-		{
-			// free_shell_data(shell);
+		if (receive_input(shell) == FAILURE)
 			continue ;
-		}
-		if (parse_tokens(shell) != SUCCESS)
-		{
-			free_shell_data(shell);
+		if (process_input(shell) == FAILURE)
 			continue ;
-		}
+		if (parse_tokens(shell) == FAILURE)
+			continue ;
 		execute_ast(shell->ast, shell);
 		free_shell_data(shell);
 	}
@@ -136,9 +158,58 @@ int	main(int ac, char **av, char **env)
 }
 
 
+bool	receive_input(t_shell *shell)
+{
+	shell->input_line = readline("dirty_shell> ");
+	if (!shell->input_line)
+		fatality(NULL, shell, 0); // for now
+	if (shell->input_line[0] == '\0')
+	{
+		free(shell->input_line);
+		return (FAILURE);
+	}
+	if (ft_strlen(shell->input_line) > 1024) // for now
+	{
+		show_error("input is too long", NULL, shell, 2);
+		return (FAILURE);
+	}
+	add_history(shell->input_line);
+	return (SUCCESS);
+}
+
+bool	process_input(t_shell *shell)
+{
+	char	*line;
+
+	line = ft_strtrim(shell->input_line, TO_TRIM);
+	if (line == NULL || line[0] == '\0')
+	{
+		free(shell->input_line);
+		free(line);
+		return (FAILURE);
+	}
+	if (check_quote(line, ft_strlen(line)) != 0)
+	{
+		free(line);
+		show_error(ERROR_QUOTE, NULL, shell, 2);
+		return (FAILURE);
+	}
+	free(shell->input_line);
+	shell->input_line = line;
+	lexer(shell->input_line, shell);
+	if (check_syntax(shell) == FAILURE)
+		return (FAILURE);
+	process_heredoc(shell);
+	expander(shell);
+	split_variables(shell);
+	delete_empty_tokens(shell);
+	// test_tokens(shell->token_list);
+	return (SUCCESS);
+}
+
 t_shell	*init_data(void)
 {
-	t_shell	*shell;
+	t_shell *shell;
 
 	shell = malloc(sizeof(t_shell));
 	if (shell == NULL)
@@ -156,44 +227,4 @@ t_shell	*init_data(void)
 	shell->paths_array = NULL;
 	shell->complete_exit = true;
 	return (shell);
-}
-
-/*
- *   Initial processing of an input line.
- *   TO_TRIM chars removed from both ends of the line.
- *   Checks validity of QUOTES
- *   Checks validity of PIPE
- *   Checks validity of REDIRECTIONS
- */
-bool	process_input(char *input_line, t_shell *shell)
-{
-	char	*line;
-
-	line = ft_strtrim(input_line, TO_TRIM);
-	if (line == NULL || line[0] == '\0')
-	{
-		free(shell->input_line);
-		free(line);
-		return (FAILURE);
-	}
-	if (check_quote(line, ft_strlen(line)) != 0)
-	{
-		free(line);
-		return (show_error(ERROR_QUOTE, NULL, shell, 2), FAILURE);
-	}
-	free(shell->input_line);
-	shell->input_line = line;
-	lexer(shell->input_line, shell);
-	quote_flag(shell);
-	if (check_syntax(shell) == FAILURE)
-		return (FAILURE);
-	check_heredoc(shell);
-	if (process_heredoc(shell) == FAILURE)
-		fatality("write failed", shell, 1);
-	expander(shell);
-	split_variables(shell);
-	// test_tokens(shell->token_list);
-	delete_empty_tokens(shell);
-	// test_tokens(shell->token_list);
-	return (SUCCESS);
 }

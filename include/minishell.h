@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/23 19:15:36 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/23 19:38:41 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,6 @@
 
 # define ERROR_QUOTE "syntax error: unclosed quote"
 # define ERROR_MEM "cannot allocate memory"
-//# define ERROR_PIPE "syntax error near unexpected token `|\'"
-//# define ERROR_REDIR "syntax error near unexpected token `newline'"
 # define ERROR_MAX_HER "maximum here-document count exceeded"
 # define ERROR_EOF "worning: heredoc delimeted by EOF"
 // token type
@@ -121,9 +119,10 @@ void				delete_empty_tokens(t_shell *shell);
 // main things
 int					main(int ac, char **av, char **env);
 t_shell				*init_data(void);
+bool				receive_input(t_shell *shell);
 
 // pre processing of input
-bool				process_input(char *input_line, t_shell *shell);
+bool				process_input(t_shell *shell);
 char				check_quote(char *line, int index);
 
 // lexer
@@ -133,22 +132,28 @@ size_t				handle_word(char *input_line, size_t start, t_shell *shell);
 void				add_token(t_shell *shell, t_token_type type, char *content);
 void				check_heredoc(t_shell *shell);
 bool				check_syntax(t_shell *shell);
+bool				check_pipe_syntax(t_token *current, t_shell *shell);
+bool				check_redir_syntax(t_token *current, t_shell *shell);
 void				quote_flag(t_shell *shell);
 
 // heredoc
-bool				process_heredoc(t_shell *shell);
+void				process_heredoc(t_shell *shell);
 bool				process_heredoc_token(t_shell *shell, t_token *current,
 						size_t i);
 void				process_delim(t_token *delim, t_shell *shell);
 void				update_file_name(char **file, size_t *i, t_shell *shell);
-bool				read_heredoc(int *fd, t_token *delim, t_shell *shell);
+bool				read_heredoc(int *fd, t_token *delim, t_shell *shell,
+						char *file);
 void				update_heredoc_token(t_token *current, char *file,
 						t_shell *shell);
-void				expand_heredoc(char **line, t_shell *shell);
-char				*heredoc_expander(char *line, t_shell *shell);
+void				expand_heredoc(char **line, t_shell *shell, char *file);
+char				*heredoc_expander(char *line, t_shell *shell, char *file);
 char				*get_new_content(char *line, size_t *i, t_shell *shell);
 void				save_heredoc_file(t_shell *shell, char *file);
 void				free_heredoc_files(t_shell *shell);
+bool				expand_line(char *line, char **new_content, t_shell *shell);
+char				**allocate_heredoc_array(t_shell *shell, char *file,
+						size_t *count);
 
 // expansion
 void				expander(t_shell *shell);

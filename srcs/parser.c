@@ -6,11 +6,57 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 18:05:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/18 12:04:18 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/23 17:01:16 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+// bool	validate_redirection(t_token *redirection)
+// {
+// 	t_token	*token;
+
+// 	if (!redirection || !redirection->next)
+// 	{
+// 		ft_putendl_fd("minishell 1: ambig redir", 2);
+// 		return (false);
+// 	}
+// 	token = redirection->next;
+// 	if (token->type != WORD)
+// 	{
+// 		ft_putstr_fd("minishell 2: syntax error near unexpected token `", 2);
+// 		ft_putstr_fd(token->content, 2);
+// 		ft_putendl_fd("'", 2);
+// 		return (false);
+// 	}
+// 	if (token->expanded && token->content[0] == '\0')
+// 	{
+// 		ft_putstr_fd("minishell 3: ", 2);
+// 		ft_putstr_fd(token->content, 2);
+// 		ft_putendl_fd(": ambiguous redirect", 2);
+// 		return (false);
+// 	}
+// 	if (token->expanded && token->next && token->next->type == WORD)
+// 	{
+// 		ft_putstr_fd("minishell 4: ", 2);
+// 		ft_putstr_fd(token->content, 2);
+// 		ft_putendl_fd(": ambiguous redirect", 2);
+// 		return (false);
+// 	}
+// 	return (true);
+// }
+
+bool	validate_redirection(t_token *redirection)
+{
+	t_token	*token;
+
+	if (!redirection || !redirection->next)
+		return (false);
+	token = redirection->next;
+	if (token->expanded && token->next && token->next->type == WORD)
+		return (false);
+	return (true);
+}
 
 bool	syntax_confirmed(t_token *token_list, t_shell *shell)
 {
@@ -21,7 +67,7 @@ bool	syntax_confirmed(t_token *token_list, t_shell *shell)
 	{
 		if (is_redir(current->type) && !validate_redirection(current))
 		{
-			show_error(NULL, NULL, shell, 2);
+			show_error("minishell: ambiguous redirect", NULL, shell, 2);
 			return (FAILURE);
 		}
 		current = current->next;
@@ -61,7 +107,7 @@ t_ast	*parse_pipe(t_token **token_list, t_shell *shell)
 }
 bool	is_redir(t_token_type type)
 {
-	return (type == IN || type == OUT || type == APPEND || type == HEREDOC);
+	return (type == IN || type == OUT || type == APPEND);
 }
 t_ast	*parse_command_and_redirection(t_token **token_list, t_shell *shell)
 {
@@ -210,39 +256,4 @@ void	move_and_free(t_token **token_list)
 	*token_list = (*token_list)->next;
 	free(temp->content);
 	free(temp);
-}
-
-bool	validate_redirection(t_token *redirection)
-{
-	t_token	*token;
-
-	token = redirection->next;
-	if (!redirection || !redirection->next)
-	{
-		ft_putendl_fd("minishell: syntax error near unexpected token `newline'",
-			2);
-		return (false);
-	}
-	if (token->type != WORD)
-	{
-		ft_putstr_fd("minishell: syntax error near unexpected token `", 2);
-		ft_putstr_fd(token->content, 2);
-		ft_putendl_fd("'", 2);
-		return (false);
-	}
-	if (token->expanded && token->content[0] == '\0')
-	{
-		ft_putstr_fd("minishell: ", 2);
-		ft_putstr_fd(token->content, 2);
-		ft_putendl_fd(": ambiguous redirect", 2);
-		return (false);
-	}
-	if (token->expanded && token->next && token->next->type == WORD)
-	{
-		ft_putstr_fd("minishell: ", 2);
-		ft_putstr_fd(token->content, 2);
-		ft_putendl_fd(": ambiguous redirect", 2);
-		return (false);
-	}
-	return (true);
 }

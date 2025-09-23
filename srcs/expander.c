@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:28:42 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/17 17:36:25 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/22 19:05:52 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,7 +227,7 @@ char	*get_env_value(char *name, t_env *env, bool alloc)
 			if (alloc == NO_ALLOC)
 				return (current->value);
 			if (current->value == NULL)
-				return (ft_strdup("")); // test
+				return (ft_strdup(""));
 			value = ft_strdup(current->value);
 			if (value == NULL)
 				return (NULL);
@@ -238,8 +238,6 @@ char	*get_env_value(char *name, t_env *env, bool alloc)
 	if (alloc == NO_ALLOC)
 		return (NULL);
 	value = ft_strdup("");
-	// if (value == NULL)
-	// 	return (NULL);
 	return (value);
 }
 /**

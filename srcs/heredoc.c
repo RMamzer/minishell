@@ -3,33 +3,33 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/18 19:39:13 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/23 19:27:09 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-bool	process_heredoc(t_shell *shell)
+void	process_heredoc(t_shell *shell)
 {
 	size_t	i;
 	t_token	*current;
 
 	i = 0;
 	current = shell->token_list;
+	check_heredoc(shell);
 	while (current)
 	{
 		if (current->type == HEREDOC && current->next)
 		{
 			if (process_heredoc_token(shell, current, i) == FAILURE)
-				return (FAILURE);
+				fatality("heredoc failed", shell, 1);
 			i++;
 		}
 		current = current->next;
 	}
-	return (SUCCESS);
 }
 
 bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
@@ -46,7 +46,7 @@ bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
 		free(file);
 		return (FAILURE);
 	}
-	if (read_heredoc(&fd, current->next, shell) == FAILURE)
+	if (read_heredoc(&fd, current->next, shell, file) == FAILURE)
 	{
 		close(fd);
 		free(file);
@@ -65,8 +65,6 @@ void	process_delim(t_token *delim, t_shell *shell)
 	size_t	i;
 	size_t	j;
 
-	//if (!delim->content)
-		//fatality(ERROR_MEM, shell, 1); // noty surre if i need it
 	new_content = ft_calloc(ft_strlen(delim->content) + 1, sizeof(char));
 	if (!new_content)
 		fatality(ERROR_MEM, shell, 1);
@@ -104,7 +102,7 @@ void	update_file_name(char **file, size_t *i, t_shell *shell)
 	}
 }
 
-bool	read_heredoc(int *fd, t_token *delim, t_shell *shell)
+bool	read_heredoc(int *fd, t_token *delim, t_shell *shell, char *file)
 {
 	char	*line;
 
@@ -122,9 +120,9 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell)
 			break ;
 		}
 		if (delim->quoted == false)
-			expand_heredoc(&line, shell);
+			expand_heredoc(&line, shell, file);
 		if (write(*fd, line, ft_strlen(line)) == -1)
-			return (free(line),FAILURE);
+			return (free(line), FAILURE);
 		if (write(*fd, "\n", 1) == -1)
 			return (free(line), FAILURE);
 		free(line);
@@ -132,47 +130,54 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell)
 	return (SUCCESS);
 }
 
-void	expand_heredoc(char **line, t_shell *shell)
+void	expand_heredoc(char **line, t_shell *shell, char *file)
 {
 	char	*expanded;
 
 	if (!line || !*line)
 		return ;
-	expanded = heredoc_expander(*line, shell);
+	expanded = heredoc_expander(*line, shell, file);
 	free(*line);
 	*line = expanded;
 }
 
-char	*heredoc_expander(char *line, t_shell *shell)
+char	*heredoc_expander(char *line, t_shell *shell, char *file)
+{
+	char	*new_content;
+
+	new_content = ft_strdup("");
+	if (!new_content)
+	{
+		free(file);
+		free(line);
+		fatality(ERROR_MEM, shell, 1);
+	}
+	if (expand_line(line, &new_content, shell) == FAILURE)
+	{
+		free(file);
+		free(new_content);
+		free(line);
+		fatality(ERROR_MEM, shell, 1);
+	}
+	return (new_content);
+}
+
+bool	expand_line(char *line, char **new_content, t_shell *shell)
 {
 	size_t	i;
-	char	*new_content;
 	char	*temp;
 
 	i = 0;
-	new_content = ft_strdup("");
-	if (new_content == NULL)
-    {
-        free(line); // Free the input line before exiting
-        fatality(ERROR_MEM, shell, 1);
-    }
 	while (line[i])
 	{
 		temp = get_new_content(line, &i, shell);
 		if (!temp)
-		{
-			free(new_content);
-			free(line);  // Free the input line before exiting
-			fatality(ERROR_MEM, shell, 1);
-		}
-		new_content = strjoin_free(new_content, temp);
-		if (!new_content)
-		{
-			free(line);  // Free the input line before exiting
-			fatality(ERROR_MEM, shell, 1);
-		}
+			return (FAILURE);
+		*new_content = strjoin_free(*new_content, temp);
+		if (!*new_content)
+			return (FAILURE);
 	}
-	return (new_content);
+	return (SUCCESS);
 }
 
 char	*get_new_content(char *line, size_t *i, t_shell *shell)
@@ -209,7 +214,7 @@ void	update_heredoc_token(t_token *current, char *file, t_shell *shell)
 	current->content = ft_strdup("<");
 	if (!current->content)
 	{
-		free(file);  // Free the file before exiting
+		free(file);
 		fatality(ERROR_MEM, shell, 1);
 	}
 	if (current->next)
@@ -219,7 +224,7 @@ void	update_heredoc_token(t_token *current, char *file, t_shell *shell)
 		current->next->content = ft_strdup(file);
 		if (!current->next->content)
 		{
-			free(file);  // Free the file before exiting
+			free(file);
 			fatality(ERROR_MEM, shell, 1);
 		}
 	}
@@ -231,17 +236,8 @@ void	save_heredoc_file(t_shell *shell, char *file)
 	size_t	count;
 	size_t	i;
 
-	count = 0;
 	i = 0;
-	if (shell->heredoc_files)
-		while (shell->heredoc_files[count])
-			count++;
-	new = ft_calloc(count + 2, sizeof(char *));
-	if (!new)
-	{
-		free(file);  // Free the file parameter before exiting
-		fatality(ERROR_MEM, shell, 1);
-	}
+	new = allocate_heredoc_array(shell, file, &count);
 	while (i < count)
 	{
 		new[i] = shell->heredoc_files[i];
@@ -250,21 +246,29 @@ void	save_heredoc_file(t_shell *shell, char *file)
 	new[count] = ft_strdup(file);
 	if (!new[count])
 	{
-		free(new);   // Free the allocated array
-		free(file);  // Free the file parameter before exiting
+		free(new);
+		free(file);
 		fatality(ERROR_MEM, shell, 1);
 	}
-    // test below
-    // if (shell->heredoc_files) // <-- add this block
-    // {
-    //     size_t j = 0;
-    //     while (shell->heredoc_files[j])
-    //         free(shell->heredoc_files[j++]);
-    //     free(shell->heredoc_files);
-    // }
-    // // test up
 	free(shell->heredoc_files);
 	shell->heredoc_files = new;
+}
+
+char	**allocate_heredoc_array(t_shell *shell, char *file, size_t *count)
+{
+	char	**new;
+
+	*count = 0;
+	if (shell->heredoc_files)
+		while (shell->heredoc_files[*count])
+			(*count)++;
+	new = ft_calloc(*count + 2, sizeof(char *));
+	if (!new)
+	{
+		free(file);
+		fatality(ERROR_MEM, shell, 1);
+	}
+	return (new);
 }
 
 void	free_heredoc_files(t_shell *shell)
@@ -283,3 +287,72 @@ void	free_heredoc_files(t_shell *shell)
 	free(shell->heredoc_files);
 	shell->heredoc_files = NULL;
 }
+
+/*
+char	*heredoc_expander(char *line, t_shell *shell)
+{
+	size_t	i;
+	char	*new_content;
+	char	*temp;
+
+	i = 0;
+	new_content = ft_strdup("");
+	if (new_content == NULL)
+	{
+		free(line); // Free the input line before exiting
+		fatality(ERROR_MEM, shell, 1);
+	}
+	while (line[i])
+	{
+		temp = get_new_content(line, &i, shell);
+		if (!temp)
+		{
+			free(new_content);
+			free(line); // Free the input line before exiting
+			fatality(ERROR_MEM, shell, 1);
+		}
+		new_content = strjoin_free(new_content, temp);
+		if (!new_content)
+		{
+			free(line); // Free the input line before exiting
+			fatality(ERROR_MEM, shell, 1);
+		}
+	}
+	return (new_content);
+}
+*/
+
+/*
+void	save_heredoc_file(t_shell *shell, char *file)
+{
+	char	**new;
+	size_t	count;
+	size_t	i;
+
+	count = 0;
+	i = 0;
+	if (shell->heredoc_files)
+		while (shell->heredoc_files[count])
+			count++;
+	new = ft_calloc(count + 2, sizeof(char *));
+	if (!new)
+	{
+		free(file); // Free the file parameter before exiting
+		fatality(ERROR_MEM, shell, 1);
+	}
+	while (i < count)
+	{
+		new[i] = shell->heredoc_files[i];
+		i++;
+	}
+	new[count] = ft_strdup(file);
+	if (!new[count])
+	{
+		free(new);  // Free the allocated array
+		free(file); // Free the file parameter before exiting
+		fatality(ERROR_MEM, shell, 1);
+	}
+	free(shell->heredoc_files);
+	shell->heredoc_files = new;
+}
+*/

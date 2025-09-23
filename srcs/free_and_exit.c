@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   free_and_exit.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:59 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/19 19:47:48 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/23 19:42:16 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,11 +46,11 @@ void	free_ast(t_ast **ast)
 }
 void	free_env(t_env *env)
 {
-	t_env *temp;
-	t_env *current;
+	t_env	*temp;
+	t_env	*current;
 
 	if (!env)
-		return;
+		return ;
 	temp = env;
 	while (temp)
 	{
@@ -85,7 +85,7 @@ void	free_shell(t_shell *shell)
 	free_shell_data(shell);
 	if (shell->env)
 		free_env(shell->env);
-	free(shell);
+		free(shell);
 }
 
 // free array of strings

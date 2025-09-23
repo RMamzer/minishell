@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   checkers.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/19 11:15:47 by mamzerr1         ###   ########.fr       */
+/*   Updated: 2025/09/23 19:40:07 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,31 +44,39 @@ bool	check_syntax(t_shell *shell)
 	current = shell->token_list;
 	while (current)
 	{
-		if (current->type == PIPE)
-		{
-			if (current == shell->token_list)
-				return (show_error(NULL, current, shell, 2), FAILURE);
-			if (current->next == NULL)
-				return (show_error(NULL, NULL, shell, 2), FAILURE);
-			if (current->next->type == PIPE)
-				return (show_error(NULL, current->next, shell, 2), FAILURE);
-		}
-		if (current->type == IN || current->type == OUT
-			|| current->type == APPEND || current->type == HEREDOC)
-		{
-			if (current->next == NULL)
-				return (show_error(NULL, NULL, shell, 2), FAILURE);
-			if (current->next->type != WORD
-				&& current->next->type != HEREDOC_DELIM_QT
-				&& current->next->type != HEREDOC_DELIM_UQ)
-				return (show_error(NULL, current->next, shell, 2), FAILURE);
-		}
+		if (current->type == PIPE && check_pipe_syntax(current,
+				shell) == FAILURE)
+			return (FAILURE);
+		if ((current->type == IN || current->type == OUT
+				|| current->type == APPEND || current->type == HEREDOC)
+			&& check_redir_syntax(current, shell) == FAILURE)
+			return (FAILURE);
 		current = current->next;
 	}
 	return (SUCCESS);
 }
 
-// maybe add count for heredocs here ?
+bool	check_pipe_syntax(t_token *current, t_shell *shell)
+{
+	if (current == shell->token_list)
+		return (show_error(NULL, current, shell, 2), FAILURE);
+	if (current->next == NULL)
+		return (show_error(NULL, NULL, shell, 2), FAILURE);
+	if (current->next->type == PIPE)
+		return (show_error(NULL, current->next, shell, 2), FAILURE);
+	return (SUCCESS);
+}
+
+bool	check_redir_syntax(t_token *current, t_shell *shell)
+{
+	if (current->next == NULL)
+		return (show_error(NULL, NULL, shell, 2), FAILURE);
+	if (current->next->type != WORD && current->next->type != HEREDOC_DELIM_QT
+		&& current->next->type != HEREDOC_DELIM_UQ)
+		return (show_error(NULL, current->next, shell, 2), FAILURE);
+	return (SUCCESS);
+}
+
 void	check_heredoc(t_shell *shell)
 {
 	t_token	*current;
