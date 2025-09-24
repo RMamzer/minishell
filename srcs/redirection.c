@@ -59,8 +59,8 @@ int	check_redirection(t_ast *ast, t_shell *shell)
 		else if (ast->type == OUT || ast->type == APPEND)
 			shell->exit_code = execute_redirection_out(ast->right, ast->type);
 		if (shell->exit_code != 0)
-			exit(shell->exit_code);
-		exit(execute_ast(ast->left, shell));
+			fatality(NULL, shell, shell->exit_code);
+		fatality(NULL,shell, execute_ast(ast->left, shell));
 	}
 	waitpid(pid, &shell->exit_code, 0);
 	if (WIFEXITED(shell->exit_code))

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   checkers.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/23 19:40:07 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/24 15:21:32 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ bool	check_redir_syntax(t_token *current, t_shell *shell)
 	return (SUCCESS);
 }
 
-void	check_heredoc(t_shell *shell)
+bool	check_heredoc(t_shell *shell)
 {
 	t_token	*current;
 	int		count;
@@ -97,7 +97,11 @@ void	check_heredoc(t_shell *shell)
 		current = current->next;
 	}
 	if (count > 16)
+	{
 		show_error(ERROR_MAX_HER, NULL, shell, 2);
+		return (FAILURE);
+	}
+	return (SUCCESS);
 }
 
 void	quote_flag(t_shell *shell)

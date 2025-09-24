@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/24 14:17:33 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/24 15:20:31 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,11 +198,12 @@ bool	process_input(t_shell *shell)
 	lexer(shell->input_line, shell);
 	if (check_syntax(shell) == FAILURE)
 		return (FAILURE);
+	if (check_heredoc(shell) == FAILURE)
+		return (FAILURE);
 	process_heredoc(shell);
 	expander(shell);
 	split_variables(shell);
 	delete_empty_tokens(shell);
-	// test_tokens(shell->token_list);
 	return (SUCCESS);
 }
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/23 19:38:41 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/24 15:20:18 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,7 @@ void				lexer(char *input_line, t_shell *shell);
 size_t				handle_operator(char *input_line, size_t i, t_shell *shell);
 size_t				handle_word(char *input_line, size_t start, t_shell *shell);
 void				add_token(t_shell *shell, t_token_type type, char *content);
-void				check_heredoc(t_shell *shell);
+bool				check_heredoc(t_shell *shell);
 bool				check_syntax(t_shell *shell);
 bool				check_pipe_syntax(t_token *current, t_shell *shell);
 bool				check_redir_syntax(t_token *current, t_shell *shell);
