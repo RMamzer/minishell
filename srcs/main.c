@@ -6,27 +6,83 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/24 15:48:16 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/24 18:28:02 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
 #include "minishell.h"
 
-// FOR MAXIM BELOW
-// cleanup for temp file
-// TODO: HEREDOC
-// TODO: SIGNALS
-// TODO: check push
+volatile sig_atomic_t	g_sig = 0;
+
+void	handle_sigint(int sig)
+{
+	write(1, "\n", 1);
+	rl_on_new_line();
+	rl_replace_line("", 0);
+	rl_redisplay();
+	g_sig = sig;
+}
+
+void	set_heredoc_signal(int signum)
+{
+	write(1, "\n", 1);
+	g_sig = signum;
+	close(STDIN_FILENO);
+}
+
+void	handle_sigint_exe(int signum)
+{
+	write(1, "\n", 1);
+	g_sig = signum;
+}
+
+
+void	set_signals(void)
+{
+	signal(SIGQUIT, SIG_IGN);
+	signal(SIGINT, handle_sigint);
+}
+
+void	child_signal(void)
+{
+	signal(SIGINT, SIG_DFL);
+	signal(SIGQUIT, SIG_DFL);
+}
+
+void	heredoc_signal(void)
+{
+	signal(SIGQUIT, SIG_IGN);
+	signal(SIGINT, set_heredoc_signal);
+}
+
+void	restore_main_signals(void)
+{
+	signal(SIGQUIT, SIG_IGN);
+	signal(SIGINT, handle_sigint);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 // test function, remove later
-void	test_tokens(t_token *list)
-{
-	while (list)
-	{
-		printf("[TYPE: %d] \"%s\"\n", list->type, list->content);
-		list = list->next;
-	}
-}
+// void	test_tokens(t_token *list)
+// {
+// 	while (list)
+// 	{
+// 		printf("[TYPE: %d] \"%s\"\n", list->type, list->content);
+// 		list = list->next;
+// 	}
+// }
 
 // void	test_env(t_env *envlist)
 // {
@@ -143,6 +199,7 @@ int	main(int ac, char **av, char **env)
 	(void)av;
 	shell = init_data();
 	create_env(shell, env);
+	set_signals();
 	while (1)
 	{
 		if (receive_input(shell) == FAILURE)
@@ -152,6 +209,7 @@ int	main(int ac, char **av, char **env)
 		if (parse_tokens(shell) == FAILURE)
 			continue ;
 		execute_ast(shell->ast, shell);
+		printf("%d", g_sig);
 		free_shell_data(shell);
 	}
 	free_shell(shell);

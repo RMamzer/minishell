@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/24 15:36:16 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/24 18:08:24 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,15 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h> //open and close
+
+
+//////////////////////////////////////////////////
+# include <signal.h>
+
+extern volatile sig_atomic_t	g_sig;
+
+///////////////////////////////////////////////////
+
 
 # define SUCCESS 0
 # define FAILURE 1
