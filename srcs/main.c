@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/23 19:45:17 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/24 14:17:33 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,7 +156,6 @@ int	main(int ac, char **av, char **env)
 	}
 	free_shell(shell);
 }
-
 
 bool	receive_input(t_shell *shell)
 {
