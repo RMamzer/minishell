@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_echo.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 15:37:48 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/19 11:34:51 by mamzerr1         ###   ########.fr       */
+/*   Updated: 2025/09/24 16:38:38 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ int	execute_builtin_echo(char **args)
 	n_flag = false;
 	if (*args)
 	{
-		while (ft_strcmp("-n", args[i]) == 0)
+		while ( args[i] && ft_strcmp("-n", args[i]) == 0)
 		{
 			n_flag = true;
 			i++;
