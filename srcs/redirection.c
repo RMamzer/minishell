@@ -44,6 +44,7 @@ int	execute_redirection_out(t_ast *ast, t_token_type type)
 	return (0);
 }
 
+
 // update error functions:
 int	check_redirection(t_ast *ast, t_shell *shell)
 {

@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/24 18:28:02 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/25 20:29:25 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,20 +15,34 @@
 
 volatile sig_atomic_t	g_sig = 0;
 
-void	handle_sigint(int sig)
+void	signal_to_exitcode(t_shell *shell)
+{
+	static t_shell	*sig_shell;
+
+	if (shell)
+		sig_shell = shell;
+	else if(g_sig != 0)
+	{
+		sig_shell->exit_code = g_sig + 128;
+	}
+}
+
+
+void	handle_readline_sigint(int sig)
 {
 	write(1, "\n", 1);
 	rl_on_new_line();
 	rl_replace_line("", 0);
 	rl_redisplay();
 	g_sig = sig;
+	signal_to_exitcode(NULL);
 }
 
-void	set_heredoc_signal(int signum)
+void	handle_heredoc_signal(int signum)
 {
 	write(1, "\n", 1);
 	g_sig = signum;
-	close(STDIN_FILENO);
+	signal_to_exitcode(NULL);
 }
 
 void	handle_sigint_exe(int signum)
@@ -38,10 +52,12 @@ void	handle_sigint_exe(int signum)
 }
 
 
-void	set_signals(void)
+void	set_readline_signals(void)
 {
+	rl_done = 0;
+	rl_event_hook= NULL;
 	signal(SIGQUIT, SIG_IGN);
-	signal(SIGINT, handle_sigint);
+	signal(SIGINT, handle_readline_sigint);
 }
 
 void	child_signal(void)
@@ -50,146 +66,23 @@ void	child_signal(void)
 	signal(SIGQUIT, SIG_DFL);
 }
 
-void	heredoc_signal(void)
+void	set_heredoc_signal(void)
 {
 	signal(SIGQUIT, SIG_IGN);
-	signal(SIGINT, set_heredoc_signal);
+	signal(SIGINT, handle_heredoc_signal);
 }
 
-void	restore_main_signals(void)
-{
-	signal(SIGQUIT, SIG_IGN);
-	signal(SIGINT, handle_sigint);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-// test function, remove later
-// void	test_tokens(t_token *list)
+// void	restore_main_signals(void)
 // {
-// 	while (list)
-// 	{
-// 		printf("[TYPE: %d] \"%s\"\n", list->type, list->content);
-// 		list = list->next;
-// 	}
+// 	signal(SIGQUIT, SIG_IGN);
+// 	signal(SIGINT, handle_sigint);
 // }
 
-// void	test_env(t_env *envlist)
-// {
-// 	while (envlist)
-// 	{
-// 		// printf("KEY: %s VALUE:%s \n", envlist->key, envlist->value);
-// 		printf("%s=%s\n", envlist->key, envlist->value);
-// 		envlist = envlist->next;
-// 	}
-// }
-// remove
-const char	*type_to_str(t_token_type t)
-{
-	switch (t)
-	{
-	case WORD:
-		return ("WORD");
-	case IN:
-		return ("IN");
-	case OUT:
-		return ("OUT");
-	case APPEND:
-		return ("APPEND");
-	case HEREDOC:
-		return ("HEREDOC");
-	case PIPE:
-		return ("PIPE");
-	default:
-		return ("UNKNOWN");
-	}
-}
 
-// static void	print_value(char **value)
-// {
-// 	int	i;
 
-// 	i = 0;
-// 	if (!value)
-// 		return ;
-// 	printf(" (");
-// 	while (value[i])
-// 	{
-// 		if (i > 0)
-// 			printf(" ");
-// 		printf("%s", value[i]);
-// 		i++;
-// 	}
-// 	printf(")");
-// }
 
-// void	print_ast(t_ast *node, int depth)
-// {
-// 	int	i;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// 	if (!node)
-// 	{
-// 		printf("ast is clean\n");
-// 		return ;
-// 	}
-// 	/* indentation */
-// 	i = 0;
-// 	while (i++ < depth)
-// 		printf("  ");
-// 	printf("%s", type_to_str(node->type));
-// 	if (node->value && node->value[0])
-// 		print_value(node->value);
-// 	printf("\n");
-// 	if (node->left)
-// 		print_ast(node->left, depth + 1);
-// 	if (node->right)
-// 		print_ast(node->right, depth + 1);
-// }
-
-// int	main(int ac, char **av, char **env)
-// {
-// 	t_shell	*shell;
-// 	char	*input;
-
-// 	(void)ac;
-// 	(void)av;
-// 	shell = init_data();
-// 	create_env(shell, env);
-// 	// test_env(shell->env); // test
-// 	while (1) // addded for testing
-// 	{
-// 		input = readline("dirty_shell> ");
-// 		if (!input)
-// 			break ;
-// 		if (input[0] != '\0')
-// 			add_history(input);
-// 		shell->input_line = input;
-// 		printf("%sp\n", shell->input_line);
-// 		if (process_input(shell->input_line, shell) != SUCCESS)
-// 		{
-// 			// free_shell_data(shell);
-// 			continue ;
-// 		}
-// 		if (parse_tokens(shell) != SUCCESS)
-// 		{
-// 			free_shell_data(shell);
-// 			continue ;
-// 		}
-// 		execute_ast(shell->ast, shell);
-// 		free_shell_data(shell);
-// 	}
-// 	free_shell(shell);
-// }
 
 int	main(int ac, char **av, char **env)
 {
@@ -199,7 +92,6 @@ int	main(int ac, char **av, char **env)
 	(void)av;
 	shell = init_data();
 	create_env(shell, env);
-	set_signals();
 	while (1)
 	{
 		if (receive_input(shell) == FAILURE)
@@ -209,14 +101,19 @@ int	main(int ac, char **av, char **env)
 		if (parse_tokens(shell) == FAILURE)
 			continue ;
 		execute_ast(shell->ast, shell);
-		printf("%d", g_sig);
 		free_shell_data(shell);
 	}
 	free_shell(shell);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
 bool	receive_input(t_shell *shell)
 {
+	set_readline_signals();
 	shell->input_line = readline("dirty_shell> ");
 	if (!shell->input_line)
 		fatality(NULL, shell, 0); // for now
@@ -258,7 +155,8 @@ bool	process_input(t_shell *shell)
 		return (FAILURE);
 	if (check_heredoc(shell) == FAILURE)
 		return (FAILURE);
-	process_heredoc(shell);
+	if (process_heredoc(shell) == FAILURE)
+		return (free_shell_data(shell), FAILURE);
 	expander(shell);
 	split_variables(shell);
 	delete_empty_tokens(shell);
@@ -269,20 +167,13 @@ t_shell	*init_data(void)
 {
 	t_shell *shell;
 
-	shell = malloc(sizeof(t_shell));
+	shell = ft_calloc(1, sizeof(t_shell));
 	if (shell == NULL)
 	{
 		ft_putendl_fd(ERROR_MEM, 2);
 		exit(FAILURE);
 	}
-	shell->exit_code = 0; // for now
-	shell->input_line = NULL;
-	shell->token_list = NULL;
-	shell->env = NULL;
-	shell->ast = NULL;
-	shell->heredoc_files = NULL;
-	shell->env_array = NULL;
-	shell->paths_array = NULL;
 	shell->complete_exit = true;
+	signal_to_exitcode(shell);
 	return (shell);
 }

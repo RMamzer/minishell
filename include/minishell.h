@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/24 18:08:24 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/25 20:28:29 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,7 @@ bool				check_redir_syntax(t_token *current, t_shell *shell);
 void				quote_flag(t_shell *shell);
 
 // heredoc
-void				process_heredoc(t_shell *shell);
+bool				process_heredoc(t_shell *shell);
 bool				process_heredoc_token(t_shell *shell, t_token *current,
 						size_t i);
 void				process_delim(t_token *delim, t_shell *shell);
@@ -300,4 +300,13 @@ void				write_bulitin_error(char *str1, char *str2, char *str3,
 int					check_redirection(t_ast *ast, t_shell *shell);
 int					write_error_and_return(char *msg, int error);
 
+
+
+void	signal_to_exitcode(t_shell *shell);
+void	handle_readline_sigint(int sig);
+void	handle_heredoc_signal(int signum);
+void	handle_sigint_exe(int signum);
+void	set_readline_signals(void);
+void	child_signal(void);
+void	set_heredoc_signal(void);
 #endif

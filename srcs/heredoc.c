@@ -6,13 +6,13 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/24 15:18:57 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/25 20:27:22 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	process_heredoc(t_shell *shell)
+bool	process_heredoc(t_shell *shell)
 {
 	size_t	i;
 	t_token	*current;
@@ -24,11 +24,12 @@ void	process_heredoc(t_shell *shell)
 		if (current->type == HEREDOC && current->next)
 		{
 			if (process_heredoc_token(shell, current, i) == FAILURE)
-				fatality("heredoc failed", shell, 1);
+				return (FAILURE);
 			i++;
 		}
 		current = current->next;
 	}
+	return (SUCCESS);
 }
 
 bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
@@ -43,11 +44,13 @@ bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
 	if (fd == -1)
 	{
 		free(file);
-		return (FAILURE);
+		//return (FAILURE);
+		brutality("minishell: open", shell, 1);
 	}
 	if (read_heredoc(&fd, current->next, shell, file) == FAILURE)
 	{
-		close(fd);
+		//close(fd);
+		unlink(file);
 		free(file);
 		return (FAILURE);
 	}
@@ -57,6 +60,8 @@ bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
 	free(file);
 	return (SUCCESS);
 }
+
+
 
 void	process_delim(t_token *delim, t_shell *shell)
 {
@@ -105,12 +110,18 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell, char *file)
 {
 	char	*line;
 
+	set_heredoc_signal();
 	while (1)
 	{
 		line = readline("> ");
+		if (g_sig == SIGINT)
+		{
+			g_sig = 0;
+			return (FAILURE);
+		 } // for now
 		if (!line)
 		{
-			ft_putendl_fd(ERROR_EOF, 2); // probably show_error
+			ft_putendl_fd(ERROR_EOF, 2);
 			break ;
 		}
 		if (ft_strcmp(line, delim->content) == 0)
@@ -121,9 +132,15 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell, char *file)
 		if (delim->quoted == false)
 			expand_heredoc(&line, shell, file);
 		if (write(*fd, line, ft_strlen(line)) == -1)
-			return (free(line), FAILURE);
+		{
+			free(line);
+			brutality("minishell: write",  shell, 1);
+		}
 		if (write(*fd, "\n", 1) == -1)
-			return (free(line), FAILURE);
+		{
+			free(line);
+			brutality("minishell: write",  shell, 1);
+		}
 		free(line);
 	}
 	return (SUCCESS);
