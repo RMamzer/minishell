@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/26 12:55:01 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/26 17:43:28 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,7 +254,7 @@ void	execute_cmd_child(char **args, t_shell *shell)
 	cmd_path = find_path_cmd(args, &malloced, shell);
 	if (access(cmd_path, X_OK) == 0)
 	{
-		restore_main_signals();
+		child_signal();
 		execve(cmd_path, args, shell->env_array);
 	}
 	if (malloced == true)
@@ -344,6 +344,7 @@ int	wait_pipe(pid_t *pids, int children_rem)
 			return (write_error_and_return("waitpd", EXIT_FAILURE));
 		if (term_pid == pids[0] || term_pid == pids[1])
 		{
+			//printf("i am: %d, my exit status is: %d\n", term_pid, WEXITSTATUS(status));
 			children_rem--;
 			if (term_pid == pids[1])
 			{
@@ -351,14 +352,13 @@ int	wait_pipe(pid_t *pids, int children_rem)
 					exit_code = WEXITSTATUS(status);
 				else if (WIFSIGNALED(status))
 					exit_code = 128 + WTERMSIG(status);
-			}	
+			}
 		}
 	}
 	return (exit_code);
 }
 void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 {
-	child_signal();
 	close(pipefd[READ_END]);
 	if (dup2(pipefd[WRITE_END], STDOUT_FILENO) == -1)
 	{
@@ -371,7 +371,6 @@ void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 
 void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
 {
-	child_signal();
 	close(pipefd[WRITE_END]);
 	if (dup2(pipefd[READ_END], STDIN_FILENO) == -1)
 	{
