@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/24 15:35:47 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/25 15:41:52 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -318,6 +318,7 @@ int	wait_children(pid_t *pids, int children_rem)
 
 void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 {
+	
 	close(pipefd[READ_END]);
 	if (dup2(pipefd[WRITE_END], STDOUT_FILENO) == -1)
 	{
