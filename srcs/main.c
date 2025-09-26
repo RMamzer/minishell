@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/25 20:29:25 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/26 11:10:09 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void	handle_readline_sigint(int sig)
 {
 	write(1, "\n", 1);
 	rl_on_new_line();
-	rl_replace_line("", 0);
+	//rl_replace_line("", 0);
 	rl_redisplay();
 	g_sig = sig;
 	signal_to_exitcode(NULL);
@@ -49,13 +49,12 @@ void	handle_sigint_exe(int signum)
 {
 	write(1, "\n", 1);
 	g_sig = signum;
+	signal_to_exitcode(NULL);
 }
 
 
 void	set_readline_signals(void)
 {
-	rl_done = 0;
-	rl_event_hook= NULL;
 	signal(SIGQUIT, SIG_IGN);
 	signal(SIGINT, handle_readline_sigint);
 }
@@ -72,11 +71,11 @@ void	set_heredoc_signal(void)
 	signal(SIGINT, handle_heredoc_signal);
 }
 
-// void	restore_main_signals(void)
-// {
-// 	signal(SIGQUIT, SIG_IGN);
-// 	signal(SIGINT, handle_sigint);
-// }
+ void	restore_main_signals(void)
+ {
+ 	signal(SIGQUIT, SIG_IGN);
+ 	signal(SIGINT, handle_sigint_exe);
+}
 
 
 

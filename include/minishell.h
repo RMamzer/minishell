@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/25 20:28:29 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/26 11:11:45 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -309,4 +309,5 @@ void	handle_sigint_exe(int signum);
 void	set_readline_signals(void);
 void	child_signal(void);
 void	set_heredoc_signal(void);
+void	restore_main_signals(void);
 #endif

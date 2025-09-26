@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/24 15:35:47 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/26 11:47:47 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -237,7 +237,10 @@ void	execute_cmd_child(char **args, t_shell *shell)
 	recreate_env_array(shell->env, shell);
 	cmd_path = find_path_cmd(args, &malloced, shell);
 	if (access(cmd_path, X_OK) == 0)
+	{
+		restore_main_signals();
 		execve(cmd_path, args, shell->env_array);
+	}
 	if (malloced == true)
 		free (cmd_path);
 	write_bulitin_error("minishell:", NULL, NULL, args[0]);
@@ -259,7 +262,9 @@ int	execute_external_cmd(char **args, t_shell *shell)
 	waitpid(pid, &shell->exit_code, 0);
 	if (WIFEXITED(shell->exit_code))
 		return (WEXITSTATUS(shell->exit_code));
-	return (EXIT_FAILURE);
+	else if (WIFSIGNALED(shell->exit_code))
+		return (shell->exit_code = 128 + WTERMSIG(shell->exit_code));
+	return (shell->exit_code);
 }
 
 // check the difference in exits between built-ins and external cmds
@@ -288,6 +293,29 @@ int	check_command(t_ast *ast, char *cmd, t_shell *shell)
 }
 
 // check how to include 128+ exit here? --> need to add extra signal return
+// int	wait_children(pid_t *pids, int children_rem)
+// {
+// 	int		status;
+// 	pid_t	term_pid;
+// 	int		exit_code;
+
+// 	exit_code = EXIT_FAILURE;
+
+// 	while (children_rem > 0)
+// 	{
+// 		term_pid = waitpid(-1, &status, 0);
+// 		if (term_pid == -1)
+// 			return (write_error_and_return("waitpd", EXIT_FAILURE));
+// 		if (term_pid == pids[0] || term_pid == pids[1])
+// 		{
+// 			children_rem--;
+// 			if (term_pid == pids[1] && (WIFEXITED(status)))
+// 				exit_code = WEXITSTATUS(status);
+// 		}
+// 	}
+// 	return (exit_code);
+// }
+
 int	wait_children(pid_t *pids, int children_rem)
 {
 	int		status;
@@ -295,12 +323,7 @@ int	wait_children(pid_t *pids, int children_rem)
 	int		exit_code;
 
 	exit_code = EXIT_FAILURE;
-	if (children_rem == 1)
-	{
-		term_pid = waitpid(*pids, &status, 0);
-		if (term_pid == -1)
-			return (write_error_and_return("waitpd", EXIT_FAILURE));
-	}
+
 	while (children_rem > 0)
 	{
 		term_pid = waitpid(-1, &status, 0);
@@ -309,15 +332,20 @@ int	wait_children(pid_t *pids, int children_rem)
 		if (term_pid == pids[0] || term_pid == pids[1])
 		{
 			children_rem--;
-			if (term_pid == pids[1] && (WIFEXITED(status)))
-				exit_code = WEXITSTATUS(status);
+			if (term_pid == pids[1])
+			{
+ 				if (WIFEXITED(status))
+					exit_code = WEXITSTATUS(status);
+				else if (WIFSIGNALED(status))
+					exit_code = 128 + WTERMSIG(status);
+			}	
 		}
 	}
 	return (exit_code);
 }
-
 void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 {
+	child_signal();
 	close(pipefd[READ_END]);
 	if (dup2(pipefd[WRITE_END], STDOUT_FILENO) == -1)
 	{
@@ -330,6 +358,7 @@ void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 
 void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
 {
+	child_signal();
 	close(pipefd[WRITE_END]);
 	if (dup2(pipefd[READ_END], STDIN_FILENO) == -1)
 	{
