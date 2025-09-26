@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/26 12:54:52 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/26 20:07:42 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ extern volatile sig_atomic_t	g_sig;
 # define ERROR_QUOTE "syntax error: unclosed quote"
 # define ERROR_MEM "cannot allocate memory"
 # define ERROR_MAX_HER "maximum here-document count exceeded"
-# define ERROR_EOF "worning: heredoc delimeted by EOF"
+# define ERROR_EOF "warning: heredoc delimeted by EOF"
 // token type
 typedef enum e_token_type
 {
@@ -122,6 +122,7 @@ typedef struct s_shell
 # define EXIT_CMD_NOT_FOUND 127
 # define EXIT_CMD_NOT_EXEC 126
 
+int check_sig_hook(void);
 
 void				delete_empty_tokens(t_shell *shell);
 
@@ -261,7 +262,7 @@ void				recreate_env_array(t_env *env, t_shell *shell);
 void				execute_cmd_child(char **args, t_shell *shell);
 int					execute_external_cmd(char **args, t_shell *shell);
 int					check_command(t_ast *node, char *cmd, t_shell *shell);
-int					wait_children(pid_t *pids, int children_rem);
+int					wait_children(pid_t *pids, int children_rem, t_shell *shell);
 void				execute_left_child(t_ast *node, t_shell *shell,
 						int *pipefd);
 void				execute_right_child(t_ast *node, t_shell *shell,
@@ -270,7 +271,7 @@ int					execute_pipe(t_ast *node, t_shell *shell);
 int					execute_pipe(t_ast *node, t_shell *shell);
 int					execute_ast(t_ast *node, t_shell *shell);
 int					get_args_len(char **args);
-int 				wait_child(pid_t pid);
+int 				wait_child(pid_t pid, t_shell *shell);
 
 //-------------------builtins
 int					execute_builtin_echo(char **args);
@@ -311,4 +312,5 @@ void	set_readline_signals(void);
 void	child_signal(void);
 void	set_heredoc_signal(void);
 void	restore_main_signals(void);
+void	set_signals_exec_parent(void);
 #endif

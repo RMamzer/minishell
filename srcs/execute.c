@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/26 17:43:28 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/26 19:39:17 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,12 +186,14 @@ void	recreate_env_array(t_env *env, t_shell *shell)
 	shell->env_array[i] = NULL;
 }
 
-int 	wait_child(pid_t pid)
+int 	wait_child(pid_t pid, t_shell *shell)
 {
 	int		status;
 	pid_t	term_pid;
 	int		exit_code;
 
+	if (shell->complete_exit == true)
+		set_signals_exec_parent();
 	exit_code = EXIT_FAILURE;
 	term_pid = waitpid(pid, &status, 0);
 	if (term_pid == -1)
@@ -275,7 +277,7 @@ int	execute_external_cmd(char **args, t_shell *shell)
 		return (write_error_and_return("fork", EXIT_FAILURE));
 	if (pid == 0)
 		execute_cmd_child(args, shell);
-	return (wait_child(pid));
+	return (wait_child(pid, shell));
 }
 
 // check the difference in exits between built-ins and external cmds
@@ -330,12 +332,14 @@ int	check_command(t_ast *ast, char *cmd, t_shell *shell)
 
 
 
-int	wait_pipe(pid_t *pids, int children_rem)
+int	wait_pipe(pid_t *pids, int children_rem, t_shell *shell)
 {
 	int		status;
 	pid_t	term_pid;
 	int		exit_code;
 
+	if (shell->exit_code == true)
+		set_signals_exec_parent();
 	exit_code = EXIT_FAILURE;
 	while (children_rem > 0)
 	{
@@ -344,7 +348,6 @@ int	wait_pipe(pid_t *pids, int children_rem)
 			return (write_error_and_return("waitpd", EXIT_FAILURE));
 		if (term_pid == pids[0] || term_pid == pids[1])
 		{
-			//printf("i am: %d, my exit status is: %d\n", term_pid, WEXITSTATUS(status));
 			children_rem--;
 			if (term_pid == pids[1])
 			{
@@ -359,6 +362,7 @@ int	wait_pipe(pid_t *pids, int children_rem)
 }
 void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 {
+	shell->complete_exit = false;
 	close(pipefd[READ_END]);
 	if (dup2(pipefd[WRITE_END], STDOUT_FILENO) == -1)
 	{
@@ -371,6 +375,7 @@ void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 
 void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
 {
+	shell->complete_exit = false;
 	close(pipefd[WRITE_END]);
 	if (dup2(pipefd[READ_END], STDIN_FILENO) == -1)
 	{
@@ -386,7 +391,6 @@ int	execute_pipe(t_ast *ast, t_shell *shell)
 	int		pipefd[2];
 	pid_t	pids[2];
 
-	shell->complete_exit = false;
 	if (pipe(pipefd) == -1)
 		write_error_and_return("pipe", EXIT_FAILURE);
 	pids[0] = fork();
@@ -401,7 +405,9 @@ int	execute_pipe(t_ast *ast, t_shell *shell)
 		execute_right_child(ast->right, shell, pipefd);
 	close(pipefd[WRITE_END]);
 	close(pipefd[READ_END]);
-	return (wait_pipe(pids, 2));
+	if (shell->complete_exit == true)
+		set_signals_exec_parent();
+	return (wait_pipe(pids, 2, shell));
 }
 
 int	execute_ast(t_ast *ast, t_shell *shell)

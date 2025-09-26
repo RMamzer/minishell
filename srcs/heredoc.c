@@ -6,11 +6,20 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/25 20:27:22 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/26 17:52:44 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+int check_sig_hook(void)
+{
+	if (g_sig == SIGINT)
+		rl_done = 1;
+	return (0);
+}
+
+
 
 bool	process_heredoc(t_shell *shell)
 {
@@ -49,7 +58,7 @@ bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
 	}
 	if (read_heredoc(&fd, current->next, shell, file) == FAILURE)
 	{
-		//close(fd);
+		close(fd);
 		unlink(file);
 		free(file);
 		return (FAILURE);
@@ -111,12 +120,16 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell, char *file)
 	char	*line;
 
 	set_heredoc_signal();
+	rl_event_hook = check_sig_hook;
 	while (1)
 	{
 		line = readline("> ");
 		if (g_sig == SIGINT)
 		{
+			if(line)
+				free(line);
 			g_sig = 0;
+			rl_event_hook = NULL;
 			return (FAILURE);
 		 } // for now
 		if (!line)
@@ -143,6 +156,7 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell, char *file)
 		}
 		free(line);
 	}
+	rl_event_hook = NULL;
 	return (SUCCESS);
 }
 

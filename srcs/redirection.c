@@ -55,6 +55,7 @@ int	check_redirection(t_ast *ast, t_shell *shell)
 		return (write_error_and_return("fork", errno));
 	if (pid == 0)
 	{
+		shell->complete_exit = false;
 		if (ast->type == IN || ast->type == HEREDOC)
 			shell->exit_code = execute_redirection_in(ast->right);
 		else if (ast->type == OUT || ast->type == APPEND)
@@ -63,5 +64,5 @@ int	check_redirection(t_ast *ast, t_shell *shell)
 			fatality(NULL, shell, shell->exit_code);
 		fatality(NULL,shell, execute_ast(ast->left, shell));
 	}
-	return (wait_child(pid));
+	return (wait_child(pid, shell));
 }
