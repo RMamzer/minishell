@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/26 11:11:45 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/26 12:54:52 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -270,6 +270,7 @@ int					execute_pipe(t_ast *node, t_shell *shell);
 int					execute_pipe(t_ast *node, t_shell *shell);
 int					execute_ast(t_ast *node, t_shell *shell);
 int					get_args_len(char **args);
+int 				wait_child(pid_t pid);
 
 //-------------------builtins
 int					execute_builtin_echo(char **args);

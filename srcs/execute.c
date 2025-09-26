@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/26 11:47:47 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/26 12:55:01 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,6 +186,22 @@ void	recreate_env_array(t_env *env, t_shell *shell)
 	shell->env_array[i] = NULL;
 }
 
+int 	wait_child(pid_t pid)
+{
+	int		status;
+	pid_t	term_pid;
+	int		exit_code;
+
+	exit_code = EXIT_FAILURE;
+	term_pid = waitpid(pid, &status, 0);
+	if (term_pid == -1)
+			return (write_error_and_return("waitpd", EXIT_FAILURE));
+	if (WIFEXITED(status))
+		exit_code = WEXITSTATUS(status);
+	else if (WIFSIGNALED(status))
+		exit_code = 128 + WTERMSIG(status);
+	return (exit_code);
+}
 
 char	*find_path_cmd(char **args, bool *malocced, t_shell *shell)
 {
@@ -259,12 +275,7 @@ int	execute_external_cmd(char **args, t_shell *shell)
 		return (write_error_and_return("fork", EXIT_FAILURE));
 	if (pid == 0)
 		execute_cmd_child(args, shell);
-	waitpid(pid, &shell->exit_code, 0);
-	if (WIFEXITED(shell->exit_code))
-		return (WEXITSTATUS(shell->exit_code));
-	else if (WIFSIGNALED(shell->exit_code))
-		return (shell->exit_code = 128 + WTERMSIG(shell->exit_code));
-	return (shell->exit_code);
+	return (wait_child(pid));
 }
 
 // check the difference in exits between built-ins and external cmds
@@ -316,14 +327,16 @@ int	check_command(t_ast *ast, char *cmd, t_shell *shell)
 // 	return (exit_code);
 // }
 
-int	wait_children(pid_t *pids, int children_rem)
+
+
+
+int	wait_pipe(pid_t *pids, int children_rem)
 {
 	int		status;
 	pid_t	term_pid;
 	int		exit_code;
 
 	exit_code = EXIT_FAILURE;
-
 	while (children_rem > 0)
 	{
 		term_pid = waitpid(-1, &status, 0);
@@ -368,7 +381,6 @@ void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
 	close(pipefd[READ_END]);
 	fatality(NULL, shell, execute_ast(ast, shell));
 }
-// need to close read and write ends of pipe
 
 int	execute_pipe(t_ast *ast, t_shell *shell)
 {
@@ -390,7 +402,7 @@ int	execute_pipe(t_ast *ast, t_shell *shell)
 		execute_right_child(ast->right, shell, pipefd);
 	close(pipefd[WRITE_END]);
 	close(pipefd[READ_END]);
-	return (wait_children(pids, 2));
+	return (wait_pipe(pids, 2));
 }
 
 int	execute_ast(t_ast *ast, t_shell *shell)

@@ -63,8 +63,5 @@ int	check_redirection(t_ast *ast, t_shell *shell)
 			fatality(NULL, shell, shell->exit_code);
 		fatality(NULL,shell, execute_ast(ast->left, shell));
 	}
-	waitpid(pid, &shell->exit_code, 0);
-	if (WIFEXITED(shell->exit_code))
-		return (WEXITSTATUS(shell->exit_code));
-	return (EXIT_FAILURE);
+	return (wait_child(pid));
 }
