@@ -6,46 +6,21 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 18:05:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/23 17:01:16 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/28 12:44:47 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// bool	validate_redirection(t_token *redirection)
-// {
-// 	t_token	*token;
 
-// 	if (!redirection || !redirection->next)
-// 	{
-// 		ft_putendl_fd("minishell 1: ambig redir", 2);
-// 		return (false);
-// 	}
-// 	token = redirection->next;
-// 	if (token->type != WORD)
-// 	{
-// 		ft_putstr_fd("minishell 2: syntax error near unexpected token `", 2);
-// 		ft_putstr_fd(token->content, 2);
-// 		ft_putendl_fd("'", 2);
-// 		return (false);
-// 	}
-// 	if (token->expanded && token->content[0] == '\0')
-// 	{
-// 		ft_putstr_fd("minishell 3: ", 2);
-// 		ft_putstr_fd(token->content, 2);
-// 		ft_putendl_fd(": ambiguous redirect", 2);
-// 		return (false);
-// 	}
-// 	if (token->expanded && token->next && token->next->type == WORD)
-// 	{
-// 		ft_putstr_fd("minishell 4: ", 2);
-// 		ft_putstr_fd(token->content, 2);
-// 		ft_putendl_fd(": ambiguous redirect", 2);
-// 		return (false);
-// 	}
-// 	return (true);
-// }
-
+/**
+ * Validates redirection tokens to detect ambiguous redirection.
+ * An ambiguous redirect occurs when an expanded variable results is 
+ * multiple words or none, where only one filename is expected.
+ * 
+ * @param redirection The redirection token to validate
+ * @return true if redirection is valid, false if ambiguous
+ */
 bool	validate_redirection(t_token *redirection)
 {
 	t_token	*token;
@@ -58,6 +33,15 @@ bool	validate_redirection(t_token *redirection)
 	return (true);
 }
 
+
+/**
+ * Confirms the syntax validity of the token list before parsing.
+ * Check for ambiguous redirections that could cause parsing errors.
+ * 
+ * @param token_list The list of tokens to validate
+ * @param shell Pointer to shell structure for error reporting
+ * @return SUCCESS if syntax is valid, FAILURE otherwise
+ */
 bool	syntax_confirmed(t_token *token_list, t_shell *shell)
 {
 	t_token	*current;
@@ -75,6 +59,13 @@ bool	syntax_confirmed(t_token *token_list, t_shell *shell)
 	return (SUCCESS);
 }
 
+
+/**
+ * Main parsing entry point. Validates syntax and builds the AST.
+ * 
+ * @param shell Pointer to the shell structure containing token list
+ * @return SUCCESS if parsing succeeds, FAILURE otherwise
+ */
 bool	parse_tokens(t_shell *shell)
 {
 	if (!shell || !shell->token_list)
@@ -84,7 +75,15 @@ bool	parse_tokens(t_shell *shell)
 	shell->ast = parse_pipe(&shell->token_list, shell);
 	return (SUCCESS);
 }
-
+/**
+ * Parses pipe operations with right associativity.
+ * Pipes have the lowest precedence and are parsed recursively.
+ * Grammar: cmd | cmd | cmd...
+ * 
+ * @param token_list POinter to current position in token list
+ * @param shell Pointer to shell structure for memory management
+ * @return AST node representing the pipe operation or single command
+ */
 t_ast	*parse_pipe(t_token **token_list, t_shell *shell)
 {
 	t_ast	*node;
@@ -105,10 +104,28 @@ t_ast	*parse_pipe(t_token **token_list, t_shell *shell)
 	}
 	return (node);
 }
+
+/**
+ * Helper function to check if a token type is a redirection operator.
+ * 
+ * @param type Token type to check
+ * @return true if token is a redirection, false otherwise
+ */
 bool	is_redir(t_token_type type)
 {
 	return (type == IN || type == OUT || type == APPEND);
 }
+
+/**
+ * Parses commands and their associated redirections.
+ * Handles the precedence where redirections can appear before, after,
+ * or interspersed with command arguments.
+ * Grammar: [redir] [word] [redir] [word]...
+ * 
+ * @param token_list Pointer to current position in token list
+ * @param shell Pointer to shell structure for memory management
+ * @return AST node representing command with redirections 
+ */
 t_ast	*parse_command_and_redirection(t_token **token_list, t_shell *shell)
 {
 	t_ast	*root;
@@ -133,7 +150,15 @@ t_ast	*parse_command_and_redirection(t_token **token_list, t_shell *shell)
 	}
 	return (cmd_node);
 }
-
+/**
+ * Handles WORD tokens by building or extending a command AST node.
+ * First WORD becomes the command, subsequent WORDs become arguments.
+ * 
+ * @param token_list Pointer to current position in token list
+ * @param cmd_node Existing command or NULL
+ * @param shell Pointer to shell structure for memory management
+ * @return Command AST node with updated arguments
+ */
 t_ast	*handle_word_ast(t_token **token_list, t_ast *cmd_node, t_shell *shell)
 {
 	if (!cmd_node)
@@ -143,6 +168,17 @@ t_ast	*handle_word_ast(t_token **token_list, t_ast *cmd_node, t_shell *shell)
 	return (cmd_node);
 }
 
+/**
+ * Handles redirection tokens by building a redirection AST node.
+ * Creates a chain of redirections where each redirection's left child
+ * points to the next redirection or final command.
+ * 
+ * @param token_list Pointer to current position in token list
+ * @param root Pointer to root of redirection chain
+ * @param tail Pointer to last redirection in chain
+ * @param shell Pointer to shell structure for memory management
+ * @return The new redirection AST
+ */
 t_ast	*handle_redir_ast(t_token **token_list, t_ast **root, t_ast **tail,
 		t_shell *shell)
 {
@@ -172,6 +208,14 @@ t_ast	*handle_redir_ast(t_token **token_list, t_ast **root, t_ast **tail,
 	return (node);
 }
 
+/**
+ * Appends an argument to a command AST node's argument list.
+ * Dynamically resizes the argument array to accommodate new arguments.
+ * 
+ * @param cmd_node Command AST node to modify
+ * @param str Argument string to add
+ * @param shell Pointer to shell structure for error handling
+ */
 void	append_arg(t_ast *cmd_node, const char *str, t_shell *shell)
 {
 	char	**new;
@@ -189,6 +233,15 @@ void	append_arg(t_ast *cmd_node, const char *str, t_shell *shell)
 	new[i + 1] = NULL;
 	cmd_node->value = new;
 }
+
+/**
+ * Initializes the argument array for a command AST node.
+ * Called when adding the first argument (usually the command name).
+ * 
+ * @param cmd_node Command AST node to initialize
+ * @param str First argument string
+ * @param shell Pointer to shell structure for error handling
+ */
 void	init_arg(t_ast *cmd_node, const char *str, t_shell *shell)
 {
 	cmd_node->value = ft_calloc(2, sizeof(char *));
@@ -199,6 +252,16 @@ void	init_arg(t_ast *cmd_node, const char *str, t_shell *shell)
 		fatality(ERROR_MEM, shell, 1);
 	cmd_node->value[1] = NULL;
 }
+
+/**
+ * Reallocates and copies arguments array to accommodate additional arguments.
+ * Increases array size by one slot plus NULL terminator.
+ * 
+ * @param old Existing argument array
+ * @param count Current number of arguments
+ * @param shell Pointer to shell structure for error handling
+ * @return New argument array with additional space
+ */
 char	**load_arg(char **old, size_t count, t_shell *shell)
 {
 	char	**new;
@@ -216,7 +279,14 @@ char	**load_arg(char **old, size_t count, t_shell *shell)
 	free(old);
 	return (new);
 }
-
+/**
+ * Creates an AST node for a filename in redirection operations.
+ * Converts a token into an AST node and cleans up the token.
+ * 
+ * @param token Token containing the filename
+ * @param shell Pointer to shell structure for error handling
+ * @return AST node representing the file
+ */
 t_ast	*add_file_node(t_token *token, t_shell *shell)
 {
 	t_ast	*file_node;
@@ -233,6 +303,15 @@ t_ast	*add_file_node(t_token *token, t_shell *shell)
 	return (file_node);
 }
 
+
+/**
+ * Creates a new AST node with the specified type.
+ * Initializes all fields to default values.
+ * 
+ * @param type Type of AST node to create
+ * @param shell Pointer to shell structure for error handling
+ * @return Newly allocated and initialized AST node
+ */
 t_ast	*add_ast_node(t_token_type type, t_shell *shell)
 {
 	t_ast	*node;
@@ -245,7 +324,12 @@ t_ast	*add_ast_node(t_token_type type, t_shell *shell)
 	node->fd[1] = -1;
 	return (node);
 }
-
+/**
+ * Advances token list pointer and frees the consumed token.
+ * Helper function to clean up tokens after processing.
+ * 
+ * @param Pointer to current position in token list
+ */
 void	move_and_free(t_token **token_list)
 {
 	t_token	*temp;

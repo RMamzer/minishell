@@ -3,19 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   checkers.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/25 16:21:50 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/28 17:59:00 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/*
- *
- *   returns 0 if not inside quotes at position 'index',
- *   or returns the quote character (' or ") if inside a quote.
+/**
+ * Determines the quote context at a specific position in the string.
+ * Tracks whether the character at 'index' is inside quotes and which type.
+ * 
+ * @param line Input string to analyze
+ * @param index Position to check quote context for
+ * @return Quote character if inside quotes (', "), 0 if outside quotes
  */
 char	check_quote(char *line, int index)
 {
@@ -35,6 +38,14 @@ char	check_quote(char *line, int index)
 	return (quote);
 }
 
+/**
+ * Validates the overall syntax of the token list.
+ * Checks for common shell syntax errors before parsing.
+ * Ensures pipes and redirections have valid syntax.
+ * 
+ * @param shell Pointer to shell structure containing token list
+ * @return SUCCESS if syntax is valid, FAILURE otherwise
+ */
 bool	check_syntax(t_shell *shell)
 {
 	t_token	*current;
@@ -56,6 +67,16 @@ bool	check_syntax(t_shell *shell)
 	return (SUCCESS);
 }
 
+
+/**
+ * Validates pipe operator syntax.
+ * Pipes cannot be at the beginning of command, at the end,
+ * or followed by another pipe
+ * 
+ * @param current Current pipe token to validate
+ * @param shell Pointer to shell structure for error reporting
+ * @return SUCCESS if pipe syntax is valid, FAILURE otherwise
+ */
 bool	check_pipe_syntax(t_token *current, t_shell *shell)
 {
 	if (current == shell->token_list)
@@ -67,6 +88,15 @@ bool	check_pipe_syntax(t_token *current, t_shell *shell)
 	return (SUCCESS);
 }
 
+/**
+ * Validates redirection operator syntax.
+ * Redirection operators must be followed by a filename (WORD token)
+ * or heredoc delimiter.
+ * 
+ * @param current Current redirection token to validate
+ * @param shell Pointer to shell structure for error reporting
+ * @return SUCCESS if redirection syntax is valid, FAILURE otherwise
+ */
 bool	check_redir_syntax(t_token *current, t_shell *shell)
 {
 	if (current->next == NULL)
@@ -77,6 +107,14 @@ bool	check_redir_syntax(t_token *current, t_shell *shell)
 	return (SUCCESS);
 }
 
+/**
+ * Processes heredoc tokens and enforces limits.
+ * Counts heredoc operators and sets delimiter types based on quoting.
+ * Enforces the bash limit of 16 heredocs per command line.
+ * 
+ * @param shell Pointer to shell structure containing token list
+ * @return SUCCESS if heredoc usage is valid, FAILURE if limit exceeded
+ */
 bool	check_heredoc(t_shell *shell)
 {
 	t_token	*current;
@@ -104,6 +142,13 @@ bool	check_heredoc(t_shell *shell)
 	return (SUCCESS);
 }
 
+/**
+ * Sets the 'quoted' flag for WORD tokens containing quotes.
+ * This flag is used later during expansion to determine
+ * whether word splitting should occur.
+ * 
+ * @param shell Pointer to shell structure containing token list
+ */
 void	quote_flag(t_shell *shell)
 {
 	t_token	*current;

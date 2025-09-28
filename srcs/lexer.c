@@ -6,12 +6,21 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:29:11 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/23 17:04:02 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/28 14:19:42 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+/**
+ * Main lexical analyzer entry point.
+ * Tokenizes an input line into linked list of tokens.
+ * Skips delimiters, identifies operators (|, >, <, >>, <<)
+ * and groups words while respecting quotes.
+ * 
+ * @param input_line The raw command line string
+ * @param shell Pointer to shell structure for token storage
+ */
 void	lexer(char *input_line, t_shell *shell)
 {
 	size_t	i;
@@ -29,7 +38,16 @@ void	lexer(char *input_line, t_shell *shell)
 	}
 	quote_flag(shell);
 }
-
+/**
+ * Extracts a word token from the input.
+ * A word is a sequence of characters that is not a delimiter
+ * or operator, unless enclosed in quotes.
+ * 
+ * @param input_line Input string being tokenized
+ * @param start Starting position of the word
+ * @param shell Pointer to the shell structure for token creation
+ * @return Length of the processed word
+ */
 size_t	handle_word(char *input_line, size_t start, t_shell *shell)
 {
 	size_t	i;
@@ -58,10 +76,15 @@ size_t	handle_word(char *input_line, size_t start, t_shell *shell)
 	return (len);
 }
 
-/*
- *	Processes operator tokens.
+/** 
+ *	Processes operator tokens (|, >, <, >>, <<)
  *	Adds the corresponding token to the token list.
  *	Returns the length of the operator token processed (1 or 2).
+ *	
+ *	@param input_line Input string being tokenized
+ *	@param i Current position in input string
+ *	@param shell Pointer to the shell structure for token creation
+ *	@return Length of operator processed (1 or 2).
  */
 size_t	handle_operator(char *input_line, size_t i, t_shell *shell)
 {
@@ -88,10 +111,14 @@ size_t	handle_operator(char *input_line, size_t i, t_shell *shell)
 	}
 }
 
-/*
- *	Creates a new token and appends it to the token list.
- *	If token list is NULL, adds token as head node.
- *	if token list is not NULL, adds token as the last one.
+/**
+ * Creates and appends a new token to the token list.
+ * If the list is empty, the new token becomes the head.
+ * Otherwise, it is appended at the end.
+ * 
+ * @param shell Pointer to the shell structure containing token list
+ * @param type Type of token being created (WORD, PIPE, IN, OUT, etc.)
+ * @param content String content of the token
  */
 void	add_token(t_shell *shell, t_token_type type, char *content)
 {
@@ -121,17 +148,37 @@ void	add_token(t_shell *shell, t_token_type type, char *content)
 		temp->next = token;
 	}
 }
-
+/**
+ * Checks if a character is a delimiter.
+ * Delimiters are whitespace characters: space, newline, or tab.
+ * 
+ * @param i Character to check
+ * @return true if character is a delimiter, false otherwise
+ */
 bool	is_delimiter(int i)
 {
 	return (i == ' ' || i == '\n' || i == '\t');
 }
 
+/**
+ * Checks if a character is an operator.
+ * Recognized operators: |, >, <.
+ * 
+ * @param c Character to check
+ * @return True if operator, false otherwise
+ */
 bool	is_operator(char c)
 {
 	return (c == '|' || c == '<' || c == '>');
 }
-
+/**
+ * Removes empty tokens from the token list.
+ * Empty tokens can result from variable expansion to empty strings.
+ * Only removes unquoted empty WORD tokens.
+ * This ensures redundant empty arguments are not passed to parsing.
+ * 
+ * @param shell Pointer to the shell structure containing token list
+ */
 void	delete_empty_tokens(t_shell *shell)
 {
 	t_token	*curr;

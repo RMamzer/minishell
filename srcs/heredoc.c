@@ -3,15 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/26 17:52:44 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/28 18:37:49 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+
+/**
+ * Signal hook callback for readline to handle SIGINT during heredoc.
+ * Sets rl_done to 1 when SIGINT is received, causing readline to exit.
+ *
+ * @return Always returns 0 (required by readline)
+ */
 int check_sig_hook(void)
 {
 	if (g_sig == SIGINT)
@@ -20,7 +27,14 @@ int check_sig_hook(void)
 }
 
 
-
+/**
+ * Main heredoc processing function.
+ * Processes all HEREDOC tokens in the token list by creating temporary files
+ * and reading user input until delimiter is found.
+ * 
+ * @param shell Pointer to shell structure containing token list
+ * @return SUCCESS if all heredocs processed successfully, FAILURE otherwise
+ */
 bool	process_heredoc(t_shell *shell)
 {
 	size_t	i;
@@ -41,6 +55,16 @@ bool	process_heredoc(t_shell *shell)
 	return (SUCCESS);
 }
 
+/**
+ * Processes a single heredoc token.
+ * Creates a temporary file, reads input until delimiter, then converts
+ * the heredoc token to a regular input redirection.
+ * 
+ * @param shell Pointer to shell structure
+ * @param current Current HEREDOC token
+ * @param i Index for unique temporary file naming
+ * @return SUCCESS if processed successfully, FAILURE otherwise
+ */
 bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
 {
 	int		fd;
@@ -53,7 +77,6 @@ bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
 	if (fd == -1)
 	{
 		free(file);
-		//return (FAILURE);
 		brutality("minishell: open", shell, 1);
 	}
 	if (read_heredoc(&fd, current->next, shell, file) == FAILURE)
@@ -71,7 +94,14 @@ bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
 }
 
 
-
+/**
+ * Removes quotes from heredoc delimiter.
+ * Processes the delimiter token to remove surrounding quotes while
+ * preserving the actual delimiter content.
+ * 
+ * @param delim Delimiter token to process
+ * @param shell Pointer to shell structure for error handling
+ */
 void	process_delim(t_token *delim, t_shell *shell)
 {
 	char	*new_content;
@@ -96,6 +126,15 @@ void	process_delim(t_token *delim, t_shell *shell)
 	delim->content = new_content;
 }
 
+/**
+ * Generates a unique temporary file name for heredoc.
+ * Creates file names in /tmp/ directory with incrementing numbers
+ * until a non-existing file is found.
+ * 
+ * @param file Pointer to store the generated file path
+ * @param i Pointer to counter for unique naming
+ * @param shell Pointer to shell structure for error handling
+ */
 void	update_file_name(char **file, size_t *i, t_shell *shell)
 {
 	char	*file_num;
@@ -160,6 +199,14 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell, char *file)
 	return (SUCCESS);
 }
 
+/**
+ * Wrapper function for heredoc line expansion.
+ * Expands variables in a heredoc line and replaces the original.
+ * 
+ * @param line Pointer to line to expand (will be modified)
+ * @param shell Pointer to shell structure
+ * @param file Temporary file path for error cleanup
+ */
 void	expand_heredoc(char **line, t_shell *shell, char *file)
 {
 	char	*expanded;
@@ -171,6 +218,15 @@ void	expand_heredoc(char **line, t_shell *shell, char *file)
 	*line = expanded;
 }
 
+/**
+ * Expands variables in a heredoc line.
+ * Similar to regular expansion but simpler (no quotes to handle).
+ * 
+ * @param line Line to expand
+ * @param shell Pointer to shell structure
+ * @param file Temporary file path for error cleanup
+ * @return Newly allocated expanded line 
+ */
 char	*heredoc_expander(char *line, t_shell *shell, char *file)
 {
 	char	*new_content;
@@ -192,6 +248,15 @@ char	*heredoc_expander(char *line, t_shell *shell, char *file)
 	return (new_content);
 }
 
+/**
+ * Expands variables in a line character by character.
+ * Processes the line and expands any variable references found.
+ * 
+ * @param line Line to process
+ * @param new_content Pointer to result string (will be built up)
+ * @param shell Pointer to shell structure
+ * @return SUCCESS if expansion completed, FAILURE on error
+ */
 bool	expand_line(char *line, char **new_content, t_shell *shell)
 {
 	size_t	i;
@@ -209,7 +274,14 @@ bool	expand_line(char *line, char **new_content, t_shell *shell)
 	}
 	return (SUCCESS);
 }
-
+/**
+ * Handles variable expansion ($VAR, $?) or literal text.
+ * 
+ * @param line Line being processed
+ * @param i Pointer to current position (will be updated)
+ * @param shell Pointer to shell structure
+ * @return Processed content segment
+ */
 char	*get_new_content(char *line, size_t *i, t_shell *shell)
 {
 	size_t	start;
@@ -237,6 +309,14 @@ char	*get_new_content(char *line, size_t *i, t_shell *shell)
 	}
 	return (temp);
 }
+/**
+ * Converts a HEREDOC token to an input redirection token.
+ * Updates the token type and content to redirect from the temporary file.
+ * 
+ * @param current HEREDOC token to convert
+ * @param file Temporary file path containing heredoc content
+ * @param shell Pointer to shell structure for error handling
+ */
 void	update_heredoc_token(t_token *current, char *file, t_shell *shell)
 {
 	free(current->content);
@@ -260,6 +340,13 @@ void	update_heredoc_token(t_token *current, char *file, t_shell *shell)
 	}
 }
 
+/**
+ * Saves a heredoc temporary file path for later cleanup.
+ * Maintains an array of all temporary files created for heredocs.
+ * 
+ * @param shell Pointer to shell structure
+ * @param file Temporary file path to save
+ */
 void	save_heredoc_file(t_shell *shell, char *file)
 {
 	char	**new;
@@ -284,6 +371,15 @@ void	save_heredoc_file(t_shell *shell, char *file)
 	shell->heredoc_files = new;
 }
 
+/**
+ * Allocates a new heredoc files array with additional space.
+ * Helper function for expanding the heredoc files array.
+ * 
+ * @param shell Pointer to shell structure
+ * @param file Temporary file path (for error cleanup)
+ * @param count Pointer to store current file count
+ * @return Newly allocated array with space for one more file 
+ */
 char	**allocate_heredoc_array(t_shell *shell, char *file, size_t *count)
 {
 	char	**new;
@@ -301,6 +397,13 @@ char	**allocate_heredoc_array(t_shell *shell, char *file, size_t *count)
 	return (new);
 }
 
+/**
+ * Cleans up all heredoc temporary files.
+ * Removes files from filesystem and frees the tracking array.
+ * Called at the end of command execution.
+ * 
+ * @param shell Pointer to shell structure
+ */
 void	free_heredoc_files(t_shell *shell)
 {
 	size_t	i;
@@ -318,71 +421,3 @@ void	free_heredoc_files(t_shell *shell)
 	shell->heredoc_files = NULL;
 }
 
-/*
-char	*heredoc_expander(char *line, t_shell *shell)
-{
-	size_t	i;
-	char	*new_content;
-	char	*temp;
-
-	i = 0;
-	new_content = ft_strdup("");
-	if (new_content == NULL)
-	{
-		free(line); // Free the input line before exiting
-		fatality(ERROR_MEM, shell, 1);
-	}
-	while (line[i])
-	{
-		temp = get_new_content(line, &i, shell);
-		if (!temp)
-		{
-			free(new_content);
-			free(line); // Free the input line before exiting
-			fatality(ERROR_MEM, shell, 1);
-		}
-		new_content = strjoin_free(new_content, temp);
-		if (!new_content)
-		{
-			free(line); // Free the input line before exiting
-			fatality(ERROR_MEM, shell, 1);
-		}
-	}
-	return (new_content);
-}
-*/
-
-/*
-void	save_heredoc_file(t_shell *shell, char *file)
-{
-	char	**new;
-	size_t	count;
-	size_t	i;
-
-	count = 0;
-	i = 0;
-	if (shell->heredoc_files)
-		while (shell->heredoc_files[count])
-			count++;
-	new = ft_calloc(count + 2, sizeof(char *));
-	if (!new)
-	{
-		free(file); // Free the file parameter before exiting
-		fatality(ERROR_MEM, shell, 1);
-	}
-	while (i < count)
-	{
-		new[i] = shell->heredoc_files[i];
-		i++;
-	}
-	new[count] = ft_strdup(file);
-	if (!new[count])
-	{
-		free(new);  // Free the allocated array
-		free(file); // Free the file parameter before exiting
-		fatality(ERROR_MEM, shell, 1);
-	}
-	free(shell->heredoc_files);
-	shell->heredoc_files = new;
-}
-*/

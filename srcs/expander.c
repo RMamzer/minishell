@@ -6,15 +6,17 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:28:42 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/22 19:05:52 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/28 17:28:51 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 /**
- *  Expands all environment variables in the shell's token list.
- *  @param shell Pointer to the shell struct containing tokens.
+ * Main expansion entry point for all WORD tokens.
+ * Processes variable expansion, quote removal, and word reconstruction.
+ * 
+ * @param shell Pointer to shell structure containing token list
  */
 void	expander(t_shell *shell)
 {
@@ -24,19 +26,24 @@ void	expander(t_shell *shell)
 	while (current)
 	{
 		if (current->type == WORD)
-			current->content = expand_content(current->content, shell, current);
+			current->content = expand_and_remove_quotes(current->content, shell, current);
 		current = current->next;
 	}
 }
 
 /**
- * Expands environment variables, the $? variable,
- * and handels quotes in the string.
- * @param content The string to expand.
- * @param shell Pointer to the shell struct(conteins env and exit code).
- * @return Newly allocated expanded string.
+ * Expands variables and removes quotes from token content.
+ * Processes the entire content character by character, handling:
+ * - Variable expansion ($VAR, $?)
+ * - Quote removal (both single and double quotes)
+ * - Preserving literal characters
+ * 
+ * @param content Original token content to expand
+ * @param shell Pointer to shell structure for environment access
+ * @param token Current token (to mark as expanded)
+ * @return Newly allocated expanded and unquoted string
  */
-char	*expand_content(char *content, t_shell *shell, t_token *token)
+char	*expand_and_remove_quotes(char *content, t_shell *shell, t_token *token)
 {
 	size_t	i;
 	char	*new_content;
@@ -60,11 +67,18 @@ char	*expand_content(char *content, t_shell *shell, t_token *token)
 }
 
 /**
- * Determens wether to handle a dollar variable or normal characters.
- * @param content The string being processed.
- * @param i Pointer to the current index in the string.
- * @param shell Pointer to the shell struct.
- * @return Newly allocated string for the processed part.
+ * Processes a character sequence based on its type.
+ * Dispatches to appropriate handler based on the current character:
+ * - Single quotes: preserve content literally
+ * - Double quotes: allow variable expansion inside
+ * - Dollar sign: variable expansion
+ * - Regular characters: copy as-is
+ * 
+ * @param content String being processed
+ * @param i Pointer to current position (will be updated)
+ * @param shell Pointer to shell structure
+ * @param token Current token for expansion marking
+ * @return Processed string segment
  */
 char	*process_content(char *content, size_t *i, t_shell *shell,
 		t_token *token)
@@ -79,6 +93,15 @@ char	*process_content(char *content, size_t *i, t_shell *shell,
 		return (handle_characters(content, i, NO_QUOTE));
 }
 
+/**
+ * Handles single-quoted strings by preserving content literally.
+ * Single quotes prevent all expansion - everything inside is literal.
+ * Removes the quote characters themselves from the output.
+ * 
+ * @param content String being processed
+ * @param i Pointer to current position (at opening quote)
+ * @return Literal content between quotes
+ */
 char	*handle_single_quote(char *content, size_t *i)
 {
 	size_t	start;
@@ -95,6 +118,18 @@ char	*handle_single_quote(char *content, size_t *i)
 		(*i)++;
 	return (temp);
 }
+
+/**
+ * Handles double-quoted strings with variable expansion.
+ * Double quotes allow variable expansion but prevent word splitting.
+ * Removes the quote characters from output while processing content.
+ * 
+ * @param content String being processed
+ * @param i Pointer to current position (at opening quote)
+ * @param shell Pointer to shell structure for variable lookup
+ * @param token Current token for expansion marking
+ * @return Processed content with variables expanded
+ */
 char	*handle_double_quote(char *content, size_t *i, t_shell *shell,
 		t_token *token)
 {
@@ -124,11 +159,15 @@ char	*handle_double_quote(char *content, size_t *i, t_shell *shell,
 }
 
 /**
- * Expands a variable starting with '$'.
- * @param content The string being processed.
- * @param i Pointer to the index after '$' in the string.
- * @param shell Pointer to the shell struct(conteins env and exit code).
- * @return Newly allocated string for the processed part.
+ * Handles environment variable expansion starting with '$'.
+ * Supports ($VAR), ($?) or literal '$'.
+ * Marks token as expanded for later word splitting.
+ *  
+ * @param content String being processed
+ * @param i Pointer to current position (at dollar sign)
+ * @param shell Pointer to shell struct
+ * @param token Current token to mark as expanded
+ * @return Expanded variable value or literal dollar
  */
 char	*handle_dollar(char *content, size_t *i, t_shell *shell, t_token *token)
 {
@@ -144,9 +183,8 @@ char	*handle_dollar(char *content, size_t *i, t_shell *shell, t_token *token)
 	else if (content[*i] == '?')
 	{
 		(*i)++;
-		// or functon which updates exitcode idk yet
 		expanded = ft_itoa(shell->exit_code);
-		token->expanded = true; // not sure yet
+		token->expanded = true;
 		return (expanded);
 	}
 	else
@@ -157,10 +195,15 @@ char	*handle_dollar(char *content, size_t *i, t_shell *shell, t_token *token)
 }
 
 /**
- * Reads consecutive non-variable characters.
- * @param content The string being processed.
- * @param i Pointer to the current index (updated to the end of read chars.)
- * @return Newly allocated string containing the characters, or NULL.
+ * Handles sequence of literal characters.
+ * Copies characters until a special character is encountered.
+ * Stops at '$', quotes, or end of the string.
+ * Behavior changes based on quote context.
+ * 
+ * @param content String being processed
+ * @param i Pointer to current position
+ * @param in_dq Whether we're inside double quotes
+ * @return String containing literal characters
  */
 char	*handle_characters(char *content, size_t *i, bool in_dq)
 {
@@ -186,11 +229,13 @@ char	*handle_characters(char *content, size_t *i, bool in_dq)
 }
 
 /**
- * Extracts a variable name and returns its value from the env.
- * @param content The string being processed.
- * @param i Pointer to the current index (updated to end of variable name).
- * @param env Pointer to th evironment linked list.
- * @return Newly allocated string with variabl's value, or NULL.
+ * Expands an environment variable by name.
+ * Extracts variable name and looks up its value in the environment.
+ * 
+ * @param content String containing variable name
+ * @param i Pointer to current position (at start of variable name)
+ * @param env Environment variable list
+ * @return Variable value or empty string if not found
  */
 char	*expand_env_var(char *content, size_t *i, t_env *env)
 {
@@ -213,7 +258,15 @@ char	*expand_env_var(char *content, size_t *i, t_env *env)
 	free(name);
 	return (value);
 }
-
+/**
+ * Retrieves environment variable value by name.
+ * Searches the environment list for matching key.
+ * 
+ * @param name Variable name to look up
+ * @param env Environment variable list
+ * @param alloc Whether to allocate new string or return pointer
+ * @return Variable value (allocated or pointer) or empty string
+ */
 char	*get_env_value(char *name, t_env *env, bool alloc)
 {
 	t_env	*current;
@@ -240,11 +293,13 @@ char	*get_env_value(char *name, t_env *env, bool alloc)
 	value = ft_strdup("");
 	return (value);
 }
+
 /**
- * Joins two strings and frees the originals.
- * @param new_content First string to join (freed inside).
- * @param temp Second string to join (freed inside).
- * @return Newly allocated concatenated string or NULL.
+ * Joins two strings and frees both input strings.
+ * 
+ * @param new_content First string (will be freed)
+ * @param temp Second string (will be freed)
+ * @return Newly allocated joined string
  */
 char	*strjoin_free(char *new_content, char *temp)
 {
@@ -258,6 +313,13 @@ char	*strjoin_free(char *new_content, char *temp)
 	return (result);
 }
 
+/**
+ * Compares two strings for equality.
+ * 
+ * @param s1 First string
+ * @param s2 Second string
+ * @return 0 if equal, positive/negative difference otherwise
+ */
 int	ft_strcmp(const char *s1, const char *s2)
 {
 	size_t	i;

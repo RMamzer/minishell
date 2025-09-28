@@ -3,16 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   free_and_exit.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:59 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/26 18:30:26 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/28 19:02:21 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// free token list
+/**
+ * Frees a linked list of tokens.
+ * Traverses the token list and frees each token's content and structure.
+ * Sets the list pointer to NULL.
+ * 
+ * @param list Pointer to the token list head pointer
+ */
 void	free_list(t_token **list)
 {
 	t_token	*temp;
@@ -30,7 +36,13 @@ void	free_list(t_token **list)
 	}
 	*list = NULL;
 }
-// free ast
+
+/**
+ * Recursively frees an Abstract Syntax Tree (AST).
+ * Frees the argument array and the node structure itself.
+ * 
+ * @param ast Pointer to the AST root
+ */
 void	free_ast(t_ast **ast)
 {
 	t_ast	*temp;
@@ -44,6 +56,13 @@ void	free_ast(t_ast **ast)
 	free(temp);
 	*ast = NULL;
 }
+
+/**
+ * Frees the environment variable linked list.
+ * Traverses the list and frees each environment node.
+ * 
+ * @param env Head of the environment variable list
+ */
 void	free_env(t_env *env)
 {
 	t_env	*temp;
@@ -60,7 +79,13 @@ void	free_env(t_env *env)
 	}
 }
 
-// free shell shell
+/**
+ * Frees shell data structures for the current command cycle.
+ * Cleans up input line, token list, AST, and execution arrays.
+ * Prepares shell for the next command without freeing persistent data.
+ * 
+ * @param shell Pointer to shell structure
+ */
 void	free_shell_data(t_shell *shell)
 {
 	if (!shell)
@@ -77,6 +102,13 @@ void	free_shell_data(t_shell *shell)
 	shell->paths_array = NULL;
 }
 
+/**
+ * Completely frees the shell structure and all associated data.
+ * Called when exiting the minishell entirely.
+ * Frees both per-command data and persistent shell data.
+ * 
+ * @param shell Pointer to shell structure
+ */
 void	free_shell(t_shell *shell)
 {
 	if (!shell)
@@ -87,7 +119,12 @@ void	free_shell(t_shell *shell)
 	free(shell);
 }
 
-// free array of strings
+/**
+ * Frees a null-terminated array of strings.
+ * Generic function for freeing arrays like arguments, environment, paths.
+ * 
+ * @param arr Array of strings to free
+ */
 void	free_array(char **arr)
 {
 	int	i;
@@ -100,6 +137,15 @@ void	free_array(char **arr)
 	free(arr);
 }
 
+/**
+ * Fatal error handler that cleans up and exits the program.
+ * Used for unrecoverable errors like memory allocation failures.
+ * Performs complete cleanup before terminating.
+ * 
+ * @param msg Error message to display (optional)
+ * @param shell Pointer to shell structure to clean up
+ * @param exit_code Exit code for the program
+ */
 void	fatality(char *msg, t_shell *shell, int exit_code)
 {
 	if (msg)
@@ -109,6 +155,17 @@ void	fatality(char *msg, t_shell *shell, int exit_code)
 	clear_history();
 	exit(exit_code);
 }
+
+/**
+ * Displays syntax error messages and updates shell state.
+ * Handles both custom error messages and token-specific errors.
+ * Does not exit the program, allowing minishell to continue.
+ * 
+ * @param msg Custom error message (optional)
+ * @param wrong_token Token causing the syntax error (optional)
+ * @param shell Pointer to shell structure
+ * @param exit_code Exit code to set in minishell
+ */
 void	show_error(char *msg, t_token *wrong_token, t_shell *shell,
 		int exit_code)
 {
@@ -127,9 +184,17 @@ void	show_error(char *msg, t_token *wrong_token, t_shell *shell,
 	}
 	free_shell_data(shell);
 	shell->exit_code = exit_code;
-	// global exit status = exit_code
 }
 
+/**
+ * Handles lexer-specific errors with appropriate cleanup.
+ * Used for memory allocation failures during tokenization.
+ * Performs specific cleanup for lexer state before exiting.
+ * 
+ * @param input_line Input line being processed (to free)
+ * @param shell Pointer to shell structure
+ * @param temp_cont Temporary content to free (optional)
+ */
 void	lexer_error(char *input_line, t_shell *shell, char *temp_cont)
 {
 	if (temp_cont)
