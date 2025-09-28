@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/26 20:07:42 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/28 17:29:57 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,9 @@ extern volatile sig_atomic_t	g_sig;
 # define FAILURE 1
 # define IN_DOUBLE_QUOTE true
 # define NO_QUOTE false
+# define ZERO_WORDS 0
+# define ONE_WORD 1
+
 
 # define ALLOC true
 # define NO_ALLOC false
@@ -47,6 +50,7 @@ extern volatile sig_atomic_t	g_sig;
 # define ERROR_MEM "cannot allocate memory"
 # define ERROR_MAX_HER "maximum here-document count exceeded"
 # define ERROR_EOF "warning: heredoc delimeted by EOF"
+
 // token type
 typedef enum e_token_type
 {
@@ -167,8 +171,7 @@ char				**allocate_heredoc_array(t_shell *shell, char *file,
 
 // expansion
 void				expander(t_shell *shell);
-char				*expand_content(char *content, t_shell *shell,
-						t_token *token);
+char	*expand_and_remove_quotes(char *content, t_shell *shell, t_token *token)
 char				*process_content(char *content, size_t *i, t_shell *shell,
 						t_token *token);
 char				*handle_dollar(char *content, size_t *i, t_shell *shell,
