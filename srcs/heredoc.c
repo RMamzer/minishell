@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/28 18:37:49 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/29 14:13:52 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,6 +154,61 @@ void	update_file_name(char **file, size_t *i, t_shell *shell)
 	}
 }
 
+/**
+ * Handles signal interruption during heredoc input.
+ * Checks for SIGINT and performs cleanup if interrupted.
+ * 
+ * @param line Current input line to free if needed
+ * @return FAILURE if interrupted, SUCCESS otherwise
+ */
+static bool	handle_heredoc_signal(char *line)
+{
+	if (g_sig == SIGINT)
+	{
+		if (line)
+			free(line);
+		g_sig = 0;
+		rl_event_hook = NULL;
+		return (FAILURE);
+	}
+	return (SUCCESS);
+}
+
+/**
+ * Writes a line to the heredoc file with newline.
+ * Handles write errors and performs cleanup on failure.
+ * 
+ * @param fd File descriptor to write to
+ * @param line Line to write
+ * @param shell Shell structure for error handling
+ */
+static void	write_heredoc_line(int *fd, char *line, t_shell *shell)
+{
+	if (write(*fd, line, ft_strlen(line)) == -1)
+	{
+		close(*fd);
+		free(line);
+		brutality("minishell: write", shell, 1);
+	}
+	if (write(*fd, "\n", 1) == -1)
+	{
+		close(*fd);
+		free(line);
+		brutality("minishell: write", shell, 1);
+	}
+}
+
+/**
+ * Reads heredoc input from user until delimiter is found.
+ * Handles variable expansion in unquoted heredocs and writes
+ * content to the temporary file.
+ * 
+ * @param fd Pointer to file descriptor of temporary file
+ * @param delim Delimiter token to match against
+ * @param shell Pointer to shell structure
+ * @param file Temporary file path for error cleanup
+ * @return SUCCESS if completed normally, FAILURE if interrupted
+ */
 bool	read_heredoc(int *fd, t_token *delim, t_shell *shell, char *file)
 {
 	char	*line;
@@ -163,40 +218,41 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell, char *file)
 	while (1)
 	{
 		line = readline("> ");
-		if (g_sig == SIGINT)
-		{
-			if(line)
-				free(line);
-			g_sig = 0;
-			rl_event_hook = NULL;
+		if (handle_heredoc_signal(line) == FAILURE)
 			return (FAILURE);
-		 } // for now
 		if (!line)
 		{
 			ft_putendl_fd(ERROR_EOF, 2);
 			break ;
 		}
-		if (ft_strcmp(line, delim->content) == 0)
-		{
-			free(line);
+		if (is_delim_written(line, delim))
 			break ;
-		}
 		if (delim->quoted == false)
-			expand_heredoc(&line, shell, file);
-		if (write(*fd, line, ft_strlen(line)) == -1)
-		{
-			free(line);
-			brutality("minishell: write",  shell, 1);
-		}
-		if (write(*fd, "\n", 1) == -1)
-		{
-			free(line);
-			brutality("minishell: write",  shell, 1);
-		}
+			expand_heredoc(&line, shell, file, fd);
+		write_heredoc_line(fd, line, shell);
 		free(line);
 	}
 	rl_event_hook = NULL;
 	return (SUCCESS);
+}
+
+/**
+ * Checks if the input line matches the heredoc delimiter.
+ * Compares the line with the delimiter and frees the line if they match.
+ * This indicates the end of heredoc input.
+ * 
+ * @param line Input line to compare with delimiter
+ * @param delim Delimiter token containing the end marker
+ * @return true if line matches delimiter, false otherwise
+ */
+bool is_delim_written(char *line, t_token *delim)
+{
+    if(ft_strcmp(line, delim->content) == 0)
+    {
+        free(line);
+        return (true);
+    }
+    return (false);
 }
 
 /**
@@ -206,14 +262,15 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell, char *file)
  * @param line Pointer to line to expand (will be modified)
  * @param shell Pointer to shell structure
  * @param file Temporary file path for error cleanup
+ * @param fd File descriptor to close on error
  */
-void	expand_heredoc(char **line, t_shell *shell, char *file)
+void	expand_heredoc(char **line, t_shell *shell, char *file, int *fd)
 {
 	char	*expanded;
 
 	if (!line || !*line)
 		return ;
-	expanded = heredoc_expander(*line, shell, file);
+	expanded = heredoc_expander(*line, shell, file, fd);
 	free(*line);
 	*line = expanded;
 }
@@ -225,21 +282,24 @@ void	expand_heredoc(char **line, t_shell *shell, char *file)
  * @param line Line to expand
  * @param shell Pointer to shell structure
  * @param file Temporary file path for error cleanup
+ * @param fd File descriptor to close on error
  * @return Newly allocated expanded line 
  */
-char	*heredoc_expander(char *line, t_shell *shell, char *file)
+char	*heredoc_expander(char *line, t_shell *shell, char *file, int *fd)
 {
 	char	*new_content;
 
 	new_content = ft_strdup("");
 	if (!new_content)
 	{
+		close(*fd);
 		free(file);
 		free(line);
 		fatality(ERROR_MEM, shell, 1);
 	}
 	if (expand_line(line, &new_content, shell) == FAILURE)
 	{
+		close(*fd);
 		free(file);
 		free(new_content);
 		free(line);
