@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/30 13:50:38 by mamzerr1         ###   ########.fr       */
+/*   Updated: 2025/09/30 18:47:46 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 /**
- * FINISH THIS PROCESS (๑•̀ᗝ•́)૭ 
+ * FINISH THIS PROCESS (๑•̀ᗝ•́)૭
  * @param msg Pointer to erorr message string.
  * @param shell Pointer to the shell struct.
  * @param exit_code Exit status of the process.
@@ -53,7 +53,7 @@ void	write_bulitin_error(char *str1, char *str2, char *str3, char *str4)
 /**
  * Calculates the number of relevant nodes in the environment list.
  * @param lst Pointer to the first node of environment list.
- * @param process Type of process being executed (EXECUTE or EXPORT) 
+ * @param process Type of process being executed (EXECUTE or EXPORT)
  * @return Number of the relevant nodes in environment list.
  */
 int	get_env_size(t_env *lst, bool process)
@@ -88,7 +88,7 @@ int	get_args_len(char **args)
 	return (len);
 }
 /**
- * Joins up to 3 strings in single malloc returns a pointer to new string. 
+ * Joins up to 3 strings in single malloc returns a pointer to new string.
  * @param s1 Pointer to the first sting that should be joined.
  * @param s2 Pointer to the second sting that should be joined.
  * @param s3 Pointer to a third sting that should be joined.
@@ -118,7 +118,7 @@ char	*super_strjoin(char const *s1, char const *s2, char const *s3)
 
 
 /**
- * Closes READ_END and WRITE_END of pipe() and returns error exit status. 
+ * Closes READ_END and WRITE_END of pipe() and returns error exit status.
  * @param msg Error message that should be outputed.
  * @param pipefs Pointer to READ_END and WRITE_END of pipe().
  * @param pipefs Error exit status.
@@ -132,7 +132,7 @@ int	error_close_and_return(char *msg, int *pipefd, int error)
 }
 
 /**
- * Recreates envp array using the list of env nodes. 
+ * Recreates envp array using the list of env nodes.
  * @param env First node of the environment list.
  * @param shell Pointer to the shell struct.
  * @return Void.
@@ -162,7 +162,6 @@ void	recreate_env_array(t_env *env, t_shell *shell)
 	shell->env_array[i] = NULL;
 }
 
-
 /**
  * Waits for the execution of pipe child processes to collect final
  * exit status.
@@ -176,7 +175,7 @@ int 	wait_child(pid_t pid, t_shell *shell)
 	pid_t	term_pid;
 	int		exit_code;
 
-	if (shell->complete_exit == true)
+	if (shell->is_parent == true)
 		set_signals_exec_parent();
 	exit_code = EXIT_FAILURE;
 	term_pid = waitpid(pid, &status, 0);
@@ -190,8 +189,10 @@ int 	wait_child(pid_t pid, t_shell *shell)
 }
 
 /**
- * Reassembles envp array for execve, finds path to cmd and executes cmd.
+ * Checks if cmd is an absolute or relative path. If not a path,
+ *  checks if cmd one of $PATH paths
  * @param args Array of arguments containing cmd name and its arguments.
+ * @param mallocced Bool indicating if returned value is malloced .
  * @param shell Pointer to the shell struct.
  * @return Void.
  */
@@ -223,7 +224,6 @@ char	*find_path_cmd(char **args, bool *malocced, t_shell *shell)
 	brutality(NULL, shell, EXIT_CMD_NOT_FOUND);
 	return (NULL);
 }
-
 
 /**
  * Reassembles envp array for execve, finds path to cmd and executes cmd.
@@ -357,7 +357,7 @@ int	wait_pipe(pid_t *pids, int children_rem, t_shell *shell)
  */
 void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 {
-	shell->complete_exit = false;
+	shell->is_parent = false;
 	close(pipefd[READ_END]);
 	if (dup2(pipefd[WRITE_END], STDOUT_FILENO) == -1)
 	{
@@ -378,7 +378,7 @@ void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
  */
 void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
 {
-	shell->complete_exit = false;
+	shell->is_parent = false;
 	close(pipefd[WRITE_END]);
 	if (dup2(pipefd[READ_END], STDIN_FILENO) == -1)
 	{
@@ -415,7 +415,7 @@ int	execute_pipe(t_ast *ast, t_shell *shell)
 		execute_right_child(ast->right, shell, pipefd);
 	close(pipefd[WRITE_END]);
 	close(pipefd[READ_END]);
-	if (shell->complete_exit == true)
+	if (shell->is_parent == true)
 		set_signals_exec_parent();
 	return (wait_pipe(pids, 2, shell));
 }

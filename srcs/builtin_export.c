@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 15:05:10 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/30 14:31:52 by mamzerr1         ###   ########.fr       */
+/*   Updated: 2025/09/30 17:02:28 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,35 +16,27 @@
 
 /**
  * Adds a key-only environment variable (e.g., `export KEY`) to the
- * environment list if it is not already present. Handles memory allocation errors.
+ * environment list if it is not already present.
  * @param shell Pointer to the shell struct.
  * @param str The variable name (key) to be added.
  * @return Void.
  */
-
 void	process_valueless_export_node(t_shell *shell, char *str)
 {
 	char	*key;
-	t_env	*new_node;
 
-	if (get_env_value(str, shell->env, NO_ALLOC))
+	if (check_env_key(str, shell->env) == true)
 		return;
 	key = ft_strdup(str);
 	if (!key)
 		fatality(ERROR_MEM, shell, 1);
-	new_node = create_env_node(key, NULL);
-	if (!new_node)
-	{
-		free (key);
-		fatality(ERROR_MEM, shell, 1);
-	}
-	add_env_node(&shell->env, new_node);
+	process_env_node(key, NULL, NO_ALLOC, shell);
 }
 
 
 /**
- * Verifies if the input string is a valid shell identifier for environment 
- * variable naming. Must start with a letter or underscore, cannot start 
+ * Verifies if the input string is a valid shell identifier for environment
+ * variable naming. Must start with a letter or underscore, cannot start
  * with a digit, and can optionally contain a single '=' as a separator.
  * @param str The string to validate.
  * @return True if the identifier is valid, false otherwise.
@@ -63,7 +55,7 @@ bool	is_identifier_valid(char *str)
 }
 
 /**
- * Prints the array of environment nodes to STDOUT in the required 
+ * Prints the array of environment nodes to STDOUT in the required
  * `declare -x KEY="VALUE"` format for the 'export' command.
  * @param temp_env Array of environment node pointers (already sorted).
  * @return Void.
@@ -85,7 +77,7 @@ void	print_env_export(t_env **temp_env)
 }
 
 /**
- * Sorts the array of environment node pointers alphabetically by key 
+ * Sorts the array of environment node pointers alphabetically by key
  * using the Bubble Sort algorithm.
  * @param env Array of environment node pointers.
  * @param len The number of elements in the array.
@@ -116,8 +108,8 @@ void	bubble_sort_env(t_env **env, int len)
 }
 
 /**
- * Prepares the environment list for 'export' display: creates a temporary 
- * array, filters out the non-standard '_' variable, sorts the array 
+ * Prepares the environment list for 'export' display: creates a temporary
+ * array, filters out the non-standard '_' variable, sorts the array
  * alphabetically by key, and prints the result.
  * @param env First node of the environment list.
  * @param shell Pointer to the shell struct.
@@ -152,9 +144,9 @@ int	sort_and_print_export(t_env *env, t_shell *shell)
 }
 
 /**
- * Executes the built-in 'export' command. With no arguments, prints the 
- * sorted environment variables. With arguments, validates each and adds/updates 
- * environment variables. Sets the shell's exit code to 1 on identifier 
+ * Executes the built-in 'export' command. With no arguments, prints the
+ * sorted environment variables. With arguments, validates each and adds/updates
+ * environment variables. Sets the shell's exit code to 1 on identifier
  * validation failure, but continues processing other arguments.
  * @param args Array of arguments for command execution.
  * @param shell Pointer to the shell struct.

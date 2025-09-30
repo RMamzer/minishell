@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env_functions.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/30 14:36:30 by mamzerr1         ###   ########.fr       */
+/*   Updated: 2025/09/30 17:07:34 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,16 +18,14 @@
 * @param Value Pointer to the malloced key string.
 * @param shell Pointer to the shell struct.
 * @return Void.
-*/ 
+*/
 void	error_malloc_env_exit(char *key, char *value, t_shell *shell)
 {
-	perror("minishell: malloc");
 	if (key)
 		free(key);
 	if (value)
 		free(value);
-	free_shell(shell);
-	exit (EXIT_FAILURE);
+	fatality(ERROR_MEM, shell, 1);
 }
 
 
@@ -35,7 +33,7 @@ void	error_malloc_env_exit(char *key, char *value, t_shell *shell)
 * Checks if the node with the provided key exists.
 * @param env Pointer to the environment node.
 * @return Void.
-*/ 
+*/
 void	free_env_node(t_env *env)
 {
 	if (env)
@@ -52,7 +50,7 @@ void	free_env_node(t_env *env)
 * @param env Pointer to the key that should be checked.
 * @param env Pointer to the first node of environment list.
 * @return Status of check (true or false).
-*/ 
+*/
 bool	check_env_key(char *key, t_env *env)
 {
 	t_env	*current;
@@ -72,7 +70,7 @@ bool	check_env_key(char *key, t_env *env)
 * @param env Pointer to the environmnt nodes list.
 * @param key Pointer to the key of the node that should be removed.
 * @return Void.
-*/ 
+*/
 void	remove_env_variable(t_env **env, char *key)
 {
 	t_env	*current;
@@ -106,7 +104,7 @@ void	remove_env_variable(t_env **env, char *key)
 * @param key Pointer to the key name that should be found.
 * @param new_value Pointer to the new_value that should be used.
 * @return Flag indicating the result of operation (success or failure).
-*/ 
+*/
 bool	update_env_value(t_env **env, char *key, char *new_value)
 {
 	t_env	*temp;
@@ -133,7 +131,7 @@ bool	update_env_value(t_env **env, char *key, char *new_value)
 * Updates shllvl value in environment. Increments it by 1 compared to the previous value
 * @param shell Pointer to the shell struct.
 * @return Void.
-*/ 
+*/
 void	update_shllvl_value(t_shell *shell)
 {
 	char	*value_shlvl;
@@ -171,28 +169,32 @@ void	add_env_node(t_env **env, t_env *new_node)
 	last->next = new_node;
 }
 
+
 /**
-* Creates an environment node and add key and value to ir.
+* Processes an environment node: checks if alloc of key and value was succesfull, creates
+* an environment node, and adds it to the environment list. Can create bth nodes with
+* allocated value or without value (NULL) depending on "value_alloc: flag
 * @param key Pointer to a key of the environment line.
-* @param envp Pointer to the value of the environment line.
-* @return New malloced environment node.
+* @param value Pointer to the value of the environment line.
+* @param value_alloc Flag indicating if value was malloced or NULL is inputed manually.
+* @return Void.
 */
-t_env	*create_env_node(char *key, char *value)
+void	process_env_node(char *key, char *value, bool value_alloc, t_shell *shell)
 {
 	t_env	*new_node;
 
-	if (!key)
-		return (NULL);
+	if (!key || (value_alloc == ALLOC && !value))
+		error_malloc_env_exit(key, value, shell);
 	new_node = calloc(1, sizeof(t_env));
 	if (!new_node)
-		return (NULL);
+		error_malloc_env_exit(key, value, shell);
 	new_node->key = key;
 	if (value)
 	{
 		new_node->value = value;
 		new_node->assigned = true;
 	}
-	return (new_node);
+	add_env_node(&shell->env, new_node);
 }
 
 /**
@@ -200,7 +202,7 @@ t_env	*create_env_node(char *key, char *value)
 * Divides an environment line into a key and value that are stored in the node.
 * @param shell Pointer to the shell struct.
 * @param envp Pointer to the single string of envp.
-* @param process Type of process being executed (ENV or EXPORT) 
+* @param process Type of process being executed (ENV or EXPORT)
 * @return Void.
 */
 void	process_env_line(t_shell *shell, const char *envp, bool process)
@@ -208,7 +210,6 @@ void	process_env_line(t_shell *shell, const char *envp, bool process)
 	char	*key;
 	char	*value;
 	char	*equal;
-	t_env	*new_node;
 
 	value = NULL;
 	equal = ft_strchr(envp, '=');
@@ -226,41 +227,12 @@ void	process_env_line(t_shell *shell, const char *envp, bool process)
 		free(key);
 		return ;
 	}
-	new_node = create_env_node(key, value);
-	if (!new_node)
-		error_malloc_env_exit(key, value, shell);
-	add_env_node(&shell->env, new_node);
+	process_env_node(key, value, ALLOC, shell);
 }
 
 /**
-* Creates the minimal enviornment for shell if nothing is provided.
-* @param shell Pointer to the shell struct.
-* @return Void.
-*/
-void	set_minimal_env(t_shell *shell)
-{
-	char	*pwd_line;
-	char	*pwd;
-	t_env	*old_pwd_node;
-
-	pwd = getcwd(NULL, 0);
-	if (!pwd)
-		error_malloc_env_exit(NULL, NULL, shell);
-	pwd_line = ft_strjoin("PWD=", pwd);
-	free(pwd);
-	if (!pwd_line)
-		error_malloc_env_exit(NULL, NULL, shell);
-	process_env_line(shell, pwd_line, ENV); // check if it leaks (set env env -i)
-	process_env_line(shell, "SHLVL=0", ENV);
-	process_env_line(shell, "_=/usr/bin/env",ENV);
-	old_pwd_node = create_env_node(ft_strdup("OLDPWD"), NULL);
-	if (!old_pwd_node)
-		error_malloc_env_exit(NULL, NULL, shell);
-	add_env_node(&shell->env, old_pwd_node);
-}
-
-/**
-* Executes the environment creation for the shell.
+* Executes the environment creation for the shell. If no environment is provided,
+* sets up a minimal environment
 * @param shell Pointer to the shell struct.
 * @param envp Pointer to envp.
 * @return Void.
@@ -268,7 +240,12 @@ void	set_minimal_env(t_shell *shell)
 void	create_env(t_shell *shell, char **envp)
 {
 	if (!envp || !envp[0])
-		set_minimal_env(shell);
+	{
+		process_env_node(ft_strdup("PWD"), getcwd(NULL, 0), ALLOC, shell);
+		process_env_node(ft_strdup("SHLVL"), ft_strdup("0"), ALLOC, shell);
+		process_env_node(ft_strdup("_"), ft_strdup("/usr/bin/env"), ALLOC, shell);
+		process_env_node(ft_strdup("OLDPWD"), NULL, NO_ALLOC, shell);
+	}
 	else
 	{
 		while (*envp)
@@ -277,5 +254,5 @@ void	create_env(t_shell *shell, char **envp)
 			envp++;
 		}
 	}
-	update_shllvl_value(shell); // check overflow lol?
+	update_shllvl_value(shell);
 }

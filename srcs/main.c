@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/26 19:58:56 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/30 18:23:07 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,7 +250,7 @@ t_shell	*init_data(void)
 		ft_putendl_fd(ERROR_MEM, 2);
 		exit(FAILURE);
 	}
-	shell->complete_exit = true;
+	shell->is_parent = true;
 	signal_to_exitcode(shell);
 	return (shell);
 }

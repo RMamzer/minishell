@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/26 20:07:42 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/30 18:20:35 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ typedef struct s_shell
 	char			**heredoc_files;
 	char			**env_array;
 	char			**paths_array;
-	bool			complete_exit;
+	bool			is_parent;
 }					t_shell;
 
 // lib and macro for execution
@@ -195,15 +195,16 @@ void				lexer_error(char *input_line, t_shell *shell,
 void				free_list(t_token **list);
 
 // env
+void	process_env_node(char *key, char *value, bool value_alloc, t_shell *shell);
 void				error_malloc_env_exit(char *key, char *value, t_shell *shell);
 bool				update_env_value(t_env **env, char *key, char *new_value);
-//char				*find_env_value(char *str, t_env *env);
 void				update_shllvl_value(t_shell *shell);
 void				add_env_node(t_env **env, t_env *new_node);
 t_env				*create_env_node(char *key, char *value);
 void				process_env_line(t_shell *shell, const char *envp, bool process);
 void				set_minimal_env(t_shell *shell);
 void				create_env(t_shell *shell, char **envp);
+bool				check_env_key(char *key, t_env *env);
 
 // ast
 bool				parse_tokens(t_shell *shell);

@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:59 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/26 18:30:26 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/30 18:24:17 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,10 @@ void	free_shell_data(t_shell *shell)
 	shell->input_line = NULL;
 	free_list(&shell->token_list);
 	free_ast(&shell->ast);
-	//free_heredoc_files(shell);
-	shell->complete_exit = true;
+	if (shell->is_parent == true)
+		free_heredoc_files(shell);
+	else if(shell->heredoc_files)
+		free_array(shell->heredoc_files);
 	free_array(shell->env_array);
 	shell->env_array = NULL;
 	free_array(shell->paths_array);
