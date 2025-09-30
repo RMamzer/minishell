@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:17:43 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/30 17:57:23 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/30 19:22:53 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,8 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell, char *file)
 {
 	char	*line;
 
-	set_heredoc_signal();
 	rl_event_hook = check_sig_hook;
+	set_heredoc_signal();
 	while (1)
 	{
 		line = readline("> ");

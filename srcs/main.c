@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/30 19:03:17 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/30 19:24:05 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ void	signal_to_exitcode(t_shell *shell)
 	{
 		sig_shell->exit_code = g_sig + 128;
 	}
+	g_sig = 0;
 }
 /**
  * Signal handler for SIGINT during readline input.
@@ -160,7 +161,10 @@ bool	receive_input(t_shell *shell)
 	set_readline_signals();
 	shell->input_line = readline("dirty_shell> ");
 	if (!shell->input_line)
+	{
+		ft_putstr_fd("exit\n", STDOUT_FILENO);
 		fatality(NULL, shell, 0);
+	}
 	if (shell->input_line[0] == '\0')
 	{
 		free(shell->input_line);
