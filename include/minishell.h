@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/28 17:29:57 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/30 11:42:42 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,15 +227,7 @@ t_ast				*add_ast_node(t_token_type type, t_shell *shell);
 void				move_and_free(t_token **token_list);
 
 // split vars
-void				split_variables(t_shell *shell);
-void				process_split_result(t_shell *shell, t_token *current,
-						char **split_result);
-void				replace_token_content(t_token *current, char *new_content,
-						t_shell *shell, char **split_result);
-t_token				*add_expanded_token(t_token *current, t_token_type type,
-						char *content);
-void				free_split(char **split);
-int					check_qty(char **split_result);
+void	split_variables(t_shell *shell);
 char				**ft_split_IFS(char *str, char *charset);
 
 // ambiguous and validation of redirection
