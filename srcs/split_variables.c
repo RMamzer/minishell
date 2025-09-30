@@ -6,12 +6,27 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:26:38 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/16 18:07:23 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/30 11:42:02 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+static void	process_split_result(t_shell *shell, t_token *current, char **split_result);
+static void	replace_token_content(t_token *current, char *new_content, t_shell *shell, char **split_result);
+static t_token	*add_expanded_token(t_token *current, t_token_type type, char *content);
+static int	check_qty(char **split_result);
+
+/**
+ * Splits expanded variables into multiple tokens based on IFS characters.
+ * This function handles word splitting after variable expansion, which is
+ * a critical part of shell processing. Only unquoted, expanded variables 
+ * are subjected to word splitting.
+ * 
+ * Example: $MAXIM containing "likes orange juice" becomes three tokens
+ * 
+ * @param shell Pointer to shell structure containing token list
+ */
 void	split_variables(t_shell *shell)
 {
 	t_token	*current;
@@ -26,13 +41,23 @@ void	split_variables(t_shell *shell)
 			if (!split_result)
 				fatality(ERROR_MEM, shell, 1);
 			process_split_result(shell, current, split_result);
-			free_split(split_result);
+			free_array(split_result);
 		}
 		current = current->next;
 	}
 }
-
-void	process_split_result(t_shell *shell, t_token *current,
+/**
+ * Processes the result of variable splitting and updates the token list.
+ * Handles three cases:
+ * - ZERO_WORDS (0): Replace with empty token
+ * - ONE_WORD (1): Replace current token content
+ * - Multiple words: Replace current + create additional tokens
+ * 
+ * @param shell Pointer to shell structure for error handling
+ * @param current Token being processed
+ * @param split_result Array of strings from splitting operation
+ */
+static void	process_split_result(t_shell *shell, t_token *current,
 		char **split_result)
 {
 	int	str_qty;
@@ -40,9 +65,9 @@ void	process_split_result(t_shell *shell, t_token *current,
 
 	i = 0;
 	str_qty = check_qty(split_result);
-	if (str_qty == 0)
+	if (str_qty == ZERO_WORDS)
 		replace_token_content(current, "", shell, split_result);
-	else if (str_qty == 1)
+	else if (str_qty == ONE_WORD)
 		replace_token_content(current, split_result[0], shell, split_result);
 	else
 	{
@@ -53,27 +78,45 @@ void	process_split_result(t_shell *shell, t_token *current,
 			current = add_expanded_token(current, WORD, split_result[i]);
 			if (!current)
 			{
-				free_split(split_result);
+				free_array(split_result);
 				fatality(ERROR_MEM, shell, 1);
 			}
 			i++;
 		}
 	}
 }
-
-void	replace_token_content(t_token *current, char *new_content,
+/**
+ * Replaces the content of an existing token with new content.
+ * Frees the old content and allocates new memory for the replacement.
+ * 
+ * @param current Token whose content will be replaced
+ * @param new_content New string content for the token
+ * @param shell Pointer to the shell structure for error handling
+ * @param split_result Split array for cleanup on error
+ */
+static void	replace_token_content(t_token *current, char *new_content,
 		t_shell *shell, char **split_result)
 {
 	free(current->content);
 	current->content = ft_strdup(new_content);
 	if (!current->content)
 	{
-		free_split(split_result);
+		free_array(split_result);
 		fatality(ERROR_MEM, shell, 1);
 	}
 }
 
-t_token	*add_expanded_token(t_token *current, t_token_type type, char *content)
+/**
+ * Creates and inserts a new token after the current token.
+ * Used when variable splitting results in multiple words.
+ * The new token is inserted into the linked list maintaining order.
+ * 
+ * @param current Token after which to insert new token
+ * @param type Token type
+ * @param content String content for the new token
+ * @return Pointer to the newly created token, or NULL on failure
+ */
+static t_token	*add_expanded_token(t_token *current, t_token_type type, char *content)
 {
 	t_token	*new_token;
 
@@ -96,22 +139,14 @@ t_token	*add_expanded_token(t_token *current, t_token_type type, char *content)
 	return (new_token);
 }
 
-void	free_split(char **split)
-{
-	int	i;
-
-	i = 0;
-	if (!split)
-		return ;
-	while (split[i])
-	{
-		free(split[i]);
-		i++;
-	}
-	free(split);
-}
-
-int	check_qty(char **split_result)
+/**
+ * Counts the number of strings in a null-terminated array.
+ * Used to determine how many words resulted from variable splitting.
+ * 
+ * @param split_result Array of strings to count
+ * @return Number of strings in the array
+ */
+static int	check_qty(char **split_result)
 {
 	int	i;
 

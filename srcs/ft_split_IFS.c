@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/13 14:47:35 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/10 18:52:22 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/28 15:21:09 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,15 @@ static int	number_of_words(const char *str, const char *sep);
 static char	*separating_words(const char *str, const char *sep);
 static void	*free_sp_ifs(char **arr);
 
+/**
+ * Splits a string using IFS (Internal Field Separator) characters.
+ * Each word is defined as a sequence of characters not present 
+ * in the separator set.
+ * 
+ * @param str String to split
+ * @param charset The set of separator characters (IFS: space, tab, newline)
+ * @return Array of strings or NULL on error
+ */
 char	**ft_split_IFS(char *str, char *charset)
 {
 	char	**arr;
@@ -45,7 +54,13 @@ char	**ft_split_IFS(char *str, char *charset)
 	arr[i] = NULL;
 	return (arr);
 }
-
+/**
+ * Checks if a character is one of the separator characters.
+ * 
+ * @param c Character to check
+ * @param sep String containing all separator characters
+ * @return 1 if character is a separator, 0 otherwise
+ */
 static int	separator(char c, const char *sep)
 {
 	int	i;
@@ -59,7 +74,13 @@ static int	separator(char c, const char *sep)
 	}
 	return (0);
 }
-
+/**
+ * Counts the number of words in the string using given separators.
+ * 
+ * @param str String to analyze
+ * @param sep String containing separator characters
+ * @return Number of words found
+ */
 static int	number_of_words(const char *str, const char *sep)
 {
 	int	i;
@@ -80,7 +101,14 @@ static int	number_of_words(const char *str, const char *sep)
 	}
 	return (counter);
 }
-
+/**
+ * Extracts a single word from the string starting at current position.
+ * Allocates and returns a new null-terminated string.
+ * 
+ * @param str Pointer to the start of the word in the input string
+ * @param sep String containing separator characters
+ * @return Newly allocated string containing the word, or NULL on error
+ */
 static char	*separating_words(const char *str, const char *sep)
 {
 	char	*separated;
@@ -103,6 +131,13 @@ static char	*separating_words(const char *str, const char *sep)
 	return (separated);
 }
 
+/**
+ * Frees all memory allocated for an array of strings.
+ * Used for cleanup in case of allocation failure.
+ * 
+ * @param arr Array to free
+ * @return Always returns NULL
+ */
 static void	*free_sp_ifs(char **arr)
 {
 	int i;

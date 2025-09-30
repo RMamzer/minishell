@@ -3,24 +3,27 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/26 17:52:44 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/30 16:27:53 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int check_sig_hook(void)
-{
-	if (g_sig == SIGINT)
-		rl_done = 1;
-	return (0);
-}
-
-
-
+static bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i);
+static void	process_delim(t_token *delim, t_shell *shell);
+static void	update_file_name(char **file, size_t *i, t_shell *shell);
+static void	update_heredoc_token(t_token *current, char *file, t_shell *shell);
+/**
+ * Main heredoc processing function.
+ * Processes all HEREDOC tokens in the token list by creating temporary files
+ * and reading user input until delimiter is found.
+ *
+ * @param shell Pointer to shell structure containing token list
+ * @return SUCCESS if all heredocs processed successfully, FAILURE otherwise
+ */
 bool	process_heredoc(t_shell *shell)
 {
 	size_t	i;
@@ -41,7 +44,17 @@ bool	process_heredoc(t_shell *shell)
 	return (SUCCESS);
 }
 
-bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
+/**
+ * Processes a single heredoc token.
+ * Creates a temporary file, reads input until delimiter, then converts
+ * the heredoc token to a regular input redirection.
+ *
+ * @param shell Pointer to shell structure
+ * @param current Current HEREDOC token
+ * @param i Index for unique temporary file naming
+ * @return SUCCESS if processed successfully, FAILURE otherwise
+ */
+static bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
 {
 	int		fd;
 	char	*file;
@@ -53,7 +66,6 @@ bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
 	if (fd == -1)
 	{
 		free(file);
-		//return (FAILURE);
 		brutality("minishell: open", shell, 1);
 	}
 	if (read_heredoc(&fd, current->next, shell, file) == FAILURE)
@@ -70,9 +82,15 @@ bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i)
 	return (SUCCESS);
 }
 
-
-
-void	process_delim(t_token *delim, t_shell *shell)
+/**
+ * Removes quotes from heredoc delimiter.
+ * Processes the delimiter token to remove surrounding quotes while
+ * preserving the actual delimiter content.
+ *
+ * @param delim Delimiter token to process
+ * @param shell Pointer to shell structure for error handling
+ */
+static void	process_delim(t_token *delim, t_shell *shell)
 {
 	char	*new_content;
 	size_t	i;
@@ -96,7 +114,16 @@ void	process_delim(t_token *delim, t_shell *shell)
 	delim->content = new_content;
 }
 
-void	update_file_name(char **file, size_t *i, t_shell *shell)
+/**
+ * Generates a unique temporary file name for heredoc.
+ * Creates file names in /tmp/ directory with incrementing numbers
+ * until a non-existing file is found.
+ *
+ * @param file Pointer to store the generated file path
+ * @param i Pointer to counter for unique naming
+ * @param shell Pointer to shell structure for error handling
+ */
+static void	update_file_name(char **file, size_t *i, t_shell *shell)
 {
 	char	*file_num;
 
@@ -115,129 +142,15 @@ void	update_file_name(char **file, size_t *i, t_shell *shell)
 	}
 }
 
-bool	read_heredoc(int *fd, t_token *delim, t_shell *shell, char *file)
-{
-	char	*line;
-
-	set_heredoc_signal();
-	rl_event_hook = check_sig_hook;
-	while (1)
-	{
-		line = readline("> ");
-		if (g_sig == SIGINT)
-		{
-			if(line)
-				free(line);
-			g_sig = 0;
-			rl_event_hook = NULL;
-			return (FAILURE);
-		 } // for now
-		if (!line)
-		{
-			ft_putendl_fd(ERROR_EOF, 2);
-			break ;
-		}
-		if (ft_strcmp(line, delim->content) == 0)
-		{
-			free(line);
-			break ;
-		}
-		if (delim->quoted == false)
-			expand_heredoc(&line, shell, file);
-		if (write(*fd, line, ft_strlen(line)) == -1)
-		{
-			free(line);
-			brutality("minishell: write",  shell, 1);
-		}
-		if (write(*fd, "\n", 1) == -1)
-		{
-			free(line);
-			brutality("minishell: write",  shell, 1);
-		}
-		free(line);
-	}
-	rl_event_hook = NULL;
-	return (SUCCESS);
-}
-
-void	expand_heredoc(char **line, t_shell *shell, char *file)
-{
-	char	*expanded;
-
-	if (!line || !*line)
-		return ;
-	expanded = heredoc_expander(*line, shell, file);
-	free(*line);
-	*line = expanded;
-}
-
-char	*heredoc_expander(char *line, t_shell *shell, char *file)
-{
-	char	*new_content;
-
-	new_content = ft_strdup("");
-	if (!new_content)
-	{
-		free(file);
-		free(line);
-		fatality(ERROR_MEM, shell, 1);
-	}
-	if (expand_line(line, &new_content, shell) == FAILURE)
-	{
-		free(file);
-		free(new_content);
-		free(line);
-		fatality(ERROR_MEM, shell, 1);
-	}
-	return (new_content);
-}
-
-bool	expand_line(char *line, char **new_content, t_shell *shell)
-{
-	size_t	i;
-	char	*temp;
-
-	i = 0;
-	while (line[i])
-	{
-		temp = get_new_content(line, &i, shell);
-		if (!temp)
-			return (FAILURE);
-		*new_content = strjoin_free(*new_content, temp);
-		if (!*new_content)
-			return (FAILURE);
-	}
-	return (SUCCESS);
-}
-
-char	*get_new_content(char *line, size_t *i, t_shell *shell)
-{
-	size_t	start;
-	char	*temp;
-
-	if (line[*i] == '$')
-	{
-		(*i)++;
-		if (ft_isalpha(line[*i]) || line[*i] == '_')
-			temp = expand_env_var(line, i, shell->env);
-		else if (line[*i] == '?')
-		{
-			(*i)++;
-			temp = ft_itoa(shell->exit_code);
-		}
-		else
-			temp = ft_strdup("$");
-	}
-	else
-	{
-		start = *i;
-		while (line[*i] && line[*i] != '$')
-			(*i)++;
-		temp = ft_substr(line, start, *i - start);
-	}
-	return (temp);
-}
-void	update_heredoc_token(t_token *current, char *file, t_shell *shell)
+/**
+ * Converts a HEREDOC token to an input redirection token.
+ * Updates the token type and content to redirect from the temporary file.
+ *
+ * @param current HEREDOC token to convert
+ * @param file Temporary file path containing heredoc content
+ * @param shell Pointer to shell structure for error handling
+ */
+static void	update_heredoc_token(t_token *current, char *file, t_shell *shell)
 {
 	free(current->content);
 	current->type = IN;
@@ -259,130 +172,3 @@ void	update_heredoc_token(t_token *current, char *file, t_shell *shell)
 		}
 	}
 }
-
-void	save_heredoc_file(t_shell *shell, char *file)
-{
-	char	**new;
-	size_t	count;
-	size_t	i;
-
-	i = 0;
-	new = allocate_heredoc_array(shell, file, &count);
-	while (i < count)
-	{
-		new[i] = shell->heredoc_files[i];
-		i++;
-	}
-	new[count] = ft_strdup(file);
-	if (!new[count])
-	{
-		free(new);
-		free(file);
-		fatality(ERROR_MEM, shell, 1);
-	}
-	free(shell->heredoc_files);
-	shell->heredoc_files = new;
-}
-
-char	**allocate_heredoc_array(t_shell *shell, char *file, size_t *count)
-{
-	char	**new;
-
-	*count = 0;
-	if (shell->heredoc_files)
-		while (shell->heredoc_files[*count])
-			(*count)++;
-	new = ft_calloc(*count + 2, sizeof(char *));
-	if (!new)
-	{
-		free(file);
-		fatality(ERROR_MEM, shell, 1);
-	}
-	return (new);
-}
-
-void	free_heredoc_files(t_shell *shell)
-{
-	size_t	i;
-
-	if (!shell->heredoc_files)
-		return ;
-	i = 0;
-	while (shell->heredoc_files[i])
-	{
-		unlink(shell->heredoc_files[i]);
-		free(shell->heredoc_files[i]);
-		i++;
-	}
-	free(shell->heredoc_files);
-	shell->heredoc_files = NULL;
-}
-
-/*
-char	*heredoc_expander(char *line, t_shell *shell)
-{
-	size_t	i;
-	char	*new_content;
-	char	*temp;
-
-	i = 0;
-	new_content = ft_strdup("");
-	if (new_content == NULL)
-	{
-		free(line); // Free the input line before exiting
-		fatality(ERROR_MEM, shell, 1);
-	}
-	while (line[i])
-	{
-		temp = get_new_content(line, &i, shell);
-		if (!temp)
-		{
-			free(new_content);
-			free(line); // Free the input line before exiting
-			fatality(ERROR_MEM, shell, 1);
-		}
-		new_content = strjoin_free(new_content, temp);
-		if (!new_content)
-		{
-			free(line); // Free the input line before exiting
-			fatality(ERROR_MEM, shell, 1);
-		}
-	}
-	return (new_content);
-}
-*/
-
-/*
-void	save_heredoc_file(t_shell *shell, char *file)
-{
-	char	**new;
-	size_t	count;
-	size_t	i;
-
-	count = 0;
-	i = 0;
-	if (shell->heredoc_files)
-		while (shell->heredoc_files[count])
-			count++;
-	new = ft_calloc(count + 2, sizeof(char *));
-	if (!new)
-	{
-		free(file); // Free the file parameter before exiting
-		fatality(ERROR_MEM, shell, 1);
-	}
-	while (i < count)
-	{
-		new[i] = shell->heredoc_files[i];
-		i++;
-	}
-	new[count] = ft_strdup(file);
-	if (!new[count])
-	{
-		free(new);  // Free the allocated array
-		free(file); // Free the file parameter before exiting
-		fatality(ERROR_MEM, shell, 1);
-	}
-	free(shell->heredoc_files);
-	shell->heredoc_files = new;
-}
-*/

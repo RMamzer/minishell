@@ -6,12 +6,26 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:29:11 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/23 17:04:02 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/30 17:35:45 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+static size_t	handle_word(char *input_line, size_t start, t_shell *shell);
+static size_t	handle_operator(char *input_line, size_t i, t_shell *shell);
+static void		add_token(t_shell *shell, t_token_type type, char *content);
+static void		quote_flag(t_shell *shell);
+
+/**
+ * Main lexical analyzer entry point.
+ * Tokenizes an input line into linked list of tokens.
+ * Skips delimiters, identifies operators (|, >, <, >>, <<)
+ * and groups words while respecting quotes.
+ *
+ * @param input_line The raw command line string
+ * @param shell Pointer to shell structure for token storage
+ */
 void	lexer(char *input_line, t_shell *shell)
 {
 	size_t	i;
@@ -30,7 +44,17 @@ void	lexer(char *input_line, t_shell *shell)
 	quote_flag(shell);
 }
 
-size_t	handle_word(char *input_line, size_t start, t_shell *shell)
+/**
+ * Extracts a word token from the input.
+ * A word is a sequence of characters that is not a delimiter
+ * or operator, unless enclosed in quotes.
+ *
+ * @param input_line Input string being tokenized
+ * @param start Starting position of the word
+ * @param shell Pointer to the shell structure for token creation
+ * @return Length of the processed word
+ */
+static size_t	handle_word(char *input_line, size_t start, t_shell *shell)
 {
 	size_t	i;
 	size_t	word_start;
@@ -58,12 +82,17 @@ size_t	handle_word(char *input_line, size_t start, t_shell *shell)
 	return (len);
 }
 
-/*
- *	Processes operator tokens.
+/**
+ *	Processes operator tokens (|, >, <, >>, <<)
  *	Adds the corresponding token to the token list.
  *	Returns the length of the operator token processed (1 or 2).
+ *
+ *	@param input_line Input string being tokenized
+ *	@param i Current position in input string
+ *	@param shell Pointer to the shell structure for token creation
+ *	@return Length of operator processed (1 or 2).
  */
-size_t	handle_operator(char *input_line, size_t i, t_shell *shell)
+static size_t	handle_operator(char *input_line, size_t i, t_shell *shell)
 {
 	if (input_line[i] == '|')
 	{
@@ -88,12 +117,16 @@ size_t	handle_operator(char *input_line, size_t i, t_shell *shell)
 	}
 }
 
-/*
- *	Creates a new token and appends it to the token list.
- *	If token list is NULL, adds token as head node.
- *	if token list is not NULL, adds token as the last one.
+/**
+ * Creates and appends a new token to the token list.
+ * If the list is empty, the new token becomes the head.
+ * Otherwise, it is appended at the end.
+ *
+ * @param shell Pointer to the shell structure containing token list
+ * @param type Type of token being created (WORD, PIPE, IN, OUT, etc.)
+ * @param content String content of the token
  */
-void	add_token(t_shell *shell, t_token_type type, char *content)
+static void	add_token(t_shell *shell, t_token_type type, char *content)
 {
 	t_token	*token;
 	t_token	*temp;
@@ -122,41 +155,34 @@ void	add_token(t_shell *shell, t_token_type type, char *content)
 	}
 }
 
-bool	is_delimiter(int i)
+/**
+ * Sets the 'quoted' flag for WORD tokens containing quotes.
+ * This flag is used later during expansion to determine
+ * whether word splitting should occur.
+ *
+ * @param shell Pointer to shell structure containing token list
+ */
+static void	quote_flag(t_shell *shell)
 {
-	return (i == ' ' || i == '\n' || i == '\t');
-}
+	t_token	*current;
+	size_t	i;
 
-bool	is_operator(char c)
-{
-	return (c == '|' || c == '<' || c == '>');
-}
-
-void	delete_empty_tokens(t_shell *shell)
-{
-	t_token	*curr;
-	t_token	*prev;
-	t_token	*temp;
-
-	curr = shell->token_list;
-	prev = NULL;
-	while (curr)
+	current = shell->token_list;
+	while (current)
 	{
-		if (curr->type == WORD && !curr->quoted && curr->content[0] == '\0')
+		if (current->type == WORD)
 		{
-			temp = curr;
-			if (prev == NULL)
-				shell->token_list = curr->next;
-			else
-				prev->next = curr->next;
-			curr = curr->next;
-			free(temp->content);
-			free(temp);
+			i = 0;
+			while (current->content[i])
+			{
+				if (current->content[i] == '\'' || current->content[i] == '"')
+				{
+					current->quoted = true;
+					break ;
+				}
+				i++;
+			}
 		}
-		else
-		{
-			prev = curr;
-			curr = curr->next;
-		}
+		current = current->next;
 	}
 }

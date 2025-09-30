@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/30 18:20:35 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/30 19:02:32 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@
 # include <stdlib.h>
 # include <unistd.h> //open and close
 
-
 //////////////////////////////////////////////////
 # include <signal.h>
 
@@ -32,11 +31,12 @@ extern volatile sig_atomic_t	g_sig;
 
 ///////////////////////////////////////////////////
 
-
 # define SUCCESS 0
 # define FAILURE 1
 # define IN_DOUBLE_QUOTE true
 # define NO_QUOTE false
+# define ZERO_WORDS 0
+# define ONE_WORD 1
 
 # define ALLOC true
 # define NO_ALLOC false
@@ -47,6 +47,7 @@ extern volatile sig_atomic_t	g_sig;
 # define ERROR_MEM "cannot allocate memory"
 # define ERROR_MAX_HER "maximum here-document count exceeded"
 # define ERROR_EOF "warning: heredoc delimeted by EOF"
+
 // token type
 typedef enum e_token_type
 {
@@ -58,37 +59,37 @@ typedef enum e_token_type
 	APPEND,
 	HEREDOC_DELIM_QT,
 	HEREDOC_DELIM_UQ
-}					t_token_type;
+}								t_token_type;
 
 typedef struct s_token
 {
-	t_token_type	type;
-	struct s_token	*next;
-	char			*content;
-	bool			quoted;
-	bool			expanded;
-}					t_token;
+	t_token_type				type;
+	struct s_token				*next;
+	char						*content;
+	bool						quoted;
+	bool						expanded;
+}								t_token;
 
 // env struct
 typedef struct s_env
 {
-	char			*key;
-	char			*value;
-	struct s_env	*next;
-	bool			assigned;
-}					t_env;
+	char						*key;
+	char						*value;
+	struct s_env				*next;
+	bool						assigned;
+}								t_env;
 
 // args instead of
 typedef struct s_ast
 {
-	t_token_type	type;
-	char			**value;
-	int				expand;
-	int				status;
-	int				fd[2];
-	struct s_ast	*left;
-	struct s_ast	*right;
-}					t_ast;
+	t_token_type				type;
+	char						**value;
+	int							expand;
+	int							status;
+	int							fd[2];
+	struct s_ast				*left;
+	struct s_ast				*right;
+}								t_ast;
 
 // core
 typedef struct s_shell
@@ -122,77 +123,82 @@ typedef struct s_shell
 # define EXIT_CMD_NOT_FOUND 127
 # define EXIT_CMD_NOT_EXEC 126
 
-int check_sig_hook(void);
-
-void				delete_empty_tokens(t_shell *shell);
-
 // main things
-int					main(int ac, char **av, char **env);
-t_shell				*init_data(void);
-bool				receive_input(t_shell *shell);
+int								main(int ac, char **av, char **env);
+bool							receive_input(t_shell *shell);
+bool							validate_and_trim_input(t_shell *shell);
+bool							process_input(t_shell *shell);
+bool							parse_tokens(t_shell *shell);
+t_shell							*init_data(void);
 
-// pre processing of input
-bool				process_input(t_shell *shell);
-char				check_quote(char *line, int index);
-
-// lexer
-void				lexer(char *input_line, t_shell *shell);
-size_t				handle_operator(char *input_line, size_t i, t_shell *shell);
-size_t				handle_word(char *input_line, size_t start, t_shell *shell);
-void				add_token(t_shell *shell, t_token_type type, char *content);
-bool				check_heredoc(t_shell *shell);
-bool				check_syntax(t_shell *shell);
-bool				check_pipe_syntax(t_token *current, t_shell *shell);
-bool				check_redir_syntax(t_token *current, t_shell *shell);
-void				quote_flag(t_shell *shell);
+// checkers
+char							check_quote(char *line, int index);
+bool							check_heredoc(t_shell *shell);
 
 // heredoc
-bool				process_heredoc(t_shell *shell);
-bool				process_heredoc_token(t_shell *shell, t_token *current,
-						size_t i);
-void				process_delim(t_token *delim, t_shell *shell);
-void				update_file_name(char **file, size_t *i, t_shell *shell);
-bool				read_heredoc(int *fd, t_token *delim, t_shell *shell,
-						char *file);
-void				update_heredoc_token(t_token *current, char *file,
-						t_shell *shell);
-void				expand_heredoc(char **line, t_shell *shell, char *file);
-char				*heredoc_expander(char *line, t_shell *shell, char *file);
-char				*get_new_content(char *line, size_t *i, t_shell *shell);
-void				save_heredoc_file(t_shell *shell, char *file);
-void				free_heredoc_files(t_shell *shell);
-bool				expand_line(char *line, char **new_content, t_shell *shell);
-char				**allocate_heredoc_array(t_shell *shell, char *file,
-						size_t *count);
+bool							process_heredoc(t_shell *shell);
 
-// expansion
-void				expander(t_shell *shell);
-char				*expand_content(char *content, t_shell *shell,
-						t_token *token);
-char				*process_content(char *content, size_t *i, t_shell *shell,
-						t_token *token);
-char				*handle_dollar(char *content, size_t *i, t_shell *shell,
-						t_token *token);
-char				*handle_characters(char *content, size_t *i, bool in_dq);
-char				*expand_env_var(char *content, size_t *i, t_env *env);
-char				*get_env_value(char *name, t_env *env, bool alloc);
-char				*strjoin_free(char *new_content, char *temp);
-int					ft_strcmp(const char *s1, const char *s2);
+// heredoc_read_loop
+bool							read_heredoc(int *fd, t_token *delim,
+									t_shell *shell, char *file);
 
-char				*handle_single_quote(char *content, size_t *i);
-char				*handle_double_quote(char *content, size_t *i,
-						t_shell *shell, t_token *token);
+// heredoc_expander
+void							expand_heredoc(char **line, t_shell *shell,
+									char *file, int *fd);
+// heredoc_save_file
+void							save_heredoc_file(t_shell *shell, char *file);
 
-// helper functions
-bool				is_delimiter(int i);
-bool				is_operator(char c);
+// lexer
+void							lexer(char *input_line, t_shell *shell);
 
-// errors
-void				show_error(char *msg, t_token *wrong_token, t_shell *shell,
-						int exit_code);
-void				lexer_error(char *input_line, t_shell *shell,
-						char *temp_cont);
-void				free_list(t_token **list);
+// expander
+void							expander(t_shell *shell);
+char	*expand_env_var(char *content, size_t *i, t_env *env); // not here
+char	*get_env_value(char *name, t_env *env, bool alloc);    // not here
+
+// expander_handlers
+char							*handle_single_quote(char *content, size_t *i);
+char							*handle_double_quote(char *content, size_t *i,
+									t_shell *shell, t_token *token);
+char							*handle_dollar(char *content, size_t *i,
+									t_shell *shell, t_token *token);
+char							*handle_characters(char *content, size_t *i,
+									bool in_dq);
+
+// confirm_syntax
+bool							check_syntax(t_shell *shell);
+bool							syntax_confirmed(t_token *token_list,
+									t_shell *shell);
+
+// delete_empty_tokens
+void							delete_empty_tokens(t_shell *shell);
+
+// is_helpers
+bool							is_redir(t_token_type type);
+bool							is_delimiter(int i);
+bool							is_operator(char c);
+bool							is_delim_written(char *line, t_token *delim);
+
+// free
+void							free_list(t_token **list);
+void							free_ast(t_ast **ast);
+void							free_env(t_env *env);
+void							free_array(char **arr);
+char							*strjoin_free(char *new_content, char *temp);
+
+// free_structs
+void							free_shell(t_shell *shell);
+void							free_shell_data(t_shell *shell);
+void							free_heredoc_files(t_shell *shell);
+
+// exit
+void							fatality(char *msg, t_shell *shell,
+									int exit_code);
+void							show_error(char *msg, t_token *wrong_token,
+									t_shell *shell, int exit_code);
+void							lexer_error(char *input_line, t_shell *shell,
+									char *temp_cont);
+int								ft_strcmp(const char *s1, const char *s2);
 
 // env
 void	process_env_node(char *key, char *value, bool value_alloc, t_shell *shell);
@@ -206,112 +212,94 @@ void				set_minimal_env(t_shell *shell);
 void				create_env(t_shell *shell, char **envp);
 bool				check_env_key(char *key, t_env *env);
 
-// ast
-bool				parse_tokens(t_shell *shell);
-t_ast				*parse_pipe(t_token **token_list, t_shell *shell);
-bool				is_redir(t_token_type type);
-t_ast				*parse_command_and_redirection(t_token **token_list,
-						t_shell *shell);
-t_ast				*handle_word_ast(t_token **token_list, t_ast *cmd_node,
-						t_shell *shell);
-t_ast				*handle_redir_ast(t_token **token_list, t_ast **root,
-						t_ast **tail, t_shell *shell);
-void				append_arg(t_ast *cmd_node, const char *str,
-						t_shell *shell);
-void				init_arg(t_ast *cmd_node, const char *str, t_shell *shell);
-char				**load_arg(char **old, size_t count, t_shell *shell);
-t_ast				*add_file_node(t_token *token, t_shell *shell);
-t_ast				*add_ast_node(t_token_type type, t_shell *shell);
-void				move_and_free(t_token **token_list);
+// parser.c
+t_ast							*parse_pipe(t_token **token_list,
+									t_shell *shell);
+
+// parser_node_creation.c
+t_ast							*add_file_node(t_token *token, t_shell *shell);
+t_ast							*add_ast_node(t_token_type type,
+									t_shell *shell);
+void							append_arg(t_ast *cmd_node, const char *str,
+									t_shell *shell);
 
 // split vars
-void				split_variables(t_shell *shell);
-void				process_split_result(t_shell *shell, t_token *current,
-						char **split_result);
-void				replace_token_content(t_token *current, char *new_content,
-						t_shell *shell, char **split_result);
-t_token				*add_expanded_token(t_token *current, t_token_type type,
-						char *content);
-void				free_split(char **split);
-int					check_qty(char **split_result);
-char				**ft_split_IFS(char *str, char *charset);
-
-// ambiguous and validation of redirection
-bool				validate_redirection(t_token *redirection);
-bool				syntax_confirmed(t_token *token_list, t_shell *shell);
-
-// errors
-
-void				free_list(t_token **list);
-void				free_ast(t_ast **node);
-void				free_shell_data(t_shell *shell);
-void				free_shell(t_shell *shell);
-void				free_array(char **arr);
-void				fatality(char *msg, t_shell *shell, int exit_code);
+void							split_variables(t_shell *shell);
+char							**ft_split_IFS(char *str, char *charset);
 
 // execute.c
-void				brutality(char *msg, t_shell *shell, int exit_code);
-void				write_bulitin_error(char *str1, char *str2, char *str3,
-						char *str4);
-void				error_close_and_exit(char *msg, int *pipefd);
-int					get_env_size(t_env *lst, bool process);
-int					get_env_size(t_env *lst, bool process);
-char				*super_strjoin(char const *s1, char const *s2,
-						char const *s3);
-void				error_exit(char *msg);
-void				recreate_env_array(t_env *env, t_shell *shell);
-void				execute_cmd_child(char **args, t_shell *shell);
-int					execute_external_cmd(char **args, t_shell *shell);
-int					check_command(t_ast *node, char *cmd, t_shell *shell);
-int					wait_children(pid_t *pids, int children_rem, t_shell *shell);
-void				execute_left_child(t_ast *node, t_shell *shell,
-						int *pipefd);
-void				execute_right_child(t_ast *node, t_shell *shell,
-						int *pipefd);
-int					execute_pipe(t_ast *node, t_shell *shell);
-int					execute_pipe(t_ast *node, t_shell *shell);
-int					execute_ast(t_ast *node, t_shell *shell);
-int					get_args_len(char **args);
-int 				wait_child(pid_t pid, t_shell *shell);
+void							brutality(char *msg, t_shell *shell,
+									int exit_code);
+void							write_bulitin_error(char *str1, char *str2,
+									char *str3, char *str4);
+void							error_close_and_exit(char *msg, int *pipefd);
+int								get_env_size(t_env *lst, bool process);
+int								get_env_size(t_env *lst, bool process);
+char							*super_strjoin(char const *s1, char const *s2,
+									char const *s3);
+void							error_exit(char *msg);
+void							recreate_env_array(t_env *env, t_shell *shell);
+void							execute_cmd_child(char **args, t_shell *shell);
+int								execute_external_cmd(char **args,
+									t_shell *shell);
+int								check_command(t_ast *node, char *cmd,
+									t_shell *shell);
+int								wait_children(pid_t *pids, int children_rem,
+									t_shell *shell);
+void							execute_left_child(t_ast *node, t_shell *shell,
+									int *pipefd);
+void							execute_right_child(t_ast *node, t_shell *shell,
+									int *pipefd);
+int								execute_pipe(t_ast *node, t_shell *shell);
+int								execute_pipe(t_ast *node, t_shell *shell);
+int								execute_ast(t_ast *node, t_shell *shell);
+int								get_args_len(char **args);
+int								wait_child(pid_t pid, t_shell *shell);
 
 //-------------------builtins
-int					execute_builtin_echo(char **args);
-int					execute_builtin_env(char **args, t_shell *shell);
-int					execute_builtin_pwd(char **args, t_shell *shell);
-int					execute_builtin_cd(char **args, t_shell *shell);
-int					change_working_directory(char *path, t_shell *shell);
-int					execute_builtin_exit(char **args, t_shell *shell);
-int					check_exit_code(char *nptr);
-int					exit_numeric_error(char *nptr);
-int					execute_builtin_unset(char **args, t_shell *shell);
+int								execute_builtin_echo(char **args);
+int								execute_builtin_env(char **args,
+									t_shell *shell);
+int								execute_builtin_pwd(char **args,
+									t_shell *shell);
+int								execute_builtin_cd(char **args, t_shell *shell);
+int								change_working_directory(char *path,
+									t_shell *shell);
+int								execute_builtin_exit(char **args,
+									t_shell *shell);
+int								check_exit_code(char *nptr);
+int								exit_numeric_error(char *nptr);
+int								execute_builtin_unset(char **args,
+									t_shell *shell);
 
-void				process_valueless_export_node(t_shell *shell, char *str);
-bool				is_identifier_valid(char *str);
-void				print_env_export(t_env **temp_env);
-void				bubble_sort_env(t_env **env, int len);
-int					sort_and_print_export(t_env *env, t_shell *shell);
-int					execute_builtin_export(char **args, t_shell *shell);
+void							process_valueless_export_node(t_shell *shell,
+									char *str);
+bool							is_identifier_valid(char *str);
+void							print_env_export(t_env **temp_env);
+void							bubble_sort_env(t_env **env, int len);
+int								sort_and_print_export(t_env *env,
+									t_shell *shell);
+int								execute_builtin_export(char **args,
+									t_shell *shell);
 
 //  other exec
-void				remove_env_variable(t_env **env, char *key);
-void				free_env_node(t_env *env);
-void				memory_error(void);
-void				write_bulitin_error(char *str1, char *str2, char *str3,
-						char *str4);
+void							remove_env_variable(t_env **env, char *key);
+void							free_env_node(t_env *env);
+void							memory_error(void);
+void							write_bulitin_error(char *str1, char *str2,
+									char *str3, char *str4);
 
 // redir
-int					check_redirection(t_ast *ast, t_shell *shell);
-int					write_error_and_return(char *msg, int error);
+int								check_redirection(t_ast *ast, t_shell *shell);
+int								write_error_and_return(char *msg, int error);
 
-
-
-void	signal_to_exitcode(t_shell *shell);
-void	handle_readline_sigint(int sig);
-void	handle_heredoc_signal(int signum);
-void	handle_sigint_exe(int signum);
-void	set_readline_signals(void);
-void	child_signal(void);
-void	set_heredoc_signal(void);
-void	restore_main_signals(void);
-void	set_signals_exec_parent(void);
+void							signal_to_exitcode(t_shell *shell);
+void							handle_readline_sigint(int sig);
+void							handle_heredoc_signal(int signum);
+void							handle_sigint_exe(int signum);
+void							set_readline_signals(void);
+void							child_signal(void);
+void							set_heredoc_signal(void);
+void							restore_main_signals(void);
+void							set_signals_exec_parent(void);
 #endif

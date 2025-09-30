@@ -6,85 +6,29 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 18:05:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/23 17:01:16 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/30 17:37:08 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// bool	validate_redirection(t_token *redirection)
-// {
-// 	t_token	*token;
+static t_ast	*parse_command_and_redirection(t_token **token_list,
+					t_shell *shell);
+static t_ast	*handle_word_ast(t_token **token_list, t_ast *cmd_node,
+					t_shell *shell);
+static t_ast	*handle_redir_ast(t_token **token_list, t_ast **root,
+					t_ast **tail, t_shell *shell);
+static void		move_and_free(t_token **token_list);
 
-// 	if (!redirection || !redirection->next)
-// 	{
-// 		ft_putendl_fd("minishell 1: ambig redir", 2);
-// 		return (false);
-// 	}
-// 	token = redirection->next;
-// 	if (token->type != WORD)
-// 	{
-// 		ft_putstr_fd("minishell 2: syntax error near unexpected token `", 2);
-// 		ft_putstr_fd(token->content, 2);
-// 		ft_putendl_fd("'", 2);
-// 		return (false);
-// 	}
-// 	if (token->expanded && token->content[0] == '\0')
-// 	{
-// 		ft_putstr_fd("minishell 3: ", 2);
-// 		ft_putstr_fd(token->content, 2);
-// 		ft_putendl_fd(": ambiguous redirect", 2);
-// 		return (false);
-// 	}
-// 	if (token->expanded && token->next && token->next->type == WORD)
-// 	{
-// 		ft_putstr_fd("minishell 4: ", 2);
-// 		ft_putstr_fd(token->content, 2);
-// 		ft_putendl_fd(": ambiguous redirect", 2);
-// 		return (false);
-// 	}
-// 	return (true);
-// }
-
-bool	validate_redirection(t_token *redirection)
-{
-	t_token	*token;
-
-	if (!redirection || !redirection->next)
-		return (false);
-	token = redirection->next;
-	if (token->expanded && token->next && token->next->type == WORD)
-		return (false);
-	return (true);
-}
-
-bool	syntax_confirmed(t_token *token_list, t_shell *shell)
-{
-	t_token	*current;
-
-	current = token_list;
-	while (current)
-	{
-		if (is_redir(current->type) && !validate_redirection(current))
-		{
-			show_error("minishell: ambiguous redirect", NULL, shell, 2);
-			return (FAILURE);
-		}
-		current = current->next;
-	}
-	return (SUCCESS);
-}
-
-bool	parse_tokens(t_shell *shell)
-{
-	if (!shell || !shell->token_list)
-		return (FAILURE);
-	if (syntax_confirmed(shell->token_list, shell) == FAILURE)
-		return (FAILURE);
-	shell->ast = parse_pipe(&shell->token_list, shell);
-	return (SUCCESS);
-}
-
+/**
+ * Parses pipe operations with right associativity.
+ * Pipes have the lowest precedence and are parsed recursively.
+ * Grammar: cmd | cmd | cmd...
+ *
+ * @param token_list POinter to current position in token list
+ * @param shell Pointer to shell structure for memory management
+ * @return AST node representing the pipe operation or single command
+ */
 t_ast	*parse_pipe(t_token **token_list, t_shell *shell)
 {
 	t_ast	*node;
@@ -105,11 +49,19 @@ t_ast	*parse_pipe(t_token **token_list, t_shell *shell)
 	}
 	return (node);
 }
-bool	is_redir(t_token_type type)
-{
-	return (type == IN || type == OUT || type == APPEND);
-}
-t_ast	*parse_command_and_redirection(t_token **token_list, t_shell *shell)
+
+/**
+ * Parses commands and their associated redirections.
+ * Handles the precedence where redirections can appear before, after,
+ * or interspersed with command arguments.
+ * Grammar: [redir] [word] [redir] [word]...
+ *
+ * @param token_list Pointer to current position in token list
+ * @param shell Pointer to shell structure for memory management
+ * @return AST node representing command with redirections
+ */
+static t_ast	*parse_command_and_redirection(t_token **token_list,
+		t_shell *shell)
 {
 	t_ast	*root;
 	t_ast	*tail;
@@ -134,7 +86,17 @@ t_ast	*parse_command_and_redirection(t_token **token_list, t_shell *shell)
 	return (cmd_node);
 }
 
-t_ast	*handle_word_ast(t_token **token_list, t_ast *cmd_node, t_shell *shell)
+/**
+ * Handles WORD tokens by building or extending a command AST node.
+ * First WORD becomes the command, subsequent WORDs become arguments.
+ *
+ * @param token_list Pointer to current position in token list
+ * @param cmd_node Existing command or NULL
+ * @param shell Pointer to shell structure for memory management
+ * @return Command AST node with updated arguments
+ */
+static t_ast	*handle_word_ast(t_token **token_list, t_ast *cmd_node,
+		t_shell *shell)
 {
 	if (!cmd_node)
 		cmd_node = add_ast_node((*token_list)->type, shell);
@@ -143,8 +105,19 @@ t_ast	*handle_word_ast(t_token **token_list, t_ast *cmd_node, t_shell *shell)
 	return (cmd_node);
 }
 
-t_ast	*handle_redir_ast(t_token **token_list, t_ast **root, t_ast **tail,
-		t_shell *shell)
+/**
+ * Handles redirection tokens by building a redirection AST node.
+ * Creates a chain of redirections where each redirection's left child
+ * points to the next redirection or final command.
+ *
+ * @param token_list Pointer to current position in token list
+ * @param root Pointer to root of redirection chain
+ * @param tail Pointer to last redirection in chain
+ * @param shell Pointer to shell structure for memory management
+ * @return The new redirection AST
+ */
+static t_ast	*handle_redir_ast(t_token **token_list, t_ast **root,
+		t_ast **tail, t_shell *shell)
 {
 	t_token	*redir_token;
 	t_token	*file_token;
@@ -172,81 +145,13 @@ t_ast	*handle_redir_ast(t_token **token_list, t_ast **root, t_ast **tail,
 	return (node);
 }
 
-void	append_arg(t_ast *cmd_node, const char *str, t_shell *shell)
-{
-	char	**new;
-	size_t	i;
-
-	i = 0;
-	if (!cmd_node->value)
-		return (init_arg(cmd_node, str, shell));
-	while (cmd_node->value[i])
-		i++;
-	new = load_arg(cmd_node->value, i, shell);
-	new[i] = ft_strdup(str);
-	if (!new[i])
-		fatality(ERROR_MEM, shell, 1);
-	new[i + 1] = NULL;
-	cmd_node->value = new;
-}
-void	init_arg(t_ast *cmd_node, const char *str, t_shell *shell)
-{
-	cmd_node->value = ft_calloc(2, sizeof(char *));
-	if (!cmd_node->value)
-		fatality(ERROR_MEM, shell, 1);
-	cmd_node->value[0] = ft_strdup(str);
-	if (!cmd_node->value[0])
-		fatality(ERROR_MEM, shell, 1);
-	cmd_node->value[1] = NULL;
-}
-char	**load_arg(char **old, size_t count, t_shell *shell)
-{
-	char	**new;
-	size_t	i;
-
-	i = 0;
-	new = ft_calloc(count + 2, sizeof(char *));
-	if (!new)
-		fatality(ERROR_MEM, shell, 1);
-	while (i < count)
-	{
-		new[i] = old[i];
-		i++;
-	}
-	free(old);
-	return (new);
-}
-
-t_ast	*add_file_node(t_token *token, t_shell *shell)
-{
-	t_ast	*file_node;
-
-	file_node = add_ast_node(token->type, shell);
-	file_node->value = ft_calloc(2, sizeof(char *));
-	if (file_node == NULL)
-		fatality(ERROR_MEM, shell, 1);
-	file_node->value[0] = ft_strdup(token->content);
-	if (file_node->value[0] == NULL)
-		fatality(ERROR_MEM, shell, 1);
-	free(token->content);
-	free(token);
-	return (file_node);
-}
-
-t_ast	*add_ast_node(t_token_type type, t_shell *shell)
-{
-	t_ast	*node;
-
-	node = ft_calloc(1, sizeof(t_ast));
-	if (!node)
-		fatality(ERROR_MEM, shell, 1);
-	node->type = type;
-	node->fd[0] = -1;
-	node->fd[1] = -1;
-	return (node);
-}
-
-void	move_and_free(t_token **token_list)
+/**
+ * Advances token list pointer and frees the consumed token.
+ * Helper function to clean up tokens after processing.
+ *
+ * @param token_list Pointer to current position in token list
+ */
+static void	move_and_free(t_token **token_list)
 {
 	t_token	*temp;
 

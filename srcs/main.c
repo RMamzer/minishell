@@ -3,83 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/30 18:23:07 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/30 19:03:17 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 #include "minishell.h"
 
 volatile sig_atomic_t	g_sig = 0;
-
-static void	print_value(char **value)
-{
-	int	i;
-
-	i = 0;
-	if (!value)
-		return ;
-	printf(" (");
-	while (value[i])
-	{
-		if (i > 0)
-			printf(" ");
-		printf("%s", value[i]);
-		i++;
-	}
-	printf(")");
-}
-
-const char	*type_to_str(t_token_type t)
-{
-	switch (t)
-	{
-	case WORD:
-		return ("WORD");
-	case IN:
-		return ("IN");
-	case OUT:
-		return ("OUT");
-	case APPEND:
-		return ("APPEND");
-	case HEREDOC:
-		return ("HEREDOC");
-	case PIPE:
-		return ("PIPE");
-	default:
-		return ("UNKNOWN");
-	}
-}
-
-void	print_ast(t_ast *node, int depth)
-{
-	int	i;
-
-	if (!node)
-	{
-		printf("ast is clean\n");
-		return ;
-	}
-	/* indentation */
-	i = 0;
-	while (i++ < depth)
-		printf("  ");
-	printf("%s", type_to_str(node->type));
-	if (node->value && node->value[0])
-		print_value(node->value);
-	printf("\n");
-	if (node->left)
-		print_ast(node->left, depth + 1);
-	if (node->right)
-		print_ast(node->right, depth + 1);
-}
-
-
-
-
 
 void	signal_to_exitcode(t_shell *shell)
 {
@@ -87,12 +20,18 @@ void	signal_to_exitcode(t_shell *shell)
 
 	if (shell)
 		sig_shell = shell;
-	else if(g_sig != 0)
+	else if (g_sig != 0)
 	{
 		sig_shell->exit_code = g_sig + 128;
 	}
 }
-
+/**
+ * Signal handler for SIGINT during readline input.
+ * Provides clean interrupt behavior when Ctrl+C is pressed.
+ * Updates display and sets signal for exit code.
+ *
+ * @param sig Signal number received
+ */
 void	handle_readline_sigint(int sig)
 {
 	write(1, "\n", 1);
@@ -102,10 +41,14 @@ void	handle_readline_sigint(int sig)
 	g_sig = sig;
 	signal_to_exitcode(NULL);
 }
-
+/**
+ * Signal handler for SIGINT during heredoc input.
+ * Handles interruption of heredoc reading.
+ *
+ * @param signum Signal number received
+ */
 void	handle_heredoc_signal(int signum)
 {
-	// write(1, "\n", 1);
 	g_sig = signum;
 	signal_to_exitcode(NULL);
 }
@@ -116,19 +59,29 @@ void	handle_sigint_exe(int signum)
 	write(1, "\n", 1);
 }
 
-
+/**
+ * Sets up signal handling for readline input phase.
+ * Configures appropriate signal behavior for interactive input.
+ */
 void	set_readline_signals(void)
 {
 	signal(SIGQUIT, SIG_IGN);
 	signal(SIGINT, handle_readline_sigint);
 }
 
+/**
+ * Sets default signal handling for child processes.
+ * Restores default signal behavior for executed commands.
+ */
 void	child_signal(void)
 {
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
 }
-
+/**
+ * Sets up signal handling for heredoc input phase.
+ * Configures signals for heredoc reading with special behavior.
+ */
 void	set_heredoc_signal(void)
 {
 	signal(SIGQUIT, SIG_IGN);
@@ -141,23 +94,34 @@ void	set_heredoc_signal(void)
 //  	signal(SIGINT, handle_sigint_exe);
 // }
 
-
-void set_signals_exec(void)
+/**
+ * Sets signal handling during command execution preparation.
+ * Ignores signals while setting up execution environment.
+ */
+void	set_signals_exec(void)
 {
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);
 }
-
-void set_signals_exec_parent(void)
+/**
+ * Sets signal handling for parent process during command execution.
+ * Provides appropriate signal handling while waiting for children.
+ */
+void	set_signals_exec_parent(void)
 {
 	signal(SIGINT, handle_sigint_exe);
 	signal(SIGQUIT, SIG_IGN);
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+/**
+ * Main entry point for the minishell program.
+ *
+ * @param ac Argument count (unused)
+ * @param av Argument vector (unused)
+ * @param env Environment variables array
+ */
 int	main(int ac, char **av, char **env)
 {
 	t_shell	*shell;
@@ -174,7 +138,6 @@ int	main(int ac, char **av, char **env)
 			continue ;
 		if (parse_tokens(shell) == FAILURE)
 			continue ;
-		//print_ast(shell->ast, 0);
 		set_signals_exec();
 		execute_ast(shell->ast, shell);
 		free_heredoc_files(shell);
@@ -185,15 +148,19 @@ int	main(int ac, char **av, char **env)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-
+/**
+ * Receives and validates user input from readline.
+ * Handles empty input, oversized input, and adds to history.
+ *
+ * @param shell Pointer to shell structure
+ * @return SUCCESS if input is valid, FAILURE otherwise
+ */
 bool	receive_input(t_shell *shell)
 {
 	set_readline_signals();
 	shell->input_line = readline("dirty_shell> ");
 	if (!shell->input_line)
-		fatality(NULL, shell, 0); // for now
+		fatality(NULL, shell, 0);
 	if (shell->input_line[0] == '\0')
 	{
 		free(shell->input_line);
@@ -208,7 +175,14 @@ bool	receive_input(t_shell *shell)
 	return (SUCCESS);
 }
 
-bool	process_input(t_shell *shell)
+/**
+ * Validates and trims whitespace from input.
+ * Checks for unclosed quotes and prepares input for lexing.
+ *
+ * @param shell Pointer to shell structure
+ * @return SUCCESS if input is valid, FAILURE otherwise
+ */
+bool	validate_and_trim_input(t_shell *shell)
 {
 	char	*line;
 
@@ -227,6 +201,20 @@ bool	process_input(t_shell *shell)
 	}
 	free(shell->input_line);
 	shell->input_line = line;
+	return (SUCCESS);
+}
+
+/**
+ * Main input processing pipeline.
+ * Prepares raw input for executable AST.
+ *
+ * @param shell Pointer to shell structure
+ * @return SUCCESS if processing completes, FAILURE otherwise
+ */
+bool	process_input(t_shell *shell)
+{
+	if (validate_and_trim_input(shell) == FAILURE)
+		return (FAILURE);
 	lexer(shell->input_line, shell);
 	if (check_syntax(shell) == FAILURE)
 		return (FAILURE);
@@ -240,9 +228,31 @@ bool	process_input(t_shell *shell)
 	return (SUCCESS);
 }
 
+/**
+ * Main parsing entry point. Validates syntax and builds the AST.
+ *
+ * @param shell Pointer to the shell structure containing token list
+ * @return SUCCESS if parsing succeeds, FAILURE otherwise
+ */
+bool	parse_tokens(t_shell *shell)
+{
+	if (!shell || !shell->token_list)
+		return (FAILURE);
+	if (syntax_confirmed(shell->token_list, shell) == FAILURE)
+		return (FAILURE);
+	shell->ast = parse_pipe(&shell->token_list, shell);
+	return (SUCCESS);
+}
+
+/**
+ * Initializes the main shell data structure.
+ * Allocates memory and sets up initial state for shell operation.
+ *
+ * @return Pointer to initialized shell structure
+ */
 t_shell	*init_data(void)
 {
-	t_shell *shell;
+	t_shell	*shell;
 
 	shell = ft_calloc(1, sizeof(t_shell));
 	if (shell == NULL)
