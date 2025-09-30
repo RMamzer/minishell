@@ -6,15 +6,13 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/29 16:12:15 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/30 17:52:24 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 #include "minishell.h"
 
 volatile sig_atomic_t	g_sig = 0;
-
 
 void	signal_to_exitcode(t_shell *shell)
 {
@@ -22,7 +20,7 @@ void	signal_to_exitcode(t_shell *shell)
 
 	if (shell)
 		sig_shell = shell;
-	else if(g_sig != 0)
+	else if (g_sig != 0)
 	{
 		sig_shell->exit_code = g_sig + 128;
 	}
@@ -31,7 +29,7 @@ void	signal_to_exitcode(t_shell *shell)
  * Signal handler for SIGINT during readline input.
  * Provides clean interrupt behavior when Ctrl+C is pressed.
  * Updates display and sets signal for exit code.
- * 
+ *
  * @param sig Signal number received
  */
 void	handle_readline_sigint(int sig)
@@ -46,7 +44,7 @@ void	handle_readline_sigint(int sig)
 /**
  * Signal handler for SIGINT during heredoc input.
  * Handles interruption of heredoc reading.
- * 
+ *
  * @param signum Signal number received
  */
 void	handle_heredoc_signal(int signum)
@@ -100,7 +98,7 @@ void	set_heredoc_signal(void)
  * Sets signal handling during command execution preparation.
  * Ignores signals while setting up execution environment.
  */
-void set_signals_exec(void)
+void	set_signals_exec(void)
 {
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);
@@ -109,19 +107,17 @@ void set_signals_exec(void)
  * Sets signal handling for parent process during command execution.
  * Provides appropriate signal handling while waiting for children.
  */
-void set_signals_exec_parent(void)
+void	set_signals_exec_parent(void)
 {
 	signal(SIGINT, handle_sigint_exe);
 	signal(SIGQUIT, SIG_IGN);
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 /**
  * Main entry point for the minishell program.
- * 
+ *
  * @param ac Argument count (unused)
  * @param av Argument vector (unused)
  * @param env Environment variables array
@@ -155,7 +151,7 @@ int	main(int ac, char **av, char **env)
 /**
  * Receives and validates user input from readline.
  * Handles empty input, oversized input, and adds to history.
- * 
+ *
  * @param shell Pointer to shell structure
  * @return SUCCESS if input is valid, FAILURE otherwise
  */
@@ -182,13 +178,13 @@ bool	receive_input(t_shell *shell)
 /**
  * Validates and trims whitespace from input.
  * Checks for unclosed quotes and prepares input for lexing.
- * 
+ *
  * @param shell Pointer to shell structure
  * @return SUCCESS if input is valid, FAILURE otherwise
  */
-bool validate_and_trim_input(t_shell *shell)
+bool	validate_and_trim_input(t_shell *shell)
 {
-    char	*line;
+	char	*line;
 
 	line = ft_strtrim(shell->input_line, TO_TRIM);
 	if (line == NULL || line[0] == '\0')
@@ -205,20 +201,20 @@ bool validate_and_trim_input(t_shell *shell)
 	}
 	free(shell->input_line);
 	shell->input_line = line;
-    return (SUCCESS);
+	return (SUCCESS);
 }
 
 /**
  * Main input processing pipeline.
  * Prepares raw input for executable AST.
- * 
+ *
  * @param shell Pointer to shell structure
  * @return SUCCESS if processing completes, FAILURE otherwise
  */
 bool	process_input(t_shell *shell)
 {
-    if(validate_and_trim_input(shell) == FAILURE)
-        return (FAILURE);
+	if (validate_and_trim_input(shell) == FAILURE)
+		return (FAILURE);
 	lexer(shell->input_line, shell);
 	if (check_syntax(shell) == FAILURE)
 		return (FAILURE);
@@ -233,14 +229,30 @@ bool	process_input(t_shell *shell)
 }
 
 /**
+ * Main parsing entry point. Validates syntax and builds the AST.
+ *
+ * @param shell Pointer to the shell structure containing token list
+ * @return SUCCESS if parsing succeeds, FAILURE otherwise
+ */
+bool	parse_tokens(t_shell *shell)
+{
+	if (!shell || !shell->token_list)
+		return (FAILURE);
+	if (syntax_confirmed(shell->token_list, shell) == FAILURE)
+		return (FAILURE);
+	shell->ast = parse_pipe(&shell->token_list, shell);
+	return (SUCCESS);
+}
+
+/**
  * Initializes the main shell data structure.
  * Allocates memory and sets up initial state for shell operation.
- * 
+ *
  * @return Pointer to initialized shell structure
  */
 t_shell	*init_data(void)
 {
-	t_shell *shell;
+	t_shell	*shell;
 
 	shell = ft_calloc(1, sizeof(t_shell));
 	if (shell == NULL)

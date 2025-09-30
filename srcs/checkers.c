@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/28 17:59:00 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/30 17:35:19 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,75 +36,6 @@ char	check_quote(char *line, int index)
 		i++;
 	}
 	return (quote);
-}
-
-/**
- * Validates the overall syntax of the token list.
- * Checks for common shell syntax errors before parsing.
- * Ensures pipes and redirections have valid syntax.
- * 
- * @param shell Pointer to shell structure containing token list
- * @return SUCCESS if syntax is valid, FAILURE otherwise
- */
-bool	check_syntax(t_shell *shell)
-{
-	t_token	*current;
-
-	if (shell->token_list == NULL)
-		return (SUCCESS);
-	current = shell->token_list;
-	while (current)
-	{
-		if (current->type == PIPE && check_pipe_syntax(current,
-				shell) == FAILURE)
-			return (FAILURE);
-		if ((current->type == IN || current->type == OUT
-				|| current->type == APPEND || current->type == HEREDOC)
-			&& check_redir_syntax(current, shell) == FAILURE)
-			return (FAILURE);
-		current = current->next;
-	}
-	return (SUCCESS);
-}
-
-
-/**
- * Validates pipe operator syntax.
- * Pipes cannot be at the beginning of command, at the end,
- * or followed by another pipe
- * 
- * @param current Current pipe token to validate
- * @param shell Pointer to shell structure for error reporting
- * @return SUCCESS if pipe syntax is valid, FAILURE otherwise
- */
-bool	check_pipe_syntax(t_token *current, t_shell *shell)
-{
-	if (current == shell->token_list)
-		return (show_error(NULL, current, shell, 2), FAILURE);
-	if (current->next == NULL)
-		return (show_error(NULL, NULL, shell, 2), FAILURE);
-	if (current->next->type == PIPE)
-		return (show_error(NULL, current->next, shell, 2), FAILURE);
-	return (SUCCESS);
-}
-
-/**
- * Validates redirection operator syntax.
- * Redirection operators must be followed by a filename (WORD token)
- * or heredoc delimiter.
- * 
- * @param current Current redirection token to validate
- * @param shell Pointer to shell structure for error reporting
- * @return SUCCESS if redirection syntax is valid, FAILURE otherwise
- */
-bool	check_redir_syntax(t_token *current, t_shell *shell)
-{
-	if (current->next == NULL)
-		return (show_error(NULL, NULL, shell, 2), FAILURE);
-	if (current->next->type != WORD && current->next->type != HEREDOC_DELIM_QT
-		&& current->next->type != HEREDOC_DELIM_UQ)
-		return (show_error(NULL, current->next, shell, 2), FAILURE);
-	return (SUCCESS);
 }
 
 /**
@@ -142,34 +73,3 @@ bool	check_heredoc(t_shell *shell)
 	return (SUCCESS);
 }
 
-/**
- * Sets the 'quoted' flag for WORD tokens containing quotes.
- * This flag is used later during expansion to determine
- * whether word splitting should occur.
- * 
- * @param shell Pointer to shell structure containing token list
- */
-void	quote_flag(t_shell *shell)
-{
-	t_token	*current;
-	size_t	i;
-
-	current = shell->token_list;
-	while (current)
-	{
-		if (current->type == WORD)
-		{
-			i = 0;
-			while (current->content[i])
-			{
-				if (current->content[i] == '\'' || current->content[i] == '"')
-				{
-					current->quoted = true;
-					break ;
-				}
-				i++;
-			}
-		}
-		current = current->next;
-	}
-}
