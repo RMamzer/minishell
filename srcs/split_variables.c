@@ -6,11 +6,16 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:26:38 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/28 13:13:05 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/09/30 11:42:02 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+static void	process_split_result(t_shell *shell, t_token *current, char **split_result);
+static void	replace_token_content(t_token *current, char *new_content, t_shell *shell, char **split_result);
+static t_token	*add_expanded_token(t_token *current, t_token_type type, char *content);
+static int	check_qty(char **split_result);
 
 /**
  * Splits expanded variables into multiple tokens based on IFS characters.
@@ -36,7 +41,7 @@ void	split_variables(t_shell *shell)
 			if (!split_result)
 				fatality(ERROR_MEM, shell, 1);
 			process_split_result(shell, current, split_result);
-			free_split(split_result);
+			free_array(split_result);
 		}
 		current = current->next;
 	}
@@ -52,7 +57,7 @@ void	split_variables(t_shell *shell)
  * @param current Token being processed
  * @param split_result Array of strings from splitting operation
  */
-void	process_split_result(t_shell *shell, t_token *current,
+static void	process_split_result(t_shell *shell, t_token *current,
 		char **split_result)
 {
 	int	str_qty;
@@ -73,7 +78,7 @@ void	process_split_result(t_shell *shell, t_token *current,
 			current = add_expanded_token(current, WORD, split_result[i]);
 			if (!current)
 			{
-				free_split(split_result);
+				free_array(split_result);
 				fatality(ERROR_MEM, shell, 1);
 			}
 			i++;
@@ -89,14 +94,14 @@ void	process_split_result(t_shell *shell, t_token *current,
  * @param shell Pointer to the shell structure for error handling
  * @param split_result Split array for cleanup on error
  */
-void	replace_token_content(t_token *current, char *new_content,
+static void	replace_token_content(t_token *current, char *new_content,
 		t_shell *shell, char **split_result)
 {
 	free(current->content);
 	current->content = ft_strdup(new_content);
 	if (!current->content)
 	{
-		free_split(split_result);
+		free_array(split_result);
 		fatality(ERROR_MEM, shell, 1);
 	}
 }
@@ -111,7 +116,7 @@ void	replace_token_content(t_token *current, char *new_content,
  * @param content String content for the new token
  * @return Pointer to the newly created token, or NULL on failure
  */
-t_token	*add_expanded_token(t_token *current, t_token_type type, char *content)
+static t_token	*add_expanded_token(t_token *current, t_token_type type, char *content)
 {
 	t_token	*new_token;
 
@@ -135,34 +140,13 @@ t_token	*add_expanded_token(t_token *current, t_token_type type, char *content)
 }
 
 /**
- * Frees a null-terminated array of strings.
- * Helper function to clean up memory allocated by splitting operations.
- * 
- * @param split Array of strings to free
- */
-void	free_split(char **split)
-{
-	int	i;
-
-	i = 0;
-	if (!split)
-		return ;
-	while (split[i])
-	{
-		free(split[i]);
-		i++;
-	}
-	free(split);
-}
-
-/**
  * Counts the number of strings in a null-terminated array.
  * Used to determine how many words resulted from variable splitting.
  * 
  * @param split_result Array of strings to count
  * @return Number of strings in the array
  */
-int	check_qty(char **split_result)
+static int	check_qty(char **split_result)
 {
 	int	i;
 
