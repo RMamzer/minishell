@@ -3,55 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/26 19:39:17 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/09/30 13:50:38 by mamzerr1         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-
-// // TESTING
-// void    print_char_array(char **arr)
-// {
-//     // A counter for the index of the array
-//     int i = 0;
-
-//     // Check if the array itself is NULL before attempting to access it
-//     if (!arr)
-//         return;
-
-//     // Loop until a NULL pointer is encountered.
-//     // In C, string arrays are often terminated by a NULL pointer.
-//     while (arr[i] != NULL)
-//     {
-//         // Use printf for formatted output. The `%s` specifier is for strings.
-//         // A newline `\n` is added for clean output.
-//         printf("%d:%s\n", i, arr[i]);
-//         i++;
-//     }
-// }
-
-
-
-// // for testing, delete later
-// void print_envp(char *const *envp) {
-//     if (envp == NULL) {
-//         printf("(NULL envp)\n");
-//         return ;
-//     }
-
-//
-// Iterate through the array of pointers until the null terminator is reached.
-//     for (int i = 0; envp[i] != NULL; i++) {
-//         printf("%s\n", envp[i]);
-//     }
-// }
-
-// REMOVE AND FIX ENV EXITS
-
+/**
+ * FINISH THIS PROCESS (๑•̀ᗝ•́)૭ 
+ * @param msg Pointer to erorr message string.
+ * @param shell Pointer to the shell struct.
+ * @param exit_code Exit status of the process.
+ * @return Void.
+ */
 void	brutality(char *msg, t_shell *shell, int exit_code)
 {
 	if (msg)
@@ -62,6 +29,15 @@ void	brutality(char *msg, t_shell *shell, int exit_code)
 	exit (exit_code);
 }
 
+/**
+ * Outputs a custom error message into STDERROR
+ * with or without perror message.
+ * @param str1 Pointer to the first sting that should be otputted.
+ * @param str2 Pointer to the second sting that should be otputted.
+ * @param str3 Pointer to the third sting that should be otputted.
+ * @param str4 Pointer to a sting that should be outputted with perror.
+ * @return Void.
+ */
 void	write_bulitin_error(char *str1, char *str2, char *str3, char *str4)
 {
 	if (str1)
@@ -74,38 +50,12 @@ void	write_bulitin_error(char *str1, char *str2, char *str3, char *str4)
 		perror(str4);
 }
 
-void	free_execution(t_shell *shell)
-{
-	if (!shell)
-		return ;
-	if (shell->env_array)
-		free_array(shell->env_array);
-	if (shell->paths_array)
-		free_array(shell->paths_array);
-}
-
-/*
-Do we need to add additional message here?
-What to free here:
-1. Path ft_split
-2. Recreated env array of arrays
-// free execution
-*/
-// void	write_error_malloc(void)
-// {
-// 	perror("minishell: malloc");
-// 	exit(errno);
-// }
-
-void	error_exec_exit(char *str1, t_shell *shell, int exit_code)
-{
-	ft_putstr_fd("minishell: ", STDERR_FILENO);
-	if (*str1)
-		perror(str1);
-	free_execution(shell);
-	exit (exit_code);
-}
-
+/**
+ * Calculates the number of relevant nodes in the environment list.
+ * @param lst Pointer to the first node of environment list.
+ * @param process Type of process being executed (EXECUTE or EXPORT) 
+ * @return Number of the relevant nodes in environment list.
+ */
 int	get_env_size(t_env *lst, bool process)
 {
 	t_env	*tmp;
@@ -122,6 +72,12 @@ int	get_env_size(t_env *lst, bool process)
 	return (i);
 }
 
+
+/**
+ * Calculates the number of arguments in the char string.
+ * @param args Array of arguments of type char.
+ * @return Length of array of arguments.
+ */
 int	get_args_len(char **args)
 {
 	int	len;
@@ -131,7 +87,13 @@ int	get_args_len(char **args)
 		len++;
 	return (len);
 }
-
+/**
+ * Joins up to 3 strings in single malloc returns a pointer to new string. 
+ * @param s1 Pointer to the first sting that should be joined.
+ * @param s2 Pointer to the second sting that should be joined.
+ * @param s3 Pointer to a third sting that should be joined.
+ * @return New malloced  joined sting.
+ */
 char	*super_strjoin(char const *s1, char const *s2, char const *s3)
 {
 	char	*joinedstr;
@@ -154,6 +116,14 @@ char	*super_strjoin(char const *s1, char const *s2, char const *s3)
 	return (joinedstr);
 }
 
+
+/**
+ * Closes READ_END and WRITE_END of pipe() and returns error exit status. 
+ * @param msg Error message that should be outputed.
+ * @param pipefs Pointer to READ_END and WRITE_END of pipe().
+ * @param pipefs Error exit status.
+ * @return Error exit status.
+ */
 int	error_close_and_return(char *msg, int *pipefd, int error)
 {
 	close(pipefd[WRITE_END]);
@@ -161,6 +131,12 @@ int	error_close_and_return(char *msg, int *pipefd, int error)
 	return (write_error_and_return(msg, error));
 }
 
+/**
+ * Recreates envp array using the list of env nodes. 
+ * @param env First node of the environment list.
+ * @param shell Pointer to the shell struct.
+ * @return Void.
+ */
 void	recreate_env_array(t_env *env, t_shell *shell)
 {
 	int		i;
@@ -186,6 +162,14 @@ void	recreate_env_array(t_env *env, t_shell *shell)
 	shell->env_array[i] = NULL;
 }
 
+
+/**
+ * Waits for the execution of pipe child processes to collect final
+ * exit status.
+ * @param pid  Id of the child process executing external cmd.
+ * @param shell Pointer to the shell struct.
+ * @return exit status of the child process executing cmd.
+ */
 int 	wait_child(pid_t pid, t_shell *shell)
 {
 	int		status;
@@ -205,6 +189,12 @@ int 	wait_child(pid_t pid, t_shell *shell)
 	return (exit_code);
 }
 
+/**
+ * Reassembles envp array for execve, finds path to cmd and executes cmd.
+ * @param args Array of arguments containing cmd name and its arguments.
+ * @param shell Pointer to the shell struct.
+ * @return Void.
+ */
 char	*find_path_cmd(char **args, bool *malocced, t_shell *shell)
 {
 	char	*cmd_path;
@@ -235,7 +225,12 @@ char	*find_path_cmd(char **args, bool *malocced, t_shell *shell)
 }
 
 
-//CHECK ENV_ARRAY AND PATHS_ARRAY frees
+/**
+ * Reassembles envp array for execve, finds path to cmd and executes cmd.
+ * @param args Array of arguments containing cmd name and its arguments.
+ * @param shell Pointer to the shell struct.
+ * @return Void.
+ */
 void	execute_cmd_child(char **args, t_shell *shell)
 {
 	char	*env_path;
@@ -267,7 +262,12 @@ void	execute_cmd_child(char **args, t_shell *shell)
 
 
 
-// free whole struct and everything
+/**
+ * Creates a child process to execute an external command.
+ * @param args Array of arguments containing cmd name and its arguments.
+ * @param shell Pointer to the shell struct.
+ * @return exit status of the command execution.
+ */
 int	execute_external_cmd(char **args, t_shell *shell)
 {
 	pid_t	pid;
@@ -280,8 +280,14 @@ int	execute_external_cmd(char **args, t_shell *shell)
 	return (wait_child(pid, shell));
 }
 
-// check the difference in exits between built-ins and external cmds
-// pipe needs to free on its level to account for builtins
+/**
+ * Verifies if cmd is a build-in or external command and starts
+ * its execution.
+ * @param ast The ast containing right side of the pipe execution.
+ * @param cmd Command being processed.
+ * @param shell Pointer to the shell struct.
+ * @return Exit status of the command execution.
+ */
 int	check_command(t_ast *ast, char *cmd, t_shell *shell)
 {
 	if (!*cmd)
@@ -305,33 +311,14 @@ int	check_command(t_ast *ast, char *cmd, t_shell *shell)
 	return (shell->exit_code);
 }
 
-// check how to include 128+ exit here? --> need to add extra signal return
-// int	wait_children(pid_t *pids, int children_rem)
-// {
-// 	int		status;
-// 	pid_t	term_pid;
-// 	int		exit_code;
-
-// 	exit_code = EXIT_FAILURE;
-
-// 	while (children_rem > 0)
-// 	{
-// 		term_pid = waitpid(-1, &status, 0);
-// 		if (term_pid == -1)
-// 			return (write_error_and_return("waitpd", EXIT_FAILURE));
-// 		if (term_pid == pids[0] || term_pid == pids[1])
-// 		{
-// 			children_rem--;
-// 			if (term_pid == pids[1] && (WIFEXITED(status)))
-// 				exit_code = WEXITSTATUS(status);
-// 		}
-// 	}
-// 	return (exit_code);
-// }
-
-
-
-
+/**
+ * Waits for the execution of pipe child processes to collect final
+ * exit status.
+ * @param pids The array with 2 pids (left chinf and right child).
+ * @param children_rem How many children should be waited for.
+ * @param shell Pointer to the shell struct.
+ * @return Exit status of the pipe pipe execution sequence.
+ */
 int	wait_pipe(pid_t *pids, int children_rem, t_shell *shell)
 {
 	int		status;
@@ -360,6 +347,14 @@ int	wait_pipe(pid_t *pids, int children_rem, t_shell *shell)
 	}
 	return (exit_code);
 }
+
+/**
+ * Executes pipe redirection for left side of the pipe.
+ * @param ast The ast node containing left side of the pipe execution.
+ * @param shell Pointer to the shell struct.
+ * @param pipefd Pointer to the WRITE_END of pipe().
+ * @return Void.
+ */
 void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 {
 	shell->complete_exit = false;
@@ -373,6 +368,14 @@ void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 	fatality(NULL, shell, execute_ast(ast, shell));
 }
 
+
+/**
+ * Executes pipe redirection for right side of the pipe.
+ * @param ast The ast containing right side of the pipe execution.
+ * @param shell Pointer to the shell struct.
+ * @param pipefd Pointer to the READ_END of pipe().
+ * @return Void.
+ */
 void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
 {
 	shell->complete_exit = false;
@@ -386,6 +389,13 @@ void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
 	fatality(NULL, shell, execute_ast(ast, shell));
 }
 
+/**
+ * Processes execution of a pipe in the ast, creates a children process
+ * for each side of a pipe.
+ * @param ast The pipe ast node being analyzed .
+ * @param shell Pointer to the shell struct.
+ * @return Exit status of the pipe execution sequence.
+ */
 int	execute_pipe(t_ast *ast, t_shell *shell)
 {
 	int		pipefd[2];
@@ -410,6 +420,12 @@ int	execute_pipe(t_ast *ast, t_shell *shell)
 	return (wait_pipe(pids, 2, shell));
 }
 
+/**
+ * Starts the recursion executing pipes, redirections, and cmds from ast.
+ * @param ast The ast node being analyzed (1st on the initial run).
+ * @param shell Pointer to the shell struct.
+ * @return Exit status of the execution sequence.
+ */
 int	execute_ast(t_ast *ast, t_shell *shell)
 {
 	if (!ast || !shell)
@@ -420,5 +436,5 @@ int	execute_ast(t_ast *ast, t_shell *shell)
 		shell->exit_code = execute_pipe(ast, shell);
 	else if (ast->type >= IN && ast->type <= APPEND)
 		shell->exit_code = check_redirection(ast, shell);
-	return (shell->exit_code); // < do i need it if i modify using pointers?
+	return (shell->exit_code);
 }
