@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_exit.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 17:38:22 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/30 18:20:56 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/01 15:39:15 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ int	execute_builtin_exit(char **args, t_shell *shell)
 		shell->exit_code = check_exit_code(args[0]); // check how it works now:
 	if (shell->is_parent == true)
 	{
-		write (STDOUT_FILENO,"exit\n" , 5);
+		write(STDOUT_FILENO, "exit\n", 5);
 		fatality(NULL, shell, shell->exit_code);
 	}
 	return (shell->exit_code);
