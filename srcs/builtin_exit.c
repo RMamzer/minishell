@@ -6,12 +6,17 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 17:38:22 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/30 18:20:56 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/08 14:54:30 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+/**
+ * Outputs error message if exit function fails
+ * @param nptr The exit code argument string.
+ * @return Exit status of failure.
+ */
 int	exit_numeric_error(char *nptr)
 {
 	ft_putstr_fd("minishell: exit: ", STDERR_FILENO);
@@ -20,6 +25,12 @@ int	exit_numeric_error(char *nptr)
 	return (EXIT_INVALID_OPTION);
 }
 
+/**
+ * Converts a string to a unsigned long long integer, checking for overflow, and then
+ * returns the result % 256 for the exit status.
+ * @param nptr The exit code argument string.
+ * @return The calculated exit status (0-255), or 255 if an overflow is detected.
+ */
 int	process_exit_num(char *nptr)
 {
 	int					sign;
@@ -48,6 +59,12 @@ int	process_exit_num(char *nptr)
 	return ((int)(num * sign % 256));
 }
 
+/**
+ * Validates the 'exit' command code passed.
+ * @param nptr The argument string to check.
+ * @return The calculated exit status (0-255) on success, or 255 if non-numeric
+ * characters are found.
+ */
 int	check_exit_code(char *nptr)
 {
 	int	i;
@@ -66,6 +83,14 @@ int	check_exit_code(char *nptr)
 	return (process_exit_num(nptr));
 }
 
+/**
+ * Executes the built-in 'exit' command. It handles argument validation, 
+ * sets the shell's exit code, and terminates the shell process if executed 
+ * in the parent.
+ * @param args Arguments passed to the command (max one).
+ * @param shell Pointer to the shell struct.
+ * @return Exit status of minishell or passed exit value.
+ */
 int	execute_builtin_exit(char **args, t_shell *shell)
 {
 	if (get_args_len(args) > 1)

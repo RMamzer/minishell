@@ -2,13 +2,24 @@
 
 #include "minishell.h"
 
+/**
+ * Prints error message into STDERROR and returns provided exit code.
+ * @param msg Pointer to the error message.
+ * @param ast The ast node being analyzed.
+ * @return Exit status of the redirection sequence.
+ */
 int	write_error_and_return(char *msg, int error)
 {
 	ft_putstr_fd("minishell: ", STDERR_FILENO);
 	perror(msg);
 	return (error);
 }
-// need to clean all opened heredocs at the end, how??
+
+/**
+ * Executes redirection for infile.
+ * @param ast The ast node being analyzed.
+ * @return Exit status of the redirection sequence.
+ */
 int	execute_redirection_in(t_ast *ast)
 {
 	int	infile_fd;
@@ -25,6 +36,12 @@ int	execute_redirection_in(t_ast *ast)
 	return (0);
 }
 
+/**
+ * Executes redirection for outfile.
+ * @param ast The ast node being analyzed.
+ * @param type Enum indicating type of redirection out.
+ * @return Exit status of the redirection sequence .
+ */
 int	execute_redirection_out(t_ast *ast, t_token_type type)
 {
 	int	outfile_fd;
@@ -45,7 +62,12 @@ int	execute_redirection_out(t_ast *ast, t_token_type type)
 }
 
 
-// update error functions:
+/**
+ * Creates a child process executiong proper redirection.
+ * @param ast The ast node being analyzed.
+ * @param shell Pointer to the shell struct.
+ * @return Exit status of the redirection sequence .
+ */
 int	check_redirection(t_ast *ast, t_shell *shell)
 {
 	pid_t	pid;

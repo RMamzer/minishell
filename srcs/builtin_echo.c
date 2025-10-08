@@ -6,12 +6,19 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 15:37:48 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/24 16:38:38 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/08 14:26:47 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+/**
+ * Executes the built-in 'echo' command. The command accepts  "-n" option.
+ * The function prints the provided arguments with the space in between them and
+ * a new line at the end. -n option removes the new line.
+ * @param args Array of arguments for command execution.
+ * @return Exit status of command execution (0 on full success, 1 on failure).
+ */
 int	execute_builtin_echo(char **args)
 {
 	bool	n_flag;
