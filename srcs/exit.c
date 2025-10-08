@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:59 by mklevero          #+#    #+#             */
-/*   Updated: 2025/10/08 21:51:12 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/08 22:33:28 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,7 @@ void	lexer_error(char *input_line, t_shell *shell, char *temp_cont)
 	shell->exit_code = 1;
 	exit(shell->exit_code);
 }
+
 
 /**
  * Compares two strings for equality.
