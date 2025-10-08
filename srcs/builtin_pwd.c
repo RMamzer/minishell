@@ -3,16 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_pwd.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/20 15:46:34 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/30 14:28:47 by mamzerr1         ###   ########.fr       */
+/*   Updated: 2025/10/08 15:51:12 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-
 
 /**
  * Executes built-in 'pwd' (Print Working Directory) function. 

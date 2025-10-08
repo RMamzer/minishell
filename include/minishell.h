@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/09/30 19:02:32 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/08 22:24:46 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,6 +192,7 @@ void							free_shell_data(t_shell *shell);
 void							free_heredoc_files(t_shell *shell);
 
 // exit
+void	brutality(char *msg, t_shell *shell, int exit_code);
 void							fatality(char *msg, t_shell *shell,
 									int exit_code);
 void							show_error(char *msg, t_token *wrong_token,
@@ -200,17 +201,20 @@ void							lexer_error(char *input_line, t_shell *shell,
 									char *temp_cont);
 int								ft_strcmp(const char *s1, const char *s2);
 
-// env
+//env_creation
+void	error_malloc_env_exit(char *key, char *value, t_shell *shell);
+void	update_shllvl_value(t_shell *shell);
 void	process_env_node(char *key, char *value, bool value_alloc, t_shell *shell);
-void				error_malloc_env_exit(char *key, char *value, t_shell *shell);
-bool				update_env_value(t_env **env, char *key, char *new_value);
-void				update_shllvl_value(t_shell *shell);
-void				add_env_node(t_env **env, t_env *new_node);
-t_env				*create_env_node(char *key, char *value);
-void				process_env_line(t_shell *shell, const char *envp, bool process);
-void				set_minimal_env(t_shell *shell);
-void				create_env(t_shell *shell, char **envp);
-bool				check_env_key(char *key, t_env *env);
+void	process_env_line(t_shell *shell, const char *envp, bool process);
+void	create_env(t_shell *shell, char **envp);
+
+//env_utils
+void	free_env_node(t_env *env);
+bool	check_env_key(char *key, t_env *env);
+void	remove_env_variable(t_env **env, char *key);
+bool	update_env_value(t_env **env, char *key, char *new_value);
+void	add_env_node(t_env **env, t_env *new_node);
+
 
 // parser.c
 t_ast							*parse_pipe(t_token **token_list,
@@ -227,71 +231,70 @@ void							append_arg(t_ast *cmd_node, const char *str,
 void							split_variables(t_shell *shell);
 char							**ft_split_IFS(char *str, char *charset);
 
-// execute.c
-void							brutality(char *msg, t_shell *shell,
-									int exit_code);
-void							write_bulitin_error(char *str1, char *str2,
-									char *str3, char *str4);
-void							error_close_and_exit(char *msg, int *pipefd);
-int								get_env_size(t_env *lst, bool process);
-int								get_env_size(t_env *lst, bool process);
-char							*super_strjoin(char const *s1, char const *s2,
-									char const *s3);
-void							error_exit(char *msg);
-void							recreate_env_array(t_env *env, t_shell *shell);
-void							execute_cmd_child(char **args, t_shell *shell);
-int								execute_external_cmd(char **args,
-									t_shell *shell);
-int								check_command(t_ast *node, char *cmd,
-									t_shell *shell);
-int								wait_children(pid_t *pids, int children_rem,
-									t_shell *shell);
-void							execute_left_child(t_ast *node, t_shell *shell,
-									int *pipefd);
-void							execute_right_child(t_ast *node, t_shell *shell,
-									int *pipefd);
-int								execute_pipe(t_ast *node, t_shell *shell);
-int								execute_pipe(t_ast *node, t_shell *shell);
-int								execute_ast(t_ast *node, t_shell *shell);
-int								get_args_len(char **args);
-int								wait_child(pid_t pid, t_shell *shell);
+//execute
+int	check_command(t_ast *ast, char *cmd, t_shell *shell);
+int	execute_ast(t_ast *ast, t_shell *shell);
 
-//-------------------builtins
+//execute_utils
+void	write_bulitin_error(char *str1, char *str2, char *str3, char *str4);
+int	get_args_len(char **args);
+char	*super_strjoin(char const *s1, char const *s2, char const *s3);
+int	get_var_num(t_env *lst, bool process);
+int 	wait_child(pid_t pid, t_shell *shell);
+
+// execute_cmd
+void	recreate_envp_array(t_env *env, t_shell *shell);
+char	*find_path_cmd(char **args, bool *malocced, t_shell *shell);
+void	execute_cmd_child(char **args, t_shell *shell);
+int	execute_external_cmd(char **args, t_shell *shell);
+
+//builtin_cd
+int	change_working_directory(char *path, t_shell *shell);
+int	execute_builtin_cd(char **args, t_shell *shell);
+
+
+//builtin_echo
 int								execute_builtin_echo(char **args);
+
+//builtin_env
 int								execute_builtin_env(char **args,
 									t_shell *shell);
-int								execute_builtin_pwd(char **args,
-									t_shell *shell);
-int								execute_builtin_cd(char **args, t_shell *shell);
-int								change_working_directory(char *path,
-									t_shell *shell);
-int								execute_builtin_exit(char **args,
-									t_shell *shell);
-int								check_exit_code(char *nptr);
-int								exit_numeric_error(char *nptr);
-int								execute_builtin_unset(char **args,
-									t_shell *shell);
 
-void							process_valueless_export_node(t_shell *shell,
-									char *str);
-bool							is_identifier_valid(char *str);
-void							print_env_export(t_env **temp_env);
-void							bubble_sort_env(t_env **env, int len);
-int								sort_and_print_export(t_env *env,
-									t_shell *shell);
-int								execute_builtin_export(char **args,
-									t_shell *shell);
+////builtin_exit
+int	exit_numeric_error(char *nptr);
+int	process_exit_num(char *nptr);
+int	check_exit_code(char *nptr);
+int	execute_builtin_exit(char **args, t_shell *shell);
 
-//  other exec
-void							remove_env_variable(t_env **env, char *key);
-void							free_env_node(t_env *env);
-void							memory_error(void);
-void							write_bulitin_error(char *str1, char *str2,
-									char *str3, char *str4);
+//builtin_export
+void	print_env_export(t_env **temp_env);
+void	bubble_sort_env(t_env **env, int len);
+int		sort_and_print_export(t_env *env, t_shell *shell);
+int	execute_builtin_export(char **args, t_shell *shell);
+//builtin_export_utils
+void	process_valueless_export_node(t_shell *shell, char *str);
+bool	is_identifier_valid(char *str);
 
-// redir
+//builtin_pwd
+int	execute_builtin_pwd(char **args, t_shell *shell);
+
+//builtin_unset
+int	execute_builtin_unset(char **args, t_shell *shell);
+
+//pipe
+int	error_close_and_return(char *msg, int *pipefd, int error);
+int	wait_pipe(pid_t *pids, int children_rem, t_shell *shell);
+void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd);
+void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd);
+int	execute_pipe(t_ast *ast, t_shell *shell);
+
+// redirection
 int								check_redirection(t_ast *ast, t_shell *shell);
+int	execute_redirection_out(t_ast *ast, t_token_type type);
+int	execute_redirection_in(t_ast *ast);
 int								write_error_and_return(char *msg, int error);
+
+
 
 void							signal_to_exitcode(t_shell *shell);
 void							handle_readline_sigint(int sig);

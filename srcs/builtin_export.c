@@ -6,53 +6,11 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 15:05:10 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/09/30 17:02:28 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/08 22:28:15 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-
-
-/**
- * Adds a key-only environment variable (e.g., `export KEY`) to the
- * environment list if it is not already present.
- * @param shell Pointer to the shell struct.
- * @param str The variable name (key) to be added.
- * @return Void.
- */
-void	process_valueless_export_node(t_shell *shell, char *str)
-{
-	char	*key;
-
-	if (check_env_key(str, shell->env) == true)
-		return;
-	key = ft_strdup(str);
-	if (!key)
-		fatality(ERROR_MEM, shell, 1);
-	process_env_node(key, NULL, NO_ALLOC, shell);
-}
-
-
-/**
- * Verifies if the input string is a valid shell identifier for environment
- * variable naming. Must start with a letter or underscore, cannot start
- * with a digit, and can optionally contain a single '=' as a separator.
- * @param str The string to validate.
- * @return True if the identifier is valid, false otherwise.
- */
-bool	is_identifier_valid(char *str)
-{
-	if (!str || *str == '\0' || ft_isdigit(*str) || *str == '=')
-		return (false);
-	while (*str && *str != '=')
-	{
-		if (!ft_isalnum(*str) && *str != '_')
-			return (false);
-		str++;
-	}
-	return (true);
-}
 
 /**
  * Prints the array of environment nodes to STDOUT in the required
@@ -121,7 +79,7 @@ int	sort_and_print_export(t_env *env, t_shell *shell)
 	t_env	*current;
 	int		i;
 
-	i = get_env_size(env, EXPORT);
+	i = get_var_num(env, EXPORT);
 	temp_env = calloc(i, sizeof(t_env *));
 	if (!temp_env)
 		fatality(ERROR_MEM, shell, 1);

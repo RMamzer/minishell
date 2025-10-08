@@ -3,14 +3,31 @@
 /*                                                        :::      ::::::::   */
 /*   exit.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:59 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/30 17:31:10 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/08 21:51:12 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+/**
+ * FINISH THIS PROCESS (๑•̀ᗝ•́)૭
+ * @param msg Pointer to erorr message string.
+ * @param shell Pointer to the shell struct.
+ * @param exit_code Exit status of the process.
+ * @return Void.
+ */
+void	brutality(char *msg, t_shell *shell, int exit_code)
+{
+	if (msg)
+		perror(msg);
+	if (shell)
+		free_shell(shell);
+	clear_history();
+	exit (exit_code);
+}
 
 /**
  * Fatal error handler that cleans up and exits the program.
