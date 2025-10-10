@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_echo.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 15:37:48 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/10/10 10:33:59 by mamzerr1         ###   ########.fr       */
+/*   Updated: 2025/10/10 12:32:29 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,16 +36,16 @@ bool	check_echo_flag(char *str)
  */
 int	execute_builtin_echo(char **args)
 {
-	bool	n_flag;
+	bool	n_output;
 	int		i;
 
 	i = 0;
-	n_flag = false;
+	n_output = true;
 	while (args[i])
 	{
 		if (check_echo_flag(args[i]))
 		{
-			n_flag = true;
+			n_output = false;
 			i++;
 		}
 		else
@@ -56,6 +56,9 @@ int	execute_builtin_echo(char **args)
 				ft_putchar_fd(' ', STDOUT_FILENO);
 		}
 	}
+	if (n_output == true)
+		ft_putchar_fd('\n', STDOUT_FILENO);
+	return (0);
 }
 
 

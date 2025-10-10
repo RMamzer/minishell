@@ -6,16 +6,16 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/10/08 14:35:29 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/10 13:14:23 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 /**
- * Executes the change of the directory using chdir() function. On succesfull 
+ * Executes the change of the directory using chdir() function. On succesfull
  * change, also updates PWF and OLDPWD environment variables
- * 
+ *
  * @param path Path to the new directory.
  * @param shell Pointer to the shell struct.
  * @return Exit status of command execution (0 on full success, 1 on failure).
@@ -39,7 +39,7 @@ int	change_working_directory(char *path, t_shell *shell)
 			free (old_pwd);
 		new_pwd = getcwd(NULL, 0);
 		if (!new_pwd)
-			return (write_error_and_return("cd: getcwd", errno));
+			return (write_error_and_return("cd: error retrieving current directory: getcwd: cannot access parent directories", errno));
 		if (update_env_value(&shell->env, "PWD", new_pwd) == false)
 			free(new_pwd);
 	}
@@ -49,9 +49,9 @@ int	change_working_directory(char *path, t_shell *shell)
 
 /**
  * Executes the built-in 'cd' command. The command does not accept options.
- * The command changes the current working directory based on the arguments provided. 
- * if no arguments are passed, changes the dir to HOME. 
- * 
+ * The command changes the current working directory based on the arguments provided.
+ * if no arguments are passed, changes the dir to HOME.
+ *
  * @param args Arguments passed to the command.
  * @param shell Pointer to the shell struct.
  * @return Exit status of command execution (0 on full success, 1 on failure).

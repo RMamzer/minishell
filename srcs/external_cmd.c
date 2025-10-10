@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:15:08 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/10/08 22:22:59 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/10 12:46:47 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,7 @@ void	execute_cmd_child(char **args, t_shell *shell)
 
 	malloced = false;
 	env_path = (get_env_value("PATH", shell->env, NO_ALLOC));
-	if (!env_path)
+	if (!env_path || !**args)
 	{
 		write_bulitin_error("minishell: ", *args, ": command not found\n", NULL);
 		brutality(NULL, shell, EXIT_CMD_NOT_FOUND);
@@ -111,7 +111,7 @@ void	execute_cmd_child(char **args, t_shell *shell)
 	}
 	if (malloced == true)
 		free (cmd_path);
-	write_bulitin_error("minishell:", NULL, NULL, args[0]);
+	write_bulitin_error("minishell: ", NULL, NULL, args[0]);
 	brutality(NULL, shell, EXIT_CMD_NOT_EXEC);
 }
 

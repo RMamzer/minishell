@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/10/08 22:28:53 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/10 12:42:36 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,7 @@
  */
 int	check_command(t_ast *ast, char *cmd, t_shell *shell)
 {
-	if (!*cmd)
-		shell->exit_code = 0;
-	else if (ft_strcmp(cmd, "echo") == 0)
+	if (ft_strcmp(cmd, "echo") == 0)
 		shell->exit_code = execute_builtin_echo(ast->value + 1);
 	else if (ft_strcmp(cmd, "cd") == 0)
 		shell->exit_code = execute_builtin_cd(ast->value + 1, shell);
