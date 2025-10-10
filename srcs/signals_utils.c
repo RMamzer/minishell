@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/10 15:48:33 by mklevero          #+#    #+#             */
-/*   Updated: 2025/10/10 17:01:10 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/10 18:18:27 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,8 @@ void	signal_to_exitcode(t_shell *shell)
 	if (shell)
 		sig_shell = shell;
 	else if (g_sig != 0)
-	{
 		sig_shell->exit_code = g_sig + 128;
-	}
-	g_sig = 0;
+	// g_sig = 0;
 }
 
 /**
@@ -40,6 +38,7 @@ void	handle_readline_sigint(int sig)
 	rl_redisplay();
 	g_sig = sig;
 	signal_to_exitcode(NULL);
+	g_sig = 0;
 }
 
 /**
