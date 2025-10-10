@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/10/10 13:14:23 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/10 14:40:12 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ int	change_working_directory(char *path, t_shell *shell)
 			free (old_pwd);
 		new_pwd = getcwd(NULL, 0);
 		if (!new_pwd)
-			return (write_error_and_return("cd: error retrieving current directory: getcwd: cannot access parent directories", errno));
+			return (write_error_and_return(ERROR_NO_DIR, errno));
 		if (update_env_value(&shell->env, "PWD", new_pwd) == false)
 			free(new_pwd);
 	}

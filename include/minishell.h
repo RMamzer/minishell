@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/10/08 22:24:46 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/10 14:39:49 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ extern volatile sig_atomic_t	g_sig;
 # define ERROR_MEM "cannot allocate memory"
 # define ERROR_MAX_HER "maximum here-document count exceeded"
 # define ERROR_EOF "warning: heredoc delimeted by EOF"
+# define ERROR_NO_DIR "cd: error retrieving current directory: getcwd: cannot access parent directories"
 
 // token type
 typedef enum e_token_type
