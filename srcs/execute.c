@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/10/10 12:42:36 by rmamzer          ###   ########.fr       */
+/*   Created: 2025/10/10 15:35:19 by mklevero          #+#    #+#             */
+/*   Updated: 2025/10/10 15:35:21 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

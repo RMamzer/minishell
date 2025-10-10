@@ -3,118 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/10/10 09:59:13 by mamzerr1         ###   ########.fr       */
+/*   Updated: 2025/10/10 16:34:29 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 volatile sig_atomic_t	g_sig = 0;
-
-void	signal_to_exitcode(t_shell *shell)
-{
-	static t_shell	*sig_shell;
-
-	if (shell)
-		sig_shell = shell;
-	else if (g_sig != 0)
-	{
-		sig_shell->exit_code = g_sig + 128;
-	}
-	g_sig = 0;
-}
-/**
- * Signal handler for SIGINT during readline input.
- * Provides clean interrupt behavior when Ctrl+C is pressed.
- * Updates display and sets signal for exit code.
- *
- * @param sig Signal number received
- */
-void	handle_readline_sigint(int sig)
-{
-	write(1, "\n", 1);
-	rl_on_new_line();
-	rl_replace_line("", 0);
-	rl_redisplay();
-	g_sig = sig;
-	signal_to_exitcode(NULL);
-}
-/**
- * Signal handler for SIGINT during heredoc input.
- * Handles interruption of heredoc reading.
- *
- * @param signum Signal number received
- */
-void	handle_heredoc_signal(int signum)
-{
-	g_sig = signum;
-	signal_to_exitcode(NULL);
-}
-
-void	handle_sigint_exe(int signum)
-{
-	(void)signum;
-	write(1, "\n", 1);
-}
-
-/**
- * Sets up signal handling for readline input phase.
- * Configures appropriate signal behavior for interactive input.
- */
-void	set_readline_signals(void)
-{
-	signal(SIGQUIT, SIG_IGN);
-	signal(SIGINT, handle_readline_sigint);
-}
-
-/**
- * Sets default signal handling for child processes.
- * Restores default signal behavior for executed commands.
- */
-void	child_signal(void)
-{
-	signal(SIGINT, SIG_DFL);
-	signal(SIGQUIT, SIG_DFL);
-}
-/**
- * Sets up signal handling for heredoc input phase.
- * Configures signals for heredoc reading with special behavior.
- */
-void	set_heredoc_signal(void)
-{
-	signal(SIGQUIT, SIG_IGN);
-	signal(SIGINT, handle_heredoc_signal);
-}
-
-//  void	restore_main_signals(void)
-//  {
-//  	signal(SIGQUIT, SIG_IGN);
-//  	signal(SIGINT, handle_sigint_exe);
-// }
-
-/**
- * Sets signal handling during command execution preparation.
- * Ignores signals while setting up execution environment.
- */
-void	set_signals_exec(void)
-{
-	signal(SIGINT, SIG_IGN);
-	signal(SIGQUIT, SIG_IGN);
-}
-/**
- * Sets signal handling for parent process during command execution.
- * Provides appropriate signal handling while waiting for children.
- */
-void	set_signals_exec_parent(void)
-{
-	signal(SIGINT, handle_sigint_exe);
-	signal(SIGQUIT, SIG_IGN);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Main entry point for the minishell program.
@@ -139,15 +37,13 @@ int	main(int ac, char **av, char **env)
 			continue ;
 		if (parse_tokens(shell) == FAILURE)
 			continue ;
-		set_signals_exec();
+		set_exec_signals();
 		execute_ast(shell->ast, shell);
 		free_heredoc_files(shell);
 		free_shell_data(shell);
 	}
 	free_shell(shell);
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Receives and validates user input from readline.
@@ -170,41 +66,12 @@ bool	receive_input(t_shell *shell)
 		free(shell->input_line);
 		return (FAILURE);
 	}
-	if (ft_strlen(shell->input_line) > 1024) // for now
+	if (ft_strlen(shell->input_line) > INPUT_MAX)
 	{
 		show_error("input is too long", NULL, shell, 2);
 		return (FAILURE);
 	}
 	add_history(shell->input_line);
-	return (SUCCESS);
-}
-
-/**
- * Validates and trims whitespace from input.
- * Checks for unclosed quotes and prepares input for lexing.
- *
- * @param shell Pointer to shell structure
- * @return SUCCESS if input is valid, FAILURE otherwise
- */
-bool	validate_and_trim_input(t_shell *shell)
-{
-	char	*line;
-
-	line = ft_strtrim(shell->input_line, TO_TRIM);
-	if (line == NULL || line[0] == '\0')
-	{
-		free(shell->input_line);
-		free(line);
-		return (FAILURE);
-	}
-	if (check_quote(line, ft_strlen(line)) != 0)
-	{
-		free(line);
-		show_error(ERROR_QUOTE, NULL, shell, 2);
-		return (FAILURE);
-	}
-	free(shell->input_line);
-	shell->input_line = line;
 	return (SUCCESS);
 }
 

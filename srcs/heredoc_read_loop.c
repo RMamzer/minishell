@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   heredoc_read_loop.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamzerr1 <mamzerr1@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:17:43 by mklevero          #+#    #+#             */
-/*   Updated: 2025/10/10 09:59:15 by mamzerr1         ###   ########.fr       */
+/*   Updated: 2025/10/10 16:13:04 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ bool	read_heredoc(int *fd, t_token *delim, t_shell *shell, char *file)
 	char	*line;
 
 	rl_event_hook = check_sig_hook;
-	set_heredoc_signal();
+	set_heredoc_signals();
 	while (1)
 	{
 		line = readline("> ");

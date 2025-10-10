@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/01 17:28:42 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/30 15:00:17 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/10 15:36:24 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,6 +130,7 @@ char	*expand_env_var(char *content, size_t *i, t_env *env)
 	free(name);
 	return (value);
 }
+
 /**
  * Retrieves environment variable value by name.
  * Searches the environment list for matching key.

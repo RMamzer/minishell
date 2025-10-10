@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_cd.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/10/10 14:40:12 by rmamzer          ###   ########.fr       */
+/*   Created: 2025/10/10 14:49:30 by mklevero          #+#    #+#             */
+/*   Updated: 2025/10/10 15:20:39 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,8 @@ int	change_working_directory(char *path, t_shell *shell)
 		old_pwd = get_env_value("PWD", shell->env, ALLOC);
 		if (!old_pwd)
 			fatality(ERROR_MEM, shell, 1);
-		if (update_env_value (&shell->env, "OLDPWD", old_pwd) == false)
-			free (old_pwd);
+		if (update_env_value(&shell->env, "OLDPWD", old_pwd) == false)
+			free(old_pwd);
 		new_pwd = getcwd(NULL, 0);
 		if (!new_pwd)
 			return (write_error_and_return(ERROR_NO_DIR, errno));
@@ -46,11 +46,10 @@ int	change_working_directory(char *path, t_shell *shell)
 	return (EXIT_SUCCESS);
 }
 
-
 /**
  * Executes the built-in 'cd' command. The command does not accept options.
- * The command changes the current working directory based on the arguments provided.
- * if no arguments are passed, changes the dir to HOME.
+ * The command changes the current working directory based on the arguments.
+ * If no arguments are passed, changes the dir to HOME.
  *
  * @param args Arguments passed to the command.
  * @param shell Pointer to the shell struct.
@@ -65,10 +64,10 @@ int	execute_builtin_cd(char **args, t_shell *shell)
 		path = get_env_value("HOME", shell->env, NO_ALLOC);
 		if (!path)
 		{
-			ft_putstr_fd("minishell: cd: HOME not set\n",STDERR_FILENO);
+			ft_putstr_fd("minishell: cd: HOME not set\n", STDERR_FILENO);
 			return (EXIT_FAILURE);
 		}
-	return (change_working_directory(path, shell));
+		return (change_working_directory(path, shell));
 	}
 	if (args[0][0] == '-')
 	{

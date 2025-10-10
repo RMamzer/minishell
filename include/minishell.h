@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/10/10 14:39:49 by rmamzer          ###   ########.fr       */
+/*   Created: 2025/10/10 15:12:40 by mklevero          #+#    #+#             */
+/*   Updated: 2025/10/10 17:11:15 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,37 +19,46 @@
 # include <limits.h>            // for exit limits
 # include <readline/history.h>  // add_history
 # include <readline/readline.h> // readline
+# include <signal.h>
 # include <stdbool.h>
 # include <stdio.h>
 # include <stdlib.h>
+# include <sys/wait.h>
 # include <unistd.h> //open and close
-
-//////////////////////////////////////////////////
-# include <signal.h>
 
 extern volatile sig_atomic_t	g_sig;
 
-///////////////////////////////////////////////////
-
+# define READ_END 0
+# define WRITE_END 1
 # define SUCCESS 0
 # define FAILURE 1
+# define ALLOC true
+# define NO_ALLOC false
+# define EXPORT true
+# define EXECUTE false
+# define ENV false
+# define EXIT_INVALID_OPTION 2
+# define EXIT_CMD_NOT_FOUND 127
+# define EXIT_CMD_NOT_EXEC 126
+# define INPUT_MAX 10000
 # define IN_DOUBLE_QUOTE true
 # define NO_QUOTE false
 # define ZERO_WORDS 0
 # define ONE_WORD 1
-
 # define ALLOC true
 # define NO_ALLOC false
-
-# define TO_TRIM " \t\n" // check this
+# define TO_TRIM " \t\n"
 
 # define ERROR_QUOTE "syntax error: unclosed quote"
 # define ERROR_MEM "cannot allocate memory"
 # define ERROR_MAX_HER "maximum here-document count exceeded"
 # define ERROR_EOF "warning: heredoc delimeted by EOF"
-# define ERROR_NO_DIR "cd: error retrieving current directory: getcwd: cannot access parent directories"
+# define ERROR_NO_DIR \
+	"cd: error retrieving current directory: getcwd:\
+							cannot access parent directories"
+# define ERROR_NOT_F ": command not found\n"
 
-// token type
+// token type enumeration
 typedef enum e_token_type
 {
 	PIPE,
@@ -62,6 +71,7 @@ typedef enum e_token_type
 	HEREDOC_DELIM_UQ
 }								t_token_type;
 
+// token node struct
 typedef struct s_token
 {
 	t_token_type				type;
@@ -71,7 +81,7 @@ typedef struct s_token
 	bool						expanded;
 }								t_token;
 
-// env struct
+// environment node struct
 typedef struct s_env
 {
 	char						*key;
@@ -80,54 +90,32 @@ typedef struct s_env
 	bool						assigned;
 }								t_env;
 
-// args instead of
+// ast node struct
 typedef struct s_ast
 {
 	t_token_type				type;
 	char						**value;
-	int							expand;
-	int							status;
-	int							fd[2];
 	struct s_ast				*left;
 	struct s_ast				*right;
 }								t_ast;
 
-// core
+// core shell struct
 typedef struct s_shell
 {
-	int				exit_code;
-	char			*input_line;
-	t_token			*token_list;
-	t_env			*env;
-	t_ast			*ast;
-	char			**heredoc_files;
-	char			**env_array;
-	char			**paths_array;
-	bool			is_parent;
-}					t_shell;
+	int							exit_code;
+	char						*input_line;
+	t_token						*token_list;
+	t_env						*env;
+	t_ast						*ast;
+	char						**heredoc_files;
+	char						**env_array;
+	char						**paths_array;
+	bool						is_parent;
+}								t_shell;
 
-// lib and macro for execution
-# include <sys/wait.h>
-# define READ_END 0
-# define WRITE_END 1
-
-# define SUCCESS 0
-# define FAILURE 1
-
-# define ALLOC true
-# define NO_ALLOC false
-
-# define EXPORT true
-# define EXECUTE false
-# define ENV false
-# define EXIT_INVALID_OPTION 2
-# define EXIT_CMD_NOT_FOUND 127
-# define EXIT_CMD_NOT_EXEC 126
-
-// main things
+// main
 int								main(int ac, char **av, char **env);
 bool							receive_input(t_shell *shell);
-bool							validate_and_trim_input(t_shell *shell);
 bool							process_input(t_shell *shell);
 bool							parse_tokens(t_shell *shell);
 t_shell							*init_data(void);
@@ -135,6 +123,7 @@ t_shell							*init_data(void);
 // checkers
 char							check_quote(char *line, int index);
 bool							check_heredoc(t_shell *shell);
+bool							validate_and_trim_input(t_shell *shell);
 
 // heredoc
 bool							process_heredoc(t_shell *shell);
@@ -154,8 +143,10 @@ void							lexer(char *input_line, t_shell *shell);
 
 // expander
 void							expander(t_shell *shell);
-char	*expand_env_var(char *content, size_t *i, t_env *env); // not here
-char	*get_env_value(char *name, t_env *env, bool alloc);    // not here
+char							*expand_env_var(char *content, size_t *i,
+									t_env *env);
+char							*get_env_value(char *name, t_env *env,
+									bool alloc);
 
 // expander_handlers
 char							*handle_single_quote(char *content, size_t *i);
@@ -193,7 +184,8 @@ void							free_shell_data(t_shell *shell);
 void							free_heredoc_files(t_shell *shell);
 
 // exit
-void	brutality(char *msg, t_shell *shell, int exit_code);
+void							brutality(char *msg, t_shell *shell,
+									int exit_code);
 void							fatality(char *msg, t_shell *shell,
 									int exit_code);
 void							show_error(char *msg, t_token *wrong_token,
@@ -202,20 +194,23 @@ void							lexer_error(char *input_line, t_shell *shell,
 									char *temp_cont);
 int								ft_strcmp(const char *s1, const char *s2);
 
-//env_creation
-void	error_malloc_env_exit(char *key, char *value, t_shell *shell);
-void	update_shllvl_value(t_shell *shell);
-void	process_env_node(char *key, char *value, bool value_alloc, t_shell *shell);
-void	process_env_line(t_shell *shell, const char *envp, bool process);
-void	create_env(t_shell *shell, char **envp);
+// env_creation
+void							error_malloc_env_exit(char *key, char *value,
+									t_shell *shell);
+void							update_shllvl_value(t_shell *shell);
+void							process_env_node(char *key, char *value,
+									bool value_alloc, t_shell *shell);
+void							process_env_line(t_shell *shell,
+									const char *envp, bool process);
+void							create_env(t_shell *shell, char **envp);
 
-//env_utils
-void	free_env_node(t_env *env);
-bool	check_env_key(char *key, t_env *env);
-void	remove_env_variable(t_env **env, char *key);
-bool	update_env_value(t_env **env, char *key, char *new_value);
-void	add_env_node(t_env **env, t_env *new_node);
-
+// env_utils
+void							free_env_node(t_env *env);
+bool							check_env_key(char *key, t_env *env);
+void							remove_env_variable(t_env **env, char *key);
+bool							update_env_value(t_env **env, char *key,
+									char *new_value);
+void							add_env_node(t_env **env, t_env *new_node);
 
 // parser.c
 t_ast							*parse_pipe(t_token **token_list,
@@ -230,80 +225,99 @@ void							append_arg(t_ast *cmd_node, const char *str,
 
 // split vars
 void							split_variables(t_shell *shell);
-char							**ft_split_IFS(char *str, char *charset);
+char							**ft_split_ifs(char *str, char *charset);
 
-//execute
-int	check_command(t_ast *ast, char *cmd, t_shell *shell);
-int	execute_ast(t_ast *ast, t_shell *shell);
+// execute
+int								check_command(t_ast *ast, char *cmd,
+									t_shell *shell);
+int								execute_ast(t_ast *ast, t_shell *shell);
 
-//execute_utils
-void	write_bulitin_error(char *str1, char *str2, char *str3, char *str4);
-int	get_args_len(char **args);
-char	*super_strjoin(char const *s1, char const *s2, char const *s3);
-int	get_var_num(t_env *lst, bool process);
-int 	wait_child(pid_t pid, t_shell *shell);
+// execute_utils
+void							write_bulitin_error(char *str1, char *str2,
+									char *str3, char *str4);
+int								get_args_len(char **args);
+char							*super_strjoin(char const *s1, char const *s2,
+									char const *s3);
+int								get_var_num(t_env *lst, bool process);
+int								wait_child(pid_t pid, t_shell *shell);
 
 // execute_cmd
-void	recreate_envp_array(t_env *env, t_shell *shell);
-char	*find_path_cmd(char **args, bool *malocced, t_shell *shell);
-void	execute_cmd_child(char **args, t_shell *shell);
-int	execute_external_cmd(char **args, t_shell *shell);
+void							recreate_envp_array(t_env *env, t_shell *shell);
+char							*find_path_cmd(char **args, bool *malocced,
+									t_shell *shell);
+void							execute_cmd_child(char **args, t_shell *shell);
+int								execute_external_cmd(char **args,
+									t_shell *shell);
 
-//builtin_cd
-int	change_working_directory(char *path, t_shell *shell);
-int	execute_builtin_cd(char **args, t_shell *shell);
+// builtin_cd
+int								change_working_directory(char *path,
+									t_shell *shell);
+int								execute_builtin_cd(char **args, t_shell *shell);
 
-
-//builtin_echo
+// builtin_echo
 int								execute_builtin_echo(char **args);
+bool							check_echo_flag(char *str);
 
-//builtin_env
+// builtin_env
 int								execute_builtin_env(char **args,
 									t_shell *shell);
 
 ////builtin_exit
-int	exit_numeric_error(char *nptr);
-int	process_exit_num(char *nptr);
-int	check_exit_code(char *nptr);
-int	execute_builtin_exit(char **args, t_shell *shell);
+int								exit_numeric_error(char *nptr);
+int								process_exit_num(char *nptr);
+int								check_exit_code(char *nptr);
+int								execute_builtin_exit(char **args,
+									t_shell *shell);
 
-//builtin_export
-void	print_env_export(t_env **temp_env);
-void	bubble_sort_env(t_env **env, int len);
-int		sort_and_print_export(t_env *env, t_shell *shell);
-int	execute_builtin_export(char **args, t_shell *shell);
-//builtin_export_utils
-void	process_valueless_export_node(t_shell *shell, char *str);
-bool	is_identifier_valid(char *str);
+// builtin_export
+void							print_env_export(t_env **temp_env);
+void							bubble_sort_env(t_env **env, int len);
+int								sort_and_print_export(t_env *env,
+									t_shell *shell);
+int								execute_builtin_export(char **args,
+									t_shell *shell);
+// builtin_export_utils
+void							process_valueless_export_node(t_shell *shell,
+									char *str);
+bool							is_identifier_valid(char *str);
 
-//builtin_pwd
-int	execute_builtin_pwd(char **args, t_shell *shell);
+// builtin_pwd
+int								execute_builtin_pwd(char **args,
+									t_shell *shell);
 
-//builtin_unset
-int	execute_builtin_unset(char **args, t_shell *shell);
+// builtin_unset
+int								execute_builtin_unset(char **args,
+									t_shell *shell);
 
-//pipe
-int	error_close_and_return(char *msg, int *pipefd, int error);
-int	wait_pipe(pid_t *pids, int children_rem, t_shell *shell);
-void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd);
-void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd);
-int	execute_pipe(t_ast *ast, t_shell *shell);
+// pipe
+int								error_close_and_return(char *msg, int *pipefd,
+									int error);
+int								wait_pipe(pid_t *pids, int children_rem,
+									t_shell *shell);
+void							execute_left_child(t_ast *ast, t_shell *shell,
+									int *pipefd);
+void							execute_right_child(t_ast *ast, t_shell *shell,
+									int *pipefd);
+int								execute_pipe(t_ast *ast, t_shell *shell);
 
 // redirection
 int								check_redirection(t_ast *ast, t_shell *shell);
-int	execute_redirection_out(t_ast *ast, t_token_type type);
-int	execute_redirection_in(t_ast *ast);
+int								execute_redirection_out(t_ast *ast,
+									t_token_type type);
+int								execute_redirection_in(t_ast *ast);
 int								write_error_and_return(char *msg, int error);
 
+// signals
+void							set_readline_signals(void);
+void							set_child_signals(void);
+void							set_heredoc_signals(void);
+void							set_exec_parent_signals(void);
+void							set_exec_signals(void);
 
-
+// signals_utils
 void							signal_to_exitcode(t_shell *shell);
 void							handle_readline_sigint(int sig);
 void							handle_heredoc_signal(int signum);
-void							handle_sigint_exe(int signum);
-void							set_readline_signals(void);
-void							child_signal(void);
-void							set_heredoc_signal(void);
-void							restore_main_signals(void);
-void							set_signals_exec_parent(void);
+void							handle_exe_sigint(int signum);
+
 #endif

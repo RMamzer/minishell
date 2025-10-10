@@ -1,4 +1,14 @@
-
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   redirection.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/10/10 15:41:16 by mklevero          #+#    #+#             */
+/*   Updated: 2025/10/10 17:16:53 by mklevero         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "minishell.h"
 
@@ -61,7 +71,6 @@ int	execute_redirection_out(t_ast *ast, t_token_type type)
 	return (0);
 }
 
-
 /**
  * Creates a child process executiong proper redirection.
  * @param ast The ast node being analyzed.
@@ -78,13 +87,13 @@ int	check_redirection(t_ast *ast, t_shell *shell)
 	if (pid == 0)
 	{
 		shell->is_parent = false;
-		if (ast->type == IN || ast->type == HEREDOC)
+		if (ast->type == IN)
 			shell->exit_code = execute_redirection_in(ast->right);
 		else if (ast->type == OUT || ast->type == APPEND)
 			shell->exit_code = execute_redirection_out(ast->right, ast->type);
 		if (shell->exit_code != 0)
 			fatality(NULL, shell, shell->exit_code);
-		fatality(NULL,shell, execute_ast(ast->left, shell));
+		fatality(NULL, shell, execute_ast(ast->left, shell));
 	}
 	return (wait_child(pid, shell));
 }

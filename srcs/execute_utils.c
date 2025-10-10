@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_utils.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:09:45 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/10/08 22:23:10 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/10 16:11:09 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ void	write_bulitin_error(char *str1, char *str2, char *str3, char *str4)
 	if (str4)
 		perror(str4);
 }
+
 /**
  * Calculates the number of arguments in the char string.
  * @param args Array of arguments of type char.
@@ -46,7 +47,6 @@ int	get_args_len(char **args)
 		len++;
 	return (len);
 }
-
 
 /**
  * Joins up to 3 strings in single malloc returns a pointer to new string.
@@ -77,8 +77,6 @@ char	*super_strjoin(char const *s1, char const *s2, char const *s3)
 	return (joinedstr);
 }
 
-
-
 /**
  * Calculates the number of relevant nodes in the environment list.
  * @param lst Pointer to the first node of environment list.
@@ -108,22 +106,21 @@ int	get_var_num(t_env *lst, bool process)
  * @param shell Pointer to the shell struct.
  * @return exit status of the child process executing cmd.
  */
-int 	wait_child(pid_t pid, t_shell *shell)
+int	wait_child(pid_t pid, t_shell *shell)
 {
 	int		status;
 	pid_t	term_pid;
 	int		exit_code;
 
 	if (shell->is_parent == true)
-		set_signals_exec_parent();
+		set_exec_parent_signals();
 	exit_code = EXIT_FAILURE;
 	term_pid = waitpid(pid, &status, 0);
 	if (term_pid == -1)
-			return (write_error_and_return("waitpd", EXIT_FAILURE));
+		return (write_error_and_return("waitpd", EXIT_FAILURE));
 	if (WIFEXITED(status))
 		exit_code = WEXITSTATUS(status);
 	else if (WIFSIGNALED(status))
 		exit_code = 128 + WTERMSIG(status);
 	return (exit_code);
 }
-

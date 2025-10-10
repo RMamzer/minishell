@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:20:27 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/30 14:40:45 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/10 17:10:16 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,8 +55,6 @@ t_ast	*add_ast_node(t_token_type type, t_shell *shell)
 	if (!node)
 		fatality(ERROR_MEM, shell, 1);
 	node->type = type;
-	node->fd[0] = -1;
-	node->fd[1] = -1;
 	return (node);
 }
 

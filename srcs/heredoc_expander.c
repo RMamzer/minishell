@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 16:16:58 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/30 16:34:13 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/10 15:40:53 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,7 @@ static bool	expand_line(char *line, char **new_content, t_shell *shell)
 	}
 	return (SUCCESS);
 }
+
 /**
  * Handles variable expansion ($VAR, $?) or literal text.
  *

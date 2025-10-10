@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipe.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 21:56:42 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/10/08 22:06:53 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/10 16:11:09 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ int	wait_pipe(pid_t *pids, int children_rem, t_shell *shell)
 	int		exit_code;
 
 	if (shell->exit_code == true)
-		set_signals_exec_parent();
+		set_exec_parent_signals();
 	exit_code = EXIT_FAILURE;
 	while (children_rem > 0)
 	{
@@ -53,7 +53,7 @@ int	wait_pipe(pid_t *pids, int children_rem, t_shell *shell)
 			children_rem--;
 			if (term_pid == pids[1])
 			{
- 				if (WIFEXITED(status))
+				if (WIFEXITED(status))
 					exit_code = WEXITSTATUS(status);
 				else if (WIFSIGNALED(status))
 					exit_code = 128 + WTERMSIG(status);
@@ -77,12 +77,11 @@ void	execute_left_child(t_ast *ast, t_shell *shell, int *pipefd)
 	if (dup2(pipefd[WRITE_END], STDOUT_FILENO) == -1)
 	{
 		close(pipefd[WRITE_END]);
-		brutality("minishell: dup2",shell, EXIT_FAILURE);
+		brutality("minishell: dup2", shell, EXIT_FAILURE);
 	}
 	close(pipefd[WRITE_END]);
 	fatality(NULL, shell, execute_ast(ast, shell));
 }
-
 
 /**
  * Executes pipe redirection for right side of the pipe.
@@ -98,7 +97,7 @@ void	execute_right_child(t_ast *ast, t_shell *shell, int *pipefd)
 	if (dup2(pipefd[READ_END], STDIN_FILENO) == -1)
 	{
 		close(pipefd[READ_END]);
-		brutality("minishel: dup2",shell, EXIT_FAILURE);
+		brutality("minishel: dup2", shell, EXIT_FAILURE);
 	}
 	close(pipefd[READ_END]);
 	fatality(NULL, shell, execute_ast(ast, shell));
@@ -131,6 +130,6 @@ int	execute_pipe(t_ast *ast, t_shell *shell)
 	close(pipefd[WRITE_END]);
 	close(pipefd[READ_END]);
 	if (shell->is_parent == true)
-		set_signals_exec_parent();
+		set_exec_parent_signals();
 	return (wait_pipe(pids, 2, shell));
 }

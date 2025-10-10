@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   external_cmd.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:15:08 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/10/10 12:46:47 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/10 15:58:50 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,7 @@ void	recreate_envp_array(t_env *env, t_shell *shell)
 
 	i = 0;
 	temp = env;
-	shell->env_array = malloc(sizeof(char *) * (get_var_num(env, EXECUTE)
-				+ 1));
+	shell->env_array = malloc(sizeof(char *) * (get_var_num(env, EXECUTE) + 1));
 	if (!shell->env_array)
 		fatality(ERROR_MEM, shell, 1);
 	while (temp)
@@ -75,7 +74,7 @@ char	*find_path_cmd(char **args, bool *malocced, t_shell *shell)
 		free(cmd_path);
 		i++;
 	}
-	write_bulitin_error("minishell: ", *args, ": command not found\n", NULL);
+	write_bulitin_error("minishell: ", *args, ERROR_NOT_F, NULL);
 	brutality(NULL, shell, EXIT_CMD_NOT_FOUND);
 	return (NULL);
 }
@@ -96,7 +95,7 @@ void	execute_cmd_child(char **args, t_shell *shell)
 	env_path = (get_env_value("PATH", shell->env, NO_ALLOC));
 	if (!env_path || !**args)
 	{
-		write_bulitin_error("minishell: ", *args, ": command not found\n", NULL);
+		write_bulitin_error("minishell: ", *args, ERROR_NOT_F, NULL);
 		brutality(NULL, shell, EXIT_CMD_NOT_FOUND);
 	}
 	shell->paths_array = ft_split(env_path, ':');
@@ -106,11 +105,11 @@ void	execute_cmd_child(char **args, t_shell *shell)
 	cmd_path = find_path_cmd(args, &malloced, shell);
 	if (access(cmd_path, X_OK) == 0)
 	{
-		child_signal();
+		set_child_signals();
 		execve(cmd_path, args, shell->env_array);
 	}
 	if (malloced == true)
-		free (cmd_path);
+		free(cmd_path);
 	write_bulitin_error("minishell: ", NULL, NULL, args[0]);
 	brutality(NULL, shell, EXIT_CMD_NOT_EXEC);
 }

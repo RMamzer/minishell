@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/11 14:15:55 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/30 16:27:53 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/10 15:06:13 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ static bool	process_heredoc_token(t_shell *shell, t_token *current, size_t i);
 static void	process_delim(t_token *delim, t_shell *shell);
 static void	update_file_name(char **file, size_t *i, t_shell *shell);
 static void	update_heredoc_token(t_token *current, char *file, t_shell *shell);
+
 /**
  * Main heredoc processing function.
  * Processes all HEREDOC tokens in the token list by creating temporary files

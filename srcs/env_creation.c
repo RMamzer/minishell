@@ -3,22 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   env_creation.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/13 16:00:20 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/10/08 16:07:49 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/10 15:34:48 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 /**
-* Frees the mallocs used during env creation on failure of one and exits.
-* @param key Pointer to the malloced key string.
-* @param Value Pointer to the malloced key string.
-* @param shell Pointer to the shell struct.
-* @return Void.
-*/
+ * Frees the mallocs used during env creation on failure of one and exits.
+ * @param key Pointer to the malloced key string.
+ * @param Value Pointer to the malloced key string.
+ * @param shell Pointer to the shell struct.
+ * @return Void.
+ */
 void	error_malloc_env_exit(char *key, char *value, t_shell *shell)
 {
 	if (key)
@@ -28,12 +28,13 @@ void	error_malloc_env_exit(char *key, char *value, t_shell *shell)
 	fatality(ERROR_MEM, shell, 1);
 }
 
-
 /**
-* Updates shllvl value in environment. Increments it by 1 compared to the previous value
-* @param shell Pointer to the shell struct.
-* @return Void.
-*/
+ * Updates shllvl value in environment. Increments it by 1 compared to the
+ * previous value.
+ *
+ * @param shell Pointer to the shell struct
+ * @return Void
+ */
 void	update_shllvl_value(t_shell *shell)
 {
 	char	*value_shlvl;
@@ -45,19 +46,22 @@ void	update_shllvl_value(t_shell *shell)
 	if (!value_shlvl)
 		error_malloc_env_exit(NULL, NULL, shell);
 	if (update_env_value(&shell->env, "SHLVL", value_shlvl) == false)
-		free (value_shlvl);
+		free(value_shlvl);
 }
 
 /**
-* Processes an environment node: checks if alloc of key and value was succesfull, creates
-* an environment node, and adds it to the environment list. Can create bth nodes with
-* allocated value or without value (NULL) depending on "value_alloc: flag
-* @param key Pointer to a key of the environment line.
-* @param value Pointer to the value of the environment line.
-* @param value_alloc Flag indicating if value was malloced or NULL is inputed manually.
-* @return Void.
-*/
-void	process_env_node(char *key, char *value, bool value_alloc, t_shell *shell)
+ * Processes an environment node: checks if alloc of key and value was
+ * succesfull, creates an environment node, and adds it to the environment list.
+ * Can create bth nodes with allocated value or without value (NULL)
+ * depending on "value_alloc: flag
+ *
+ * @param key Pointer to a key of the environment line
+ * @param value Pointer to the value of the environment line
+ * @param value_alloc Flag indicating if value was malloced or NULL is inputed
+ * @return Void
+ */
+void	process_env_node(char *key, char *value, bool value_alloc,
+		t_shell *shell)
 {
 	t_env	*new_node;
 
@@ -76,13 +80,13 @@ void	process_env_node(char *key, char *value, bool value_alloc, t_shell *shell)
 }
 
 /**
-* Turns an envp line into a env node and adds it to other env nodes.
-* Divides an environment line into a key and value that are stored in the node.
-* @param shell Pointer to the shell struct.
-* @param envp Pointer to the single string of envp.
-* @param process Type of process being executed (ENV or EXPORT)
-* @return Void.
-*/
+ * Turns an envp line into a env node and adds it to other env nodes.
+ * Divides an environment line into a key and value that are stored in the node.
+ * @param shell Pointer to the shell struct
+ * @param envp Pointer to the single string of envp
+ * @param process Type of process being executed (ENV or EXPORT)
+ * @return Void
+ */
 void	process_env_line(t_shell *shell, const char *envp, bool process)
 {
 	char	*key;
@@ -109,19 +113,21 @@ void	process_env_line(t_shell *shell, const char *envp, bool process)
 }
 
 /**
-* Executes the environment creation for the shell. If no environment is provided,
-* sets up a minimal environment
-* @param shell Pointer to the shell struct.
-* @param envp Pointer to envp.
-* @return Void.
-*/
+ * Executes the environment creation for the shell. If no environment is
+ * provided, sets up a minimal environment.
+ *
+ * @param shell Pointer to the shell struct
+ * @param envp Pointer to envp
+ * @return Void
+ */
 void	create_env(t_shell *shell, char **envp)
 {
 	if (!envp || !envp[0])
 	{
 		process_env_node(ft_strdup("PWD"), getcwd(NULL, 0), ALLOC, shell);
 		process_env_node(ft_strdup("SHLVL"), ft_strdup("0"), ALLOC, shell);
-		process_env_node(ft_strdup("_"), ft_strdup("/usr/bin/env"), ALLOC, shell);
+		process_env_node(ft_strdup("_"), ft_strdup("/usr/bin/env"), ALLOC,
+			shell);
 		process_env_node(ft_strdup("OLDPWD"), NULL, NO_ALLOC, shell);
 	}
 	else

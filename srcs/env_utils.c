@@ -3,19 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   env_utils.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 15:13:52 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/10/08 15:14:12 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/10 15:01:45 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
 /**
-* Checks if the node with the provided key exists.
-* @param env Pointer to the environment node.
-* @return Void.
-*/
+ * Checks if the node with the provided key exists.
+ * @param env Pointer to the environment node.
+ * @return Void.
+ */
 void	free_env_node(t_env *env)
 {
 	if (env)
@@ -28,11 +29,11 @@ void	free_env_node(t_env *env)
 }
 
 /**
-* Checks if the node with the provided key exist.
-* @param env Pointer to the key that should be checked.
-* @param env Pointer to the first node of environment list.
-* @return Status of check (true or false).
-*/
+ * Checks if the node with the provided key exist.
+ * @param env Pointer to the key that should be checked.
+ * @param env Pointer to the first node of environment list.
+ * @return Status of check (true or false).
+ */
 bool	check_env_key(char *key, t_env *env)
 {
 	t_env	*current;
@@ -48,11 +49,11 @@ bool	check_env_key(char *key, t_env *env)
 }
 
 /**
-* Executes the removal of the environment node.
-* @param env Pointer to the environmnt nodes list.
-* @param key Pointer to the key of the node that should be removed.
-* @return Void.
-*/
+ * Executes the removal of the environment node.
+ * @param env Pointer to the environmnt nodes list.
+ * @param key Pointer to the key of the node that should be removed.
+ * @return Void.
+ */
 void	remove_env_variable(t_env **env, char *key)
 {
 	t_env	*current;
@@ -81,12 +82,12 @@ void	remove_env_variable(t_env **env, char *key)
 }
 
 /**
-* Updates a value in env list based on provided key and new value.
-* @param env Pointer to the environmnt nodes list.
-* @param key Pointer to the key name that should be found.
-* @param new_value Pointer to the new_value that should be used.
-* @return Flag indicating the result of operation (success or failure).
-*/
+ * Updates a value in env list based on provided key and new value.
+ * @param env Pointer to the environmnt nodes list.
+ * @param key Pointer to the key name that should be found.
+ * @param new_value Pointer to the new_value that should be used.
+ * @return Flag indicating the result of operation (success or failure).
+ */
 bool	update_env_value(t_env **env, char *key, char *new_value)
 {
 	t_env	*temp;
@@ -109,13 +110,12 @@ bool	update_env_value(t_env **env, char *key, char *new_value)
 	return (false);
 }
 
-
 /**
-* Creates an environment node and adds key and value fro env line to it.
-* @param env Pointer to an environment node list.
-* @param new_node Pointer to the new environment node.
-* @return New malloced environment node.
-*/
+ * Creates an environment node and adds key and value fro env line to it.
+ * @param env Pointer to an environment node list.
+ * @param new_node Pointer to the new environment node.
+ * @return New malloced environment node.
+ */
 void	add_env_node(t_env **env, t_env *new_node)
 {
 	t_env	*last;
@@ -132,4 +132,3 @@ void	add_env_node(t_env **env, t_env *new_node)
 		last = last->next;
 	last->next = new_node;
 }
-

@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 15:02:34 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/30 15:03:13 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/10 15:01:30 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
  * Empty tokens can result from variable expansion to empty strings.
  * Only removes unquoted empty WORD tokens.
  * This ensures redundant empty arguments are not passed to parsing.
- * 
+ *
  * @param shell Pointer to the shell structure containing token list
  */
 void	delete_empty_tokens(t_shell *shell)

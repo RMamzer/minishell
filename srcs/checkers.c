@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/09/30 17:35:19 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/10 16:19:26 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 /**
  * Determines the quote context at a specific position in the string.
  * Tracks whether the character at 'index' is inside quotes and which type.
- * 
+ *
  * @param line Input string to analyze
  * @param index Position to check quote context for
  * @return Quote character if inside quotes (', "), 0 if outside quotes
@@ -42,7 +42,7 @@ char	check_quote(char *line, int index)
  * Processes heredoc tokens and enforces limits.
  * Counts heredoc operators and sets delimiter types based on quoting.
  * Enforces the bash limit of 16 heredocs per command line.
- * 
+ *
  * @param shell Pointer to shell structure containing token list
  * @return SUCCESS if heredoc usage is valid, FAILURE if limit exceeded
  */
@@ -73,3 +73,31 @@ bool	check_heredoc(t_shell *shell)
 	return (SUCCESS);
 }
 
+/**
+ * Validates and trims whitespace from input.
+ * Checks for unclosed quotes and prepares input for lexing.
+ *
+ * @param shell Pointer to shell structure
+ * @return SUCCESS if input is valid, FAILURE otherwise
+ */
+bool	validate_and_trim_input(t_shell *shell)
+{
+	char	*line;
+
+	line = ft_strtrim(shell->input_line, TO_TRIM);
+	if (line == NULL || line[0] == '\0')
+	{
+		free(shell->input_line);
+		free(line);
+		return (FAILURE);
+	}
+	if (check_quote(line, ft_strlen(line)) != 0)
+	{
+		free(line);
+		show_error(ERROR_QUOTE, NULL, shell, 2);
+		return (FAILURE);
+	}
+	free(shell->input_line);
+	shell->input_line = line;
+	return (SUCCESS);
+}

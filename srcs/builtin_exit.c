@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_exit.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/24 17:38:22 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/10/08 14:54:30 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/10 15:26:00 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,12 @@ int	exit_numeric_error(char *nptr)
 }
 
 /**
- * Converts a string to a unsigned long long integer, checking for overflow, and then
+ * Converts a string to a unsigned long long integer, checking for overflow,
+	and then
  * returns the result % 256 for the exit status.
  * @param nptr The exit code argument string.
- * @return The calculated exit status (0-255), or 255 if an overflow is detected.
+ * @return The calculated exit status (0-255),
+	or 255 if an overflow is detected.
  */
 int	process_exit_num(char *nptr)
 {
@@ -84,9 +86,10 @@ int	check_exit_code(char *nptr)
 }
 
 /**
- * Executes the built-in 'exit' command. It handles argument validation, 
- * sets the shell's exit code, and terminates the shell process if executed 
+ * Executes the built-in 'exit' command. It handles argument validation,
+ * sets the shell's exit code, and terminates the shell process if executed
  * in the parent.
+ *
  * @param args Arguments passed to the command (max one).
  * @param shell Pointer to the shell struct.
  * @return Exit status of minishell or passed exit value.
@@ -99,10 +102,10 @@ int	execute_builtin_exit(char **args, t_shell *shell)
 		return (EXIT_FAILURE);
 	}
 	if (*args)
-		shell->exit_code = check_exit_code(args[0]); // check how it works now:
+		shell->exit_code = check_exit_code(args[0]);
 	if (shell->is_parent == true)
 	{
-		write (STDOUT_FILENO,"exit\n" , 5);
+		write(STDOUT_FILENO, "exit\n", 5);
 		fatality(NULL, shell, shell->exit_code);
 	}
 	return (shell->exit_code);
