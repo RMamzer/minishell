@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   signals_utils.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/10 15:48:33 by mklevero          #+#    #+#             */
-/*   Updated: 2025/10/10 18:18:27 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/12 19:22:09 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,5 +62,4 @@ void	handle_heredoc_signal(int signum)
 void	handle_exe_sigint(int signum)
 {
 	(void)signum;
-	write(1, "\n", 1);
 }
