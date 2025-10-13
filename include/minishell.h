@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/10 15:12:40 by mklevero          #+#    #+#             */
-/*   Updated: 2025/10/10 17:11:15 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/13 15:40:41 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -292,8 +292,7 @@ int								execute_builtin_unset(char **args,
 // pipe
 int								error_close_and_return(char *msg, int *pipefd,
 									int error);
-int								wait_pipe(pid_t *pids, int children_rem,
-									t_shell *shell);
+int								wait_pipe(pid_t *pids, int children_rem);
 void							execute_left_child(t_ast *ast, t_shell *shell,
 									int *pipefd);
 void							execute_right_child(t_ast *ast, t_shell *shell,

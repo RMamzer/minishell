@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/10/10 18:44:04 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/13 15:38:46 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ int	main(int ac, char **av, char **env)
  */
 bool	receive_input(t_shell *shell)
 {
+	g_sig = 0;
 	set_readline_signals();
 	shell->input_line = readline("dirty_shell> ");
 	if (!shell->input_line)

@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/10 15:48:33 by mklevero          #+#    #+#             */
-/*   Updated: 2025/10/12 19:22:09 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/13 15:32:59 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,5 +61,5 @@ void	handle_heredoc_signal(int signum)
  */
 void	handle_exe_sigint(int signum)
 {
-	(void)signum;
+	g_sig = signum;
 }

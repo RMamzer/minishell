@@ -6,7 +6,7 @@
 /*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 22:09:45 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/10/12 18:31:25 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/13 15:54:59 by rmamzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,8 +112,8 @@ int	wait_child(pid_t pid, t_shell *shell)
 	pid_t	term_pid;
 	int		exit_code;
 
-	// if (shell->is_parent == true)
-	// 	set_exec_parent_signals();
+	if (shell->is_parent == true)
+		set_exec_parent_signals();
 	exit_code = EXIT_FAILURE;
 	term_pid = waitpid(pid, &status, 0);
 	if (term_pid == -1)
@@ -124,5 +124,7 @@ int	wait_child(pid_t pid, t_shell *shell)
 	{
 		exit_code = 128 + WTERMSIG(status);
 	}
+	if (g_sig == SIGINT)
+		ft_putchar_fd('\n', STDOUT_FILENO);
 	return (exit_code);
 }
