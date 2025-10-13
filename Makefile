@@ -2,7 +2,7 @@ NAME = minishell
 
 CC = cc
 
-C_FLAGS = -Wall -Wextra -Werror -g
+C_FLAGS = -Wall -Wextra -Werror
 
 LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a
@@ -36,7 +36,7 @@ all: $(NAME)
 	@printf "$(RED) ░ ▒  ▒  ▒ ░  ░▒ ░ ▒░    ░     ▓██ ░▒░       ░ ░▒  ░ ░ ▒ ░▒░ ░ ░ ░  ░░ ░ ▒  ░░ ░ ▒  ░        ░▒ ░ ▒░ ░ ░  ░ ▒   ▒▒ ░ ░ ▒  ▒ ▓██ ░▒░    \n$(RESET)"
 	@printf "$(RED) ░ ░  ░  ▒ ░  ░░   ░   ░       ▒ ▒ ░░        ░  ░  ░   ░  ░░ ░   ░     ░ ░     ░ ░           ░░   ░    ░    ░   ▒    ░ ░  ░ ▒ ▒ ░░     \n$(RESET)"
 	@printf "$(RED)   ░     ░     ░               ░ ░                 ░   ░  ░  ░   ░  ░    ░  ░    ░  ░         ░        ░  ░     ░  ░   ░    ░ ░        \n$(RESET)"
-	@printf "$(RED) ░                             ░ ░                                                                                   ░      ░ ░     \n$(RESET)"
+	@printf "$(RED) ░                             ░ ░                                                                                   ░      ░ ░     	  \n$(RESET)"
 $(LIBFT):
 	make -C $(LIBFT_DIR)
 
