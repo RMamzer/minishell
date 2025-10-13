@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipe.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/08 21:56:42 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/10/13 15:40:56 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/13 16:20:15 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,49 +25,6 @@ int	error_close_and_return(char *msg, int *pipefd, int error)
 	close(pipefd[READ_END]);
 	return (write_error_and_return(msg, error));
 }
-
-// /**
-//  * Waits for the execution of pipe child processes to collect final
-//  * exit status.
-//  * @param pids The array with 2 pids (left chinf and right child).
-//  * @param children_rem How many children should be waited for.
-//  * @param shell Pointer to the shell struct.
-//  * @return Exit status of the pipe pipe execution sequence.
-//  */
-// int	wait_pipe(pid_t *pids, int children_rem, t_shell *shell)
-// {
-// 	int		status;
-// 	pid_t	term_pid;
-// 	bool 	sigint_received; //updated
-
-// 	sigint_received = false;
-// 	while (children_rem > 0)
-// 	{
-// 		term_pid = waitpid(-1, &status, 0);
-// 		if (term_pid == -1)
-// 			return (write_error_and_return("waitpd", EXIT_FAILURE));
-// 		if (term_pid == pids[0] || term_pid == pids[1])
-// 		{
-// 			children_rem--;
-// 			if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT) // updated
-// 				sigint_received = true;
-// 			if (term_pid == pids[1])
-// 			{
-// 				if (WIFEXITED(status))
-// 					shell->exit_code = WEXITSTATUS(status);
-// 				else if (WIFSIGNALED(status))
-// 					shell->exit_code = 128 + WTERMSIG(status);
-// 			}
-// 		}
-// 	}
-// 	if(shell->is_parent == true && sigint_received == true) //updated]
-// 		ft_putchar_fd('\n', STDOUT_FILENO);
-// 	return (shell->exit_code);
-// }
-
-
-
-
 
 /**
  * Waits for the execution of pipe child processes to collect final
@@ -172,7 +129,7 @@ int	execute_pipe(t_ast *ast, t_shell *shell)
 		execute_right_child(ast->right, shell, pipefd);
 	close(pipefd[WRITE_END]);
 	close(pipefd[READ_END]);
-	if (shell->is_parent == true) //modification
+	if (shell->is_parent == true)
 		set_exec_parent_signals();
 	return (wait_pipe(pids, 2));
 }

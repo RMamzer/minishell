@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   signals_utils.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/10 15:48:33 by mklevero          #+#    #+#             */
-/*   Updated: 2025/10/13 15:32:59 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/13 16:20:20 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ void	signal_to_exitcode(t_shell *shell)
 		sig_shell = shell;
 	else if (g_sig != 0)
 		sig_shell->exit_code = g_sig + 128;
-	// g_sig = 0;
 }
 
 /**
