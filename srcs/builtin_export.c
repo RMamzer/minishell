@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/27 15:05:10 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/10/13 16:18:52 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/13 19:49:44 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,18 +102,49 @@ int	sort_and_print_export(t_env *env, t_shell *shell)
 }
 
 /**
+ * Executes  the creation of variables for the built-in 'export' command.
+ * Validates each argument and adds environment variables.
+ * Sets the shell's exit code to 1 on identifier validation failure,
+ * but continues processing other arguments.
+ * @param args Array of arguments for command execution.
+ * @param shell Pointer to the shell struct.
+ * @return Exit status of command execution (0 on full success, 1 on failure).
+ */
+int	create_export_variables(char **args, t_shell *shell)
+{
+	int	i;
+	int	exit_code;
+
+	exit_code = 0;
+	i = -1;
+	while (args[++i])
+	{
+		if (is_identifier_valid(args[i]) == false)
+		{
+			write_bulitin_error("minishell: export: `", args[i],
+				"': not a valid identifier\n", NULL);
+			exit_code = EXIT_FAILURE;
+		}
+		else if (args[i][0] == '_' && (args[i][1] == '\0' || args[i][1] == '='))
+			continue ;
+		else if (ft_strchr(args[i], '='))
+			process_env_line(shell, args[i], EXPORT);
+		else
+			process_valueless_export_node(shell, args[i]);
+	}
+	return (exit_code);
+}
+
+/**
  * Executes the built-in 'export' command. With no arguments, prints the
- * sorted environment variables. With arguments, validates each and adds/updates
- * environment variables. Sets the shell's exit code to 1 on identifier
- * validation failure, but continues processing other arguments.
+ * sorted environment variables. Otherwise, creates new variables.
+ * No options are accepted.
  * @param args Array of arguments for command execution.
  * @param shell Pointer to the shell struct.
  * @return Exit status of command execution (0 on full success, 1 on failure).
  */
 int	execute_builtin_export(char **args, t_shell *shell)
 {
-	int	i;
-
 	if (args[0] == NULL)
 		return (sort_and_print_export(shell->env, shell));
 	if (args[0][0] == '-')
@@ -122,19 +153,5 @@ int	execute_builtin_export(char **args, t_shell *shell)
 			": options are not supported\nexport: usage: [name ...]\n", NULL);
 		return (EXIT_INVALID_OPTION);
 	}
-	i = -1;
-	while (args[++i])
-	{
-		if (is_identifier_valid(args[i]) == false)
-		{
-			write_bulitin_error("minishell: export: `", args[i],
-				"': not a valid identifier\n", NULL);
-			shell->exit_code = EXIT_FAILURE;
-		}
-		else if (ft_strchr(args[i], '='))
-			process_env_line(shell, args[i], EXPORT);
-		else
-			process_valueless_export_node(shell, args[i]);
-	}
-	return (shell->exit_code);
+	return (create_export_variables(args, shell));
 }

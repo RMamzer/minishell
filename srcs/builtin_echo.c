@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 15:37:48 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/10/13 16:18:43 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/13 19:42:55 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,20 +45,17 @@ int	execute_builtin_echo(char **args)
 
 	i = 0;
 	n_output = true;
+	while (args[i] && check_echo_flag(args[i]))
+	{
+		n_output = false;
+		i++;
+	}
 	while (args[i])
 	{
-		if (check_echo_flag(args[i]))
-		{
-			n_output = false;
-			i++;
-		}
-		else
-		{
-			ft_putstr_fd(args[i], STDOUT_FILENO);
-			i++;
-			if (args[i])
-				ft_putchar_fd(' ', STDOUT_FILENO);
-		}
+		ft_putstr_fd(args[i], STDOUT_FILENO);
+		i++;
+		if (args[i])
+			ft_putchar_fd(' ', STDOUT_FILENO);
 	}
 	if (n_output == true)
 		ft_putchar_fd('\n', STDOUT_FILENO);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rmamzer <rmamzer@student.hive.fi>          +#+  +:+       +#+        */
+/*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/10 15:12:40 by mklevero          #+#    #+#             */
-/*   Updated: 2025/10/13 15:40:41 by rmamzer          ###   ########.fr       */
+/*   Updated: 2025/10/13 19:48:59 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,8 +54,8 @@ extern volatile sig_atomic_t	g_sig;
 # define ERROR_MAX_HER "maximum here-document count exceeded"
 # define ERROR_EOF "warning: heredoc delimeted by EOF"
 # define ERROR_NO_DIR \
-	"cd: error retrieving current directory: getcwd:\
-							cannot access parent directories"
+	"cd: error retrieving current directory:\
+ getcwd: cannot access parent directories"
 # define ERROR_NOT_F ": command not found\n"
 
 // token type enumeration
@@ -275,6 +275,8 @@ void							bubble_sort_env(t_env **env, int len);
 int								sort_and_print_export(t_env *env,
 									t_shell *shell);
 int								execute_builtin_export(char **args,
+									t_shell *shell);
+int								create_export_variables(char **args,
 									t_shell *shell);
 // builtin_export_utils
 void							process_valueless_export_node(t_shell *shell,
