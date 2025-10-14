@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/10 15:12:40 by mklevero          #+#    #+#             */
-/*   Updated: 2025/10/13 19:48:59 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/14 19:46:53 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,8 +53,7 @@ extern volatile sig_atomic_t	g_sig;
 # define ERROR_MEM "cannot allocate memory"
 # define ERROR_MAX_HER "maximum here-document count exceeded"
 # define ERROR_EOF "warning: heredoc delimeted by EOF"
-# define ERROR_NO_DIR \
-	"cd: error retrieving current directory:\
+# define ERROR_NO_DIR "cd: error retrieving current directory:\
  getcwd: cannot access parent directories"
 # define ERROR_NOT_F ": command not found\n"
 
@@ -124,6 +123,7 @@ t_shell							*init_data(void);
 char							check_quote(char *line, int index);
 bool							check_heredoc(t_shell *shell);
 bool							validate_and_trim_input(t_shell *shell);
+bool							check_empty_ambig(t_shell *shell);
 
 // heredoc
 bool							process_heredoc(t_shell *shell);

@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:54:37 by rmamzer           #+#    #+#             */
-/*   Updated: 2025/10/13 16:20:01 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/14 20:03:06 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,6 +96,11 @@ bool	process_input(t_shell *shell)
 		return (free_shell_data(shell), FAILURE);
 	expander(shell);
 	split_variables(shell);
+	if (check_empty_ambig(shell) == FAILURE)
+	{
+		show_error("minishell: ambiguous redirect", NULL, shell, 2);
+		return (FAILURE);
+	}
 	delete_empty_tokens(shell);
 	return (SUCCESS);
 }

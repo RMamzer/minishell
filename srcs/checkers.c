@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/10/13 16:19:04 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/14 19:48:46 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,5 +99,24 @@ bool	validate_and_trim_input(t_shell *shell)
 	}
 	free(shell->input_line);
 	shell->input_line = line;
+	return (SUCCESS);
+}
+
+/**
+ * Validates redirection tokens to detect ambiguous redirection.
+ * 
+ */
+bool	check_empty_ambig(t_shell *shell)
+{
+	t_token	*current;
+
+	current = shell->token_list;
+	while (current)
+	{
+		if (is_redir(current->type) && current->next
+			&& !(*current->next->content))
+			return (FAILURE);
+		current = current->next;
+	}
 	return (SUCCESS);
 }
