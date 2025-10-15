@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/10/14 19:48:46 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/15 12:35:14 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,10 @@ bool	validate_and_trim_input(t_shell *shell)
 
 /**
  * Validates redirection tokens to detect ambiguous redirection.
+ * Checks the content of the token following a redirection operator.
  * 
+ * @param shell Pointer to the shell structure
+ * @return SUCCESS if content is not empty, FAILURE otherwise
  */
 bool	check_empty_ambig(t_shell *shell)
 {
