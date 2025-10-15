@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 17:56:25 by mklevero          #+#    #+#             */
-/*   Updated: 2025/10/15 12:35:14 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/15 15:56:40 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ char	check_quote(char *line, int index)
 
 /**
  * Processes heredoc tokens and enforces limits.
- * Counts heredoc operators and sets delimiter types based on quoting.
+ * Counts heredoc operators.
  * Enforces the bash limit of 16 heredocs per command line.
  *
  * @param shell Pointer to shell structure containing token list
@@ -56,13 +56,7 @@ bool	check_heredoc(t_shell *shell)
 	while (current)
 	{
 		if (current->type == HEREDOC && current->next)
-		{
 			count++;
-			if (current->next->quoted == true)
-				current->next->type = HEREDOC_DELIM_QT;
-			else
-				current->next->type = HEREDOC_DELIM_UQ;
-		}
 		current = current->next;
 	}
 	if (count > 16)
@@ -105,7 +99,7 @@ bool	validate_and_trim_input(t_shell *shell)
 /**
  * Validates redirection tokens to detect ambiguous redirection.
  * Checks the content of the token following a redirection operator.
- * 
+ *
  * @param shell Pointer to the shell structure
  * @return SUCCESS if content is not empty, FAILURE otherwise
  */

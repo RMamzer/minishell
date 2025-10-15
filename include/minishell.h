@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/10 15:12:40 by mklevero          #+#    #+#             */
-/*   Updated: 2025/10/14 19:46:53 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/15 16:13:14 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,16 @@
 
 # include "libft.h"
 # include <errno.h>
-# include <fcntl.h>             // O_RDONLY abd others
-# include <limits.h>            // for exit limits
-# include <readline/history.h>  // add_history
-# include <readline/readline.h> // readline
+# include <fcntl.h>
+# include <limits.h>
+# include <readline/history.h>
+# include <readline/readline.h>
 # include <signal.h>
 # include <stdbool.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <sys/wait.h>
-# include <unistd.h> //open and close
+# include <unistd.h>
 
 extern volatile sig_atomic_t	g_sig;
 
@@ -65,9 +65,7 @@ typedef enum e_token_type
 	IN,
 	OUT,
 	HEREDOC,
-	APPEND,
-	HEREDOC_DELIM_QT,
-	HEREDOC_DELIM_UQ
+	APPEND
 }								t_token_type;
 
 // token node struct

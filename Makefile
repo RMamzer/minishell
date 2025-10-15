@@ -45,7 +45,7 @@ $(OBJS_DIR)%.o: $(SRCS_DIR)%.c
 	$(CC) $(C_FLAGS) -c $< -o $@ $(HEADERS)
 
 $(NAME): $(OBJS) $(LIBFT)
-	$(CC) $(C_FLAGS) $(OBJS) $(LIBFT)  -lreadline -o $(NAME)
+	$(CC) $(C_FLAGS) $(OBJS) $(LIBFT) -lreadline -o $(NAME)
 
 clean:
 	rm -rf $(OBJS_DIR)

@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/10 14:49:30 by mklevero          #+#    #+#             */
-/*   Updated: 2025/10/13 19:29:13 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/15 15:38:50 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ int	change_working_directory(char *path, t_shell *shell)
 			free(old_pwd);
 		new_pwd = getcwd(NULL, 0);
 		if (!new_pwd)
-			return (write_error_and_return(ERROR_NO_DIR, errno));
+			return (write_error_and_return(ERROR_NO_DIR, 0));
 		if (update_env_value(&shell->env, "PWD", new_pwd) == false)
 			free(new_pwd);
 	}

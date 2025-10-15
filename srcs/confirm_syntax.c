@@ -6,7 +6,7 @@
 /*   By: mklevero <mklevero@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 14:15:15 by mklevero          #+#    #+#             */
-/*   Updated: 2025/10/14 19:42:03 by mklevero         ###   ########.fr       */
+/*   Updated: 2025/10/15 15:42:07 by mklevero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,8 +78,7 @@ static bool	check_redir_syntax(t_token *current, t_shell *shell)
 {
 	if (current->next == NULL)
 		return (show_error(NULL, NULL, shell, 2), FAILURE);
-	if (current->next->type != WORD && current->next->type != HEREDOC_DELIM_QT
-		&& current->next->type != HEREDOC_DELIM_UQ)
+	if (current->next->type != WORD)
 		return (show_error(NULL, current->next, shell, 2), FAILURE);
 	return (SUCCESS);
 }
@@ -101,7 +100,7 @@ bool	syntax_confirmed(t_token *token_list, t_shell *shell)
 	{
 		if (is_redir(current->type) && !validate_redirection(current))
 		{
-			show_error("minishell: ambiguous redirect", NULL, shell, 2);
+			show_error("minishell: ambiguous redirect", NULL, shell, 1);
 			return (FAILURE);
 		}
 		current = current->next;
